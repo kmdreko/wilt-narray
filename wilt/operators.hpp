@@ -82,7 +82,7 @@ WILT_BEGIN
     template <class Operator>
     static NArray<T, N> left(NArray<T, N>&& lhs, const NArray<U, N>& rhs, Operator op)
     {
-      NArray<T, N> ret(std::forward<T>(lhs));
+      NArray<T, N> ret(std::forward<NArray<U, N>>(lhs));
       _binaryOp2(
         ret._basePtr(), ret._basePtr(), rhs._basePtr(), ret._dimsPtr(), 
         ret._stepPtr(), ret._stepPtr(), rhs._stepPtr(), op, N);
@@ -115,7 +115,7 @@ WILT_BEGIN
     template <class Operator>
     static NArray<T, N> left(NArray<T, N>&& lhs, Operator op)
     {
-      NArray<T, N> ret(std::forward<T>(lhs)); 
+      NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(lhs)); 
       _unaryOp2(
         ret._basePtr(), ret._basePtr(), ret._dimsPtr(), 
         ret._stepPtr(), ret._stepPtr(), op, N);
@@ -148,7 +148,7 @@ WILT_BEGIN
     template <class Operator>
     static NArray<U, N> right(const NArray<T, N>& lhs, NArray<U, N>&& rhs, Operator op)
     {
-      NArray<U, N> ret(std::forward<U>(rhs));
+      NArray<U, N> ret(std::forward<NArray<U, N>>(rhs));
       _binaryOp2(
         ret._basePtr(), lhs._basePtr(), ret._basePtr(), ret._dimsPtr(), 
         ret._stepPtr(), lhs._stepPtr(), ret._stepPtr(), op, N);
@@ -181,7 +181,7 @@ WILT_BEGIN
     template <class Operator>
     static NArray<U, N> right(NArray<U, N>&& rhs, Operator op)
     {
-      NArray<U, N> ret(std::forward<U>(rhs)); 
+      NArray<U, N> ret(std::forward<wilt::NArray<U, N>>(rhs)); 
       _unaryOp2(
         ret._basePtr(), ret._basePtr(), ret._dimsPtr(), 
         ret._stepPtr(), ret._stepPtr(), op, N);
@@ -204,7 +204,7 @@ WILT_BEGIN
     template <class Operator>
     static NArray<T, N> left(NArray<T, N>&& lhs, const NArray<T, N>& rhs, Operator op)
     {
-      NArray<T, N> ret(std::forward<T>(lhs));
+      NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(lhs));
       _binaryOp2(
         ret._basePtr(), ret._basePtr(), rhs._basePtr(), ret._dimsPtr(), 
         ret._stepPtr(), ret._stepPtr(), rhs._stepPtr(), op, N);
@@ -213,7 +213,7 @@ WILT_BEGIN
     template <class Operator>
     static NArray<T, N> right(const NArray<T, N>& lhs, NArray<T, N>&& rhs, Operator op)
     {
-      NArray<T, N> ret(std::forward<T>(rhs));
+      NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(rhs));
       _binaryOp2(
         ret._basePtr(), lhs._basePtr(), ret._basePtr(), ret._dimsPtr(), 
         ret._stepPtr(), lhs._stepPtr(), ret._stepPtr(), op, N);
@@ -232,7 +232,7 @@ WILT_BEGIN
     template <class Operator>
     static NArray<T, N> left(NArray<T, N>&& lhs, Operator op)
     {
-      NArray<T, N> ret(std::forward<T>(lhs));
+      NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(lhs));
       _unaryOp2(
         ret._basePtr(), ret._basePtr(), ret._dimsPtr(), 
         ret._stepPtr(), ret._stepPtr(), op, N);
@@ -241,7 +241,7 @@ WILT_BEGIN
     template <class Operator>
     static NArray<T, N> right(NArray<T, N>&& rhs, Operator op)
     {
-      NArray<T, N> ret(std::forward<T>(rhs)); 
+      NArray<T, N> ret(std::forward<NArray<T, N>>(rhs)); 
       _unaryOp2(
         ret._basePtr(), ret._basePtr(), ret._dimsPtr(), 
         ret._stepPtr(), ret._stepPtr(), op, N);
@@ -318,7 +318,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -333,7 +333,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -348,9 +348,9 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -374,7 +374,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), op);
+      return move_op<Ret, T, U, N>::left(std::forward<wilt::NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
@@ -398,7 +398,7 @@ WILT_COMMON_BEGIN
     if (rhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
@@ -426,7 +426,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -441,7 +441,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -456,9 +456,9 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -482,7 +482,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
@@ -506,9 +506,69 @@ WILT_COMMON_BEGIN
     if (rhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(std::forward<wilt::NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> mul(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("mul(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> mul(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("mul(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+    if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> mul(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("mul(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+    if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> mul(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("mul(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+    if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
+    if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
   template <class Ret, class T, class U, dim_t N>
@@ -530,7 +590,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
@@ -554,9 +614,69 @@ WILT_COMMON_BEGIN
     if (rhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> div(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("div(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> div(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("div(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+    if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> div(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("div(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+    if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> div(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("div(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+    if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
+    if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
   template <class Ret, class T, class U, dim_t N>
@@ -578,7 +698,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), op);
+      return move_op<Ret, T, U, N>::left(std::forward<wilt::NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
@@ -602,9 +722,69 @@ WILT_COMMON_BEGIN
     if (rhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> mod(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("mod(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> mod(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("mod(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+    if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> mod(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("mod(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+    if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
+  }
+
+  template <class Ret, class T, class U, dim_t N>
+  NArray<Ret, N> mod(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
+  {
+    auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
+
+    if (lhs.dims() != rhs.dims())
+      throw std::invalid_argument("mod(): dimensions must match");
+    if (lhs.empty())
+      return NArray<Ret, N>();
+    if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
+    if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
+
+    return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
   template <class Ret, class T, class U, dim_t N>
@@ -626,7 +806,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
@@ -650,7 +830,7 @@ WILT_COMMON_BEGIN
     if (rhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
@@ -678,7 +858,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -693,7 +873,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -708,9 +888,9 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -734,7 +914,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
@@ -758,7 +938,7 @@ WILT_COMMON_BEGIN
     if (rhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
@@ -786,7 +966,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -801,7 +981,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -816,9 +996,9 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -842,7 +1022,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
@@ -866,7 +1046,7 @@ WILT_COMMON_BEGIN
     if (rhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
@@ -894,7 +1074,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -909,7 +1089,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -924,9 +1104,9 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), rhs, op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(lhs, std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
@@ -950,7 +1130,7 @@ WILT_COMMON_BEGIN
     if (lhs.empty())
       return NArray<Ret, N>();
     if (lhs.isUnique() && lhs.isContinuous() && lhs.isAligned())
-      return move_op<Ret, T, U, N>::left(std::forward<T>(lhs), op);
+      return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
@@ -974,7 +1154,7 @@ WILT_COMMON_BEGIN
     if (rhs.empty())
       return NArray<Ret, N>();
     if (rhs.isUnique() && rhs.isContinuous() && rhs.isAligned())
-      return move_op<Ret, T, U, N>::right(std::forward<U>(rhs), op);
+      return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
@@ -1100,17 +1280,17 @@ wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const wilt::NArra
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
-  return wilt::add<typename wilt::add_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::add<typename wilt::add_ret<T, U>::type>(std::forward<NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::add<typename wilt::add_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::add<typename wilt::add_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::add<typename wilt::add_ret<T, U>::type>(std::forward<T>(lhs), std::forward<U>(rhs));
+  return wilt::add<typename wilt::add_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const wilt::NArray<T, N>& lhs, const U& rhs)
@@ -1120,7 +1300,7 @@ wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const wilt::NArra
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
-  return wilt::add<typename wilt::add_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::add<typename wilt::add_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const T& lhs, const wilt::NArray<U, N>& rhs)
@@ -1130,7 +1310,7 @@ wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const T& lhs, con
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::add<typename wilt::add_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::add<typename wilt::add_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
 template <class T, class U, dim_t N>
@@ -1141,17 +1321,17 @@ wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const wilt::NArra
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
-  return wilt::sub<typename wilt::sub_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::sub<typename wilt::sub_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::sub<typename wilt::sub_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::sub<typename wilt::sub_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::sub<typename wilt::sub_ret<T, U>::type>(std::forward<T>(lhs), std::forward<U>(rhs));
+  return wilt::sub<typename wilt::sub_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const wilt::NArray<T, N>& lhs, const U& rhs)
@@ -1161,7 +1341,7 @@ wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const wilt::NArra
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
-  return wilt::sub<typename wilt::sub_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::sub<typename wilt::sub_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const T& lhs, const wilt::NArray<U, N>& rhs)
@@ -1171,7 +1351,7 @@ wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const T& lhs, con
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::sub<typename wilt::sub_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::sub<typename wilt::sub_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
 template <class T, class U, dim_t N>
@@ -1182,7 +1362,7 @@ wilt::NArray<typename wilt::mul_ret<T, U>::type, N> operator* (const wilt::NArra
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::mul_ret<T, U>::type, N> operator* (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
-  return wilt::mul<typename wilt::mul_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::mul<typename wilt::mul_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::mul_ret<T, U>::type, N> operator* (const T& lhs, const wilt::NArray<U, N>& rhs)
@@ -1192,7 +1372,7 @@ wilt::NArray<typename wilt::mul_ret<T, U>::type, N> operator* (const T& lhs, con
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::mul_ret<T, U>::type, N> operator* (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::mul<typename wilt::mul_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::mul<typename wilt::mul_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
 template <class T, class U, dim_t N>
@@ -1203,7 +1383,7 @@ wilt::NArray<typename wilt::div_ret<T, U>::type, N> operator/ (const wilt::NArra
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::div_ret<T, U>::type, N> operator/ (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
-  return wilt::div<typename wilt::div_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::div<typename wilt::div_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::div_ret<T, U>::type, N> operator/ (const T& lhs, const wilt::NArray<U, N>& rhs)
@@ -1213,7 +1393,7 @@ wilt::NArray<typename wilt::div_ret<T, U>::type, N> operator/ (const T& lhs, con
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::div_ret<T, U>::type, N> operator/ (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::div<typename wilt::div_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::div<typename wilt::div_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
 template <class T, class U, dim_t N>
@@ -1224,7 +1404,7 @@ wilt::NArray<typename wilt::mod_ret<T, U>::type, N> operator% (const wilt::NArra
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::mod_ret<T, U>::type, N> operator% (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
-  return wilt::mod<typename wilt::mod_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::mod<typename wilt::mod_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::mod_ret<T, U>::type, N> operator% (const T& lhs, const wilt::NArray<U, N>& rhs)
@@ -1234,7 +1414,7 @@ wilt::NArray<typename wilt::mod_ret<T, U>::type, N> operator% (const T& lhs, con
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::mod_ret<T, U>::type, N> operator% (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::mod<typename wilt::mod_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::mod<typename wilt::mod_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
 template <class T, class U, dim_t N>
@@ -1344,17 +1524,17 @@ wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const wilt::N
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
-  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(std::forward<T>(lhs), std::forward<U>(rhs));
+  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const wilt::NArray<T, N>& lhs, const U& rhs)
@@ -1364,7 +1544,7 @@ wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const wilt::N
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
-  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const T& lhs, const wilt::NArray<U, N>& rhs)
@@ -1374,7 +1554,7 @@ wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const T& lhs,
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
 template <class T, class U, dim_t N>
@@ -1385,17 +1565,17 @@ wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const wilt::NA
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
-  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(std::forward<T>(lhs), std::forward<U>(rhs));
+  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const wilt::NArray<T, N>& lhs, const U& rhs)
@@ -1405,7 +1585,7 @@ wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const wilt::NA
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
-  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const T& lhs, const wilt::NArray<U, N>& rhs)
@@ -1415,7 +1595,7 @@ wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const T& lhs, 
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
 template <class T, class U, dim_t N>
@@ -1426,17 +1606,17 @@ wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const wilt::N
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
-  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(std::forward<T>(lhs), std::forward<U>(rhs));
+  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const wilt::NArray<T, N>& lhs, const U& rhs)
@@ -1446,7 +1626,7 @@ wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const wilt::N
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
-  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(std::forward<T>(lhs), rhs);
+  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(std::forward<wilt::NArray<U, N>>(lhs), rhs);
 }
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const T& lhs, const wilt::NArray<U, N>& rhs)
@@ -1456,7 +1636,7 @@ wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const T& lhs,
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
-  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, std::forward<U>(rhs));
+  return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
 template <class T, class U> decltype(std::declval<T>() +  std::declval<U>()) operator+  (const wilt::NArray<T, 0>& lhs, const wilt::NArray<U, 0>& rhs) { return (T)lhs +  (U)rhs; }

@@ -1,6 +1,6 @@
 // FILE: filters.hpp
 // DATE: 8/20/2014
-// AUTH: Trevor Wilson [kmdreko@gmail.com]
+// AUTH: Trevor Wilson [trwq75@mst.edu]
 // DESC: Defines various NArray filtering functions
 
 // include guards
@@ -801,8 +801,8 @@ WILT_COMMON_BEGIN
     return filterMin<T>(src, size, BorderType<T>(border));
   }
 
-  template <class T, dim_t N>
-  NArray<T, N> filterMedian(const NArray<T, N>& src, const Point<N>& size, BorderType<T> border)
+  template <class T, class U, dim_t N>
+  NArray<T, N> filterMedian(const NArray<U, N>& src, const Point<N>& size, BorderType<U> border)
   {
     // validate input
     for (dim_t i = 0; i < N; ++i)
@@ -814,7 +814,7 @@ WILT_COMMON_BEGIN
     }
 
     NArray<T, N> ret;
-    const T* pad = border._padPtr();
+    const U* pad = border._padPtr();
 
     // create sliding index window
     pos_t length = _size(size);
@@ -822,10 +822,10 @@ WILT_COMMON_BEGIN
     pos_t pos = length / 2;
     idx[pos] = 0;
 
-    auto normalOp = [](const T* src, pos_t* idx, pos_t n)
+    auto normalOp = [](const U* src, pos_t* idx, pos_t n) -> T
     {
       // copy ptrs
-      const T** ptrs = new const T*[n];
+      const U** ptrs = new const U*[n];
       for (int i = 0; i < n; ++i)
         ptrs[i] = src + idx[i];
 
@@ -837,7 +837,7 @@ WILT_COMMON_BEGIN
         int a = A;
         int b = B;
 
-        const T* x = ptrs[n/2];
+        const U* x = ptrs[n/2];
         while (true)
         {
           while (*ptrs[a] < *x) ++a;
@@ -851,14 +851,14 @@ WILT_COMMON_BEGIN
         if (a > n/2) B = b;
       }
 
-      const T* ret = ptrs[n/2];
+      const U* ret = ptrs[n/2];
       delete[] ptrs;
       return *ret;
     };
-    auto paddedOp = [pad](const T* src, pos_t* idx, pos_t n)
+    auto paddedOp = [pad](const U* src, pos_t* idx, pos_t n) -> T
     {
       // copy ptrs
-      const T** ptrs = new const T*[n];
+      const U** ptrs = new const U*[n];
       for (int i = 0; i < n; ++i)
         if (idx[i] == WILT_OUTSIDE_ARRAY)
           ptrs[i] = pad;
@@ -873,7 +873,7 @@ WILT_COMMON_BEGIN
         int a = A;
         int b = B;
 
-        const T* x = ptrs[n/2];
+        const U* x = ptrs[n/2];
         while (true)
         {
           while (*ptrs[a] < *x) ++a;
@@ -887,7 +887,7 @@ WILT_COMMON_BEGIN
         if (a > n/2) B = b;
       }
 
-      const T* ret = ptrs[n/2];
+      const U* ret = ptrs[n/2];
       delete[] ptrs;
       return *ret;
     };
@@ -1068,6 +1068,93 @@ WILT_COMMON_BEGIN
   NArray<T, N> filterKernel(const NArray<U, N>& src, const NArray<V, N>& kernel, int border)
   {
     return filterKernel<T>(src, kernel, BorderType<U>(border));
+  }
+
+  template <class T, class U, dim_t N, class Operator>
+  NArray<T, N> filterCustom(const NArray<U, N>& src, const Point<N>& size, Operator op, BorderType<U> border)
+  {
+    // validate input
+    for (dim_t i = 0; i < N; ++i)
+    {
+      if (src.length(i) <= size[i] / 2)
+        throw std::invalid_argument("filterCustom(): filter size too large");
+      if (size[i] % 2 != 1)
+        throw std::invalid_argument("filterCustom(): filter size must be odd");
+    }
+
+    NArray<T, N> ret;
+
+    // create sliding index window
+    pos_t length = _size(size);
+    pos_t* idx = new pos_t[length];
+    pos_t pos = length / 2;
+    idx[pos] = 0;
+
+    try { switch(border.type())
+    {
+    case Border::REPLICATE:
+      ret = NArray<T, N>(src.dims());
+      _filterReplicate(ret._basePtr(), src._basePtr(), 
+        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+        &size[N-1], idx, pos, 1, op, N);
+      break;
+
+    case Border::REFLECT:
+      ret = NArray<T, N>(src.dims());
+      _filterReflect(ret._basePtr(), src._basePtr(), 
+        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+        &size[N-1], idx, pos, 1, op, N);
+      break;
+
+    case Border::REFLECT_101:
+      ret = NArray<T, N>(src.dims());
+      _filterReflect101(ret._basePtr(), src._basePtr(), 
+        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+        &size[N-1], idx, pos, 1, op, N);
+      break;
+
+    case Border::WRAP:
+      ret = NArray<T, N>(src.dims());
+      _filterWrap(ret._basePtr(), src._basePtr(), 
+        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+        &size[N-1], idx, pos, 1, op, N);
+      break;
+
+    case Border::PADDED:
+      ret = NArray<T, N>(src.dims());
+      _filterPadded(ret._basePtr(), src._basePtr(), 
+        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+        &size[N-1], idx, pos, 1, op, N);
+      break;
+
+    case Border::IGNORE:
+      ret = NArray<T, N>(src.dims());
+      _filterPadded(ret._basePtr(), src._basePtr(), 
+        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+        &size[N-1], idx, pos, 1, op, N);
+      break;
+
+    case Border::NONE:
+      ret = NArray<T, N>(src.dims()-size+1);
+      _filterNone(ret._basePtr(), src._basePtr(), 
+        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+        &size[N-1], idx, pos, 1, op, N);
+      break;
+
+    default:
+      throw std::domain_error("filterCustom(): Invalid border type");
+      break;
+
+    } } catch(...) { delete[] idx; throw; }
+
+    delete[] idx;
+    return ret;
+  }
+
+  template <class T, class U, dim_t N, class Operator>
+  NArray<T, N> filterCustom(const NArray<U, N>& src, const Point<N>& size, Operator op, int border)
+  {
+    return filterCustom<T>(src, size, op, BorderType<U>(border));
   }
 
 WILT_COMMON_END

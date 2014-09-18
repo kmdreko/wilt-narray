@@ -1,5 +1,5 @@
 // FILE: util.h
-// AUTH: Trevor Wilson [kmdreko@gmail.com]
+// AUTH: Trevor Wilson [trwq75@mst.edu]
 // DATE: 8/20/14
 // DESC: defines utilities like macros, typedefs, and required libraries
 
@@ -62,14 +62,12 @@
 #include <cstddef>
 // - std::size_t
 // - std::ptrdiff_t
+#include <cstdint>
+// - uint8_t
 #include <stdexcept>
 // - std::invalid_argument
 // - std::domain_error
 // - std::out_of_range
-#include <cassert>
-// - assert
-#include <cstdint>
-// - uint8_t
 
 // type aliases
 typedef std::size_t    dim_t;
@@ -90,23 +88,20 @@ WILT_BEGIN
   template <class T, class U> struct bit_xor_ret { typedef decltype(std::declval<T>() ^ std::declval<U>()) type; };
 
   template <class T> struct sum_t { typedef T type; };
+  template <class T> struct mean_t { typedef T type; };
   template <class T> struct raw_t { static bool value() { return false; } };
   
-  
   template <> struct sum_t<uint8_t> { typedef int type; };
+  template <> struct mean_t<uint8_t> { typedef double type; };
 
-  template <> struct raw_t<int8_t>  { static bool value() { return true; } };
-  template <> struct raw_t<int16_t> { static bool value() { return true; } };
-  template <> struct raw_t<int32_t> { static bool value() { return true; } };
-  template <> struct raw_t<int64_t> { static bool value() { return true; } };
-  template <> struct raw_t<uint8_t>  { static bool value() { return true; } };
+  template <> struct raw_t<uint8_t> { static bool value() { return true; } };
   template <> struct raw_t<uint16_t> { static bool value() { return true; } };
   template <> struct raw_t<uint32_t> { static bool value() { return true; } };
   template <> struct raw_t<uint64_t> { static bool value() { return true; } };
-
-  template <> struct raw_t<float> { static bool value() { return true; } };
-  template <> struct raw_t<double> { static bool value() { return true; } };
-  template <> struct raw_t<long double> { static bool value() { return true; } };
+  template <> struct raw_t<int8_t> { static bool value() { return true; } };
+  template <> struct raw_t<int16_t> { static bool value() { return true; } };
+  template <> struct raw_t<int32_t> { static bool value() { return true; } };
+  template <> struct raw_t<int64_t> { static bool value() { return true; } };
 
 WILT_END
 

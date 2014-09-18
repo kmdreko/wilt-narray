@@ -1,5 +1,5 @@
 // FILE: core.hpp
-// AUTH: Trevor Wilson [kmdreko@gmail.com]
+// AUTH: Trevor Wilson [trwq75@mst.edu]
 // DATE: 8/20/14
 // DESC: includes the core headers of the wilt library
 

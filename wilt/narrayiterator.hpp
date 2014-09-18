@@ -1,6 +1,6 @@
 // FILE: narrayiterator.hpp
 // DATE: 7/30/2014
-// AUTH: Trevor Wilson [kmdreko@gmail.com]
+// AUTH: Trevor Wilson [trwq75@mst.edu]
 // DESC: Defines an N-dimensional templated matrix iterator class
 
 // #include guards
@@ -120,6 +120,9 @@ WILT_COMMON_BEGIN
     //! @return     reference to data at the iterator position
     reference operator* () const
     {
+      if (m_pos < 0 || m_pos >= _size(m_dims))
+        throw std::domain_error("NArrayIterator*(): pointing outside bounds");
+
       return *_at(m_pos);
     }
 
@@ -127,6 +130,9 @@ WILT_COMMON_BEGIN
     //! @return     pointer to data at the iterator position
     pointer operator-> () const
     {
+      if (m_pos < 0 || m_pos > _size(m_dims))
+        throw std::domain_error("NArrayIterator*(): pointing outside bounds");
+
       return _at(m_pos);
     }
 
@@ -135,7 +141,11 @@ WILT_COMMON_BEGIN
     //! @return     reference to data at the iterator position + offset
     reference operator[] (pos_t pos) const
     {
-      return *_at(m_pos + pos);
+      pos_t loc = m_pos + pos;
+      if (loc < 0 || loc > _size(m_dims))
+        throw std::domain_error("NArrayIterator*(): pointing outside bounds");
+
+      return *_at(loc);
     }
 
     //! @brief      equal operator, determines both if it references the same

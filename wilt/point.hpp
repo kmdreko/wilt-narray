@@ -1,6 +1,6 @@
 // FILE: point.hpp
 // DATE: 7/30/2014
-// AUTH: Trevor Wilson [kmdreko@gmail.com]
+// AUTH: Trevor Wilson [trwq75@mst.edu]
 // DESC: Defines a multi-dimensional point class
 
 // include guards
@@ -341,6 +341,40 @@ WILT_COMMON_END
     for (int i = N-2; i >= 0; --i)
       pos += pos[i] * dims[i+1];
     return idx;
+  }
+
+  inline Point<1> _point(pos_t a)
+  {
+    Point<1> ret;
+    ret[0] = a;
+    return ret;
+  }
+
+  inline Point<2> _point(pos_t a, pos_t b)
+  {
+    Point<2> ret;
+    ret[0] = a;
+    ret[1] = b;
+    return ret;
+  }
+
+  inline Point<3> _point(pos_t a, pos_t b, pos_t c)
+  {
+    Point<3> ret;
+    ret[0] = a;
+    ret[1] = b;
+    ret[2] = c;
+    return ret;
+  }
+
+  inline Point<4> _point(pos_t a, pos_t b, pos_t c, pos_t d)
+  {
+    Point<4> ret;
+    ret[0] = a;
+    ret[1] = b;
+    ret[2] = c;
+    ret[3] = d;
+    return ret;
   }
 
 WILT_END
