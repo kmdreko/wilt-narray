@@ -347,6 +347,8 @@ WILT_BEGIN
 
 WILT_COMMON_BEGIN
 
+  template <class T, dim_t N> class NArray;
+
   enum PTR
   {
     ASSUME,
@@ -355,6 +357,17 @@ WILT_COMMON_BEGIN
   };
 
 WILT_COMMON_END
+
+  template <class T, dim_t N>
+  struct slice_t
+  {
+    typedef NArray<T, N-1> type;
+  };
+  template <class T>
+  struct slice_t<T, 1>
+  {
+    typedef T& type;
+  };
 
   template <class T, class A = std::allocator<T>>
   class NArrayHeader
@@ -898,14 +911,14 @@ WILT_COMMON_BEGIN
     //! Identical function to sliceX(x)
     //! It is preferable to do arr.at({x, y, y, ...}) than arr[x][y][z]... 
     //! because the operator[] must make a new NArray for each use.
-    NArray<value , N-1> operator[] (pos_t x)
+    typename slice_t<T, N>::type operator[] (pos_t x)
     {
       if (x >= m_dims[0])
         throw std::out_of_range("operator[] index out of bounds");
 
       return _nSlice(x, 0);
     }
-    NArray<cvalue, N-1> operator[] (pos_t x) const
+    const typename slice_t<T, N>::type operator[] (pos_t x) const
     {
       if (x >= m_dims[0])
         throw std::out_of_range("operator[] index out of bounds");
@@ -1034,14 +1047,14 @@ WILT_COMMON_BEGIN
     //! @exception  std::domain_error if call for invalid N
     //!
     //! Equivalent to sliceN(x|y|z|w, n)
-    NArray<value , N-1> sliceX(pos_t x)
+    typename slice_t<T, N>::type sliceX(pos_t x)
     {
       if (x >= m_dims[0] || x < 0)
         throw std::out_of_range("sliceX(x) index out of bounds");
 
       return _nSlice(x, 0);
     }
-    const NArray<cvalue, N-1> sliceX(pos_t x) const
+    const typename slice_t<T, N>::type sliceX(pos_t x) const
     {
       if (x >= m_dims[0] || x < 0)
         throw std::out_of_range("sliceX(x) index out of bounds");
@@ -1108,14 +1121,14 @@ WILT_COMMON_BEGIN
     //! @param[in]  dim - the dimension of the slice
     //! @return     N-1 NArray that references the same data
     //! @exception  std::out_of_range if dim or n invalid
-    NArray<value , N-1> sliceN(pos_t n, dim_t dim)
+    typename slice_t<T, N>::type sliceN(pos_t n, dim_t dim)
     {
       if (dim >= N || n >= m_dims[dim] || n < 0)
         throw std::out_of_range("nSlice(n, dim) index out of bounds");
 
       return _nSlice(n, dim);
     }
-    const NArray<cvalue, N-1> sliceN(pos_t n, dim_t dim) const
+    const typename slice_t<T, N>::type sliceN(pos_t n, dim_t dim) const
     {
       if (dim >= N || n >= m_dims[dim] || n < 0)
         throw std::out_of_range("nSlice(n, dim) index out of bounds");
@@ -1632,11 +1645,11 @@ WILT_COMMON_BEGIN
     }
 
   private:
-    NArray<value , N-1> _nSlice(pos_t n, dim_t dim)
+    typename slice_t<T, N>::type _nSlice(pos_t n, dim_t dim)
     {
       return NArray<value, N-1>(m_header, m_base+m_step[dim]*n, _slice(m_dims, dim), _slice(m_step, dim));
     }
-    const NArray<cvalue, N-1> _nSlice(pos_t n, dim_t dim) const
+    const typename slice_t<T, N>::type _nSlice(pos_t n, dim_t dim) const
     {
       return NArray<cvalue, N-1>(m_header, m_base+m_step[dim]*n, _slice(m_dims, dim), _slice(m_step, dim));
     }
@@ -1747,19 +1760,7 @@ WILT_COMMON_BEGIN
 
     }
 
-    NArray<T, 0>& operator= (const T& t)
-    {
-      WILT_STATIC_ASSERT(!std::is_const<T>::value, "cannot assign to a const value");
-
-      if (!m_header._ptr())
-        throw std::domain_error("NArray<T, 0> references no data");
-
-      *m_base = t;
-
-      return *this;
-    }
-
-    operator T() const
+    operator T&() const
     {
       if (!m_header._ptr())
         throw std::runtime_error("Mat<T, 0> references no data");
