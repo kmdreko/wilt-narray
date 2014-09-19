@@ -383,8 +383,8 @@ WILT_COMMON_BEGIN
     return filter<T>(src, size, op, BorderType<U>(border));
   }
 
-  template <class T, class U, dim_t N>
-  NArray<T, N> filterMean(const NArray<U, N>& src, const Point<N>& size, BorderType<U> border)
+  template <class T, dim_t N>
+  NArray<typename mean_t<T>::type, N> filterMean(const NArray<T, N>& src, const Point<N>& size, BorderType<T> border)
   {
     // validate input
     for (dim_t i = 0; i < N; ++i)
@@ -395,8 +395,8 @@ WILT_COMMON_BEGIN
         throw std::invalid_argument("filterMean(): filter size must be odd");
     }
 
-    NArray<T, N> ret;
-    const U* pad = border._padPtr();
+    NArray<typename mean_t<T>::type, N> ret;
+    const T* pad = border._padPtr();
 
     // create sliding index window
     pos_t length = _size(size);
@@ -404,16 +404,16 @@ WILT_COMMON_BEGIN
     pos_t pos = length / 2;
     idx[pos] = 0;
 
-    auto normalOp = [](const U* src, pos_t* idx, pos_t n)
+    auto normalOp = [](const T* src, pos_t* idx, pos_t n)
     {
-      T total = src[idx[0]];
+      typename mean_t<T>::type total = src[idx[0]];
       for (int i = 1; i < n; ++i)
         total += src[idx[i]];
       return total / n;
     };
-    auto paddedOp = [pad](const U* src, pos_t* idx, pos_t n)
+    auto paddedOp = [pad](const T* src, pos_t* idx, pos_t n)
     {
-      T total = (idx[0] == WILT_OUTSIDE_ARRAY) ? *pad : src[idx[0]];
+      typename mean_t<T>::type total = (idx[0] == WILT_OUTSIDE_ARRAY) ? *pad : src[idx[0]];
       for (int i = 1; i < n; ++i)
         if (idx[i] == WILT_OUTSIDE_ARRAY)
           total += *pad;
@@ -421,9 +421,9 @@ WILT_COMMON_BEGIN
           total += src[idx[i]];
       return total / n;
     };
-    auto ignoreOp = [](const U* src, pos_t* idx, pos_t n)
+    auto ignoreOp = [](const T* src, pos_t* idx, pos_t n)
     {
-      T total = src[idx[n/2]];
+      typename mean_t<T>::type total = src[idx[n/2]];
       pos_t m = 0;
       for (int i = 0; i < n; ++i)
         if (i != n/2)
@@ -437,49 +437,49 @@ WILT_COMMON_BEGIN
     try { switch(border.type())
     {
     case Border::REPLICATE:
-      ret = NArray<T, N>(src.dims());
+      ret = NArray<typename mean_t<T>::type, N>(src.dims());
       _filterReplicate(ret._basePtr(), src._basePtr(), 
         ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
-      ret = NArray<T, N>(src.dims());
+      ret = NArray<typename mean_t<T>::type, N>(src.dims());
       _filterReflect(ret._basePtr(), src._basePtr(), 
         ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
-      ret = NArray<T, N>(src.dims());
+      ret = NArray<typename mean_t<T>::type, N>(src.dims());
       _filterReflect101(ret._basePtr(), src._basePtr(), 
         ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
-      ret = NArray<T, N>(src.dims());
+      ret = NArray<typename mean_t<T>::type, N>(src.dims());
       _filterWrap(ret._basePtr(), src._basePtr(), 
         ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
-      ret = NArray<T, N>(src.dims());
+      ret = NArray<typename mean_t<T>::type, N>(src.dims());
       _filterPadded(ret._basePtr(), src._basePtr(), 
         ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::IGNORE:
-      ret = NArray<T, N>(src.dims());
+      ret = NArray<typename mean_t<T>::type, N>(src.dims());
       _filterPadded(ret._basePtr(), src._basePtr(), 
         ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
         &size[N-1], idx, pos, 1, ignoreOp, N);
       break;
 
     case Border::NONE:
-      ret = NArray<T, N>(src.dims()-size+1);
+      ret = NArray<typename mean_t<T>::type, N>(src.dims()-size+1);
       _filterNone(ret._basePtr(), src._basePtr(), 
         ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
@@ -495,10 +495,10 @@ WILT_COMMON_BEGIN
     return ret;
   }
 
-  template <class T, class U, dim_t N>
-  NArray<T, N> filterMean(const NArray<U, N>& src, const Point<N>& size, int border)
+  template <class T, dim_t N>
+  NArray<typename mean_t<T>::type, N> filterMean(const NArray<T, N>& src, const Point<N>& size, int border)
   {
-    return filterMean<T>(src, size, BorderType<U>(border));
+    return filterMean(src, size, BorderType<T>(border));
   }
 
   template <class T, dim_t N>
@@ -636,7 +636,7 @@ WILT_COMMON_BEGIN
   template <class T, dim_t N>
   NArray<T, N> filterMax(const NArray<T, N>& src, const NArray<uint8_t, N>& kernel, int border)
   {
-    return filterMax<T>(src, kernel, BorderType<T>(border));
+    return filterMax(src, kernel, BorderType<T>(border));
   }
 
   template <class T, dim_t N>
@@ -648,7 +648,7 @@ WILT_COMMON_BEGIN
   template <class T, dim_t N>
   NArray<T, N> filterMax(const NArray<T, N>& src, const Point<N>& size, int border)
   {
-    return filterMax<T>(src, size, BorderType<T>(border));
+    return filterMax(src, size, BorderType<T>(border));
   }
 
   template <class T, dim_t N>
@@ -786,7 +786,7 @@ WILT_COMMON_BEGIN
   template <class T, dim_t N>
   NArray<T, N> filterMin(const NArray<T, N>& src, const NArray<uint8_t, N>& kernel, int border)
   {
-    return filterMin<T>(src, kernel, BorderType<T>(border));
+    return filterMin(src, kernel, BorderType<T>(border));
   }
 
   template <class T, dim_t N>
@@ -798,11 +798,11 @@ WILT_COMMON_BEGIN
   template <class T, dim_t N>
   NArray<T, N> filterMin(const NArray<T, N>& src, const Point<N>& size, int border)
   {
-    return filterMin<T>(src, size, BorderType<T>(border));
+    return filterMin(src, size, BorderType<T>(border));
   }
 
-  template <class T, class U, dim_t N>
-  NArray<T, N> filterMedian(const NArray<U, N>& src, const Point<N>& size, BorderType<U> border)
+  template <class T, dim_t N>
+  NArray<T, N> filterMedian(const NArray<T, N>& src, const Point<N>& size, BorderType<T> border)
   {
     // validate input
     for (dim_t i = 0; i < N; ++i)
@@ -814,7 +814,7 @@ WILT_COMMON_BEGIN
     }
 
     NArray<T, N> ret;
-    const U* pad = border._padPtr();
+    const T* pad = border._padPtr();
 
     // create sliding index window
     pos_t length = _size(size);
@@ -822,10 +822,10 @@ WILT_COMMON_BEGIN
     pos_t pos = length / 2;
     idx[pos] = 0;
 
-    auto normalOp = [](const U* src, pos_t* idx, pos_t n) -> T
+    auto normalOp = [](const T* src, pos_t* idx, pos_t n) -> T
     {
       // copy ptrs
-      const U** ptrs = new const U*[n];
+      const T** ptrs = new const T*[n];
       for (int i = 0; i < n; ++i)
         ptrs[i] = src + idx[i];
 
@@ -851,14 +851,14 @@ WILT_COMMON_BEGIN
         if (a > n/2) B = b;
       }
 
-      const U* ret = ptrs[n/2];
+      const T* ret = ptrs[n/2];
       delete[] ptrs;
       return *ret;
     };
-    auto paddedOp = [pad](const U* src, pos_t* idx, pos_t n) -> T
+    auto paddedOp = [pad](const T* src, pos_t* idx, pos_t n) -> T
     {
       // copy ptrs
-      const U** ptrs = new const U*[n];
+      const T** ptrs = new const T*[n];
       for (int i = 0; i < n; ++i)
         if (idx[i] == WILT_OUTSIDE_ARRAY)
           ptrs[i] = pad;
@@ -873,7 +873,7 @@ WILT_COMMON_BEGIN
         int a = A;
         int b = B;
 
-        const U* x = ptrs[n/2];
+        const T* x = ptrs[n/2];
         while (true)
         {
           while (*ptrs[a] < *x) ++a;
@@ -887,7 +887,7 @@ WILT_COMMON_BEGIN
         if (a > n/2) B = b;
       }
 
-      const U* ret = ptrs[n/2];
+      const T* ret = ptrs[n/2];
       delete[] ptrs;
       return *ret;
     };
@@ -946,10 +946,10 @@ WILT_COMMON_BEGIN
     return ret;
   }
 
-  template <class T, class U, dim_t N>
-  NArray<T, N> filterMedian(const NArray<U, N>& src, const Point<N>& size, int border)
+  template <class T, dim_t N>
+  NArray<T, N> filterMedian(const NArray<T, N>& src, const Point<N>& size, int border)
   {
-    return filterMedian<T>(src, size, BorderType<U>(border));
+    return filterMedian(src, size, BorderType<T>(border));
   }
 
   template <class T, class U, class V, dim_t N>
