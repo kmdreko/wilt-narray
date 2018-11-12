@@ -25,11 +25,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// include guards
 #ifndef WILT_NARRAY_HPP
 #define WILT_NARRAY_HPP
 
-// libraries
 #include <memory>
 // - std::allocator
 #include <type_traits>
@@ -1950,9 +1948,7 @@ WILT_COMMON_BEGIN
 WILT_COMMON_END
 WILT_END
 
-// additional
 #include "narrayiterator.hpp"
 #include "operators.hpp"
 
-// WILT_NARRAY_HPP
-#endif
+#endif // !WILT_NARRAY_HPP

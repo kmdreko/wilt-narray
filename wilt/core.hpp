@@ -31,7 +31,6 @@
 // #define WILT_DISABLE_INLINE_NAMESPACES
 // #define WILT_DISABLE_BRACE_INITIALIZATION
 
-// core headers
 #include "util.h"
 #include "point.hpp"
 #include "narray.hpp"

@@ -25,11 +25,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// #include guards
 #ifndef WILT_NARRAYITERATOR_HPP
 #define WILT_NARRAYITERATOR_HPP
 
-// libraries
 #include <iterator>
 // - std::random_access_iterator_tag
 
@@ -314,5 +312,4 @@ WILT_COMMON_BEGIN
 WILT_COMMON_END
 WILT_END
 
-// WILT_NARRAYITERATOR_HPP
-#endif 
+#endif // !WILT_NARRAYITERATOR_HPP

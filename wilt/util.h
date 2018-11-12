@@ -25,7 +25,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// include guards
 #ifndef WILT_UTIL_H
 #define WILT_UTIL_H
 
@@ -145,5 +144,4 @@ namespace std
   };
 }
 
-// WILT_UTIL_H
-#endif
+#endif // !WILT_UTIL_H

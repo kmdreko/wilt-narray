@@ -25,11 +25,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// include guards
 #ifndef WILT_FILTERS_HPP
 #define WILT_FILTERS_HPP
 
-// libraries
 #include <cstring>
 // - memcpy
 
@@ -1182,5 +1180,4 @@ WILT_COMMON_BEGIN
 WILT_COMMON_END
 WILT_END
 
-// WILT_FILTERS_HPP
-#endif
+#endif // !WILT_FILTERS_HPP

@@ -25,11 +25,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// include guards
 #ifndef WILT_POINT_HPP
 #define WILT_POINT_HPP
 
-// libraries
 #include <array>
 // - std::array
 
@@ -536,5 +534,4 @@ wilt::Point<N> operator/ (pos_t lhs, const wilt::Point<N>& rhs)
   return ret;
 }
 
-// WILT_POINT_HPP
-#endif 
+#endif // !WILT_POINT_HPP

@@ -25,7 +25,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// include guards
 #ifndef WILT_OPERATORS_HPP
 #define WILT_OPERATORS_HPP
 
@@ -1661,5 +1660,4 @@ wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const T& lhs,
   return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
-// WILT_OPERATORS_HPP
-#endif
+#endif // !WILT_OPERATORS_HPP
