@@ -35,13 +35,6 @@
   #define WILT_LOOP_UNROLLING_ENABLED 0
 #endif
 
-// disabling brace initialization is useful for compiling without c++11 support
-#ifndef WILT_DISABLE_BRACE_INITIALIZATION
-  #define WILT_BRACE_INITIALIZATION_ENABLED 1
-#else
-  #define WILT_BRACE_INITIALIZATION_ENABLED 0
-#endif
-
 // a flag for invalid index
 #define WILT_OUTSIDE_ARRAY PTRDIFF_MIN
 

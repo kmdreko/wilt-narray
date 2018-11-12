@@ -642,7 +642,6 @@ namespace wilt
         _clean();
     }
 
-#if WILT_BRACE_INITIALIZATION_ENABLED == 1
     NArray(const Point<N>& size, std::initializer_list<T> list)
       : m_header(),
         m_base(nullptr),
@@ -654,7 +653,6 @@ namespace wilt
       else
         _clean();
     }
-#endif
 
     template <class Generator>
     NArray(const Point<N>& size, Generator gen)

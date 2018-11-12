@@ -48,7 +48,6 @@ namespace wilt
       m_size.fill(0);
     }
 
-#if WILT_BRACE_INITIALIZATION_ENABLED == 1
     //! @brief      Value constructor. 
     //! @param[in]  list - initializer list to copy from
     //! @exception  std::exception if list size doesn't match dimensions
@@ -65,7 +64,6 @@ namespace wilt
           m_size[i] = *iter;
       }
     }
-#endif
 
     //! @brief      Copy constructor
     //! @param[in]  pt - Point to copy from
