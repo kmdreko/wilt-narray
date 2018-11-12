@@ -35,6 +35,9 @@
 #include "narray.hpp"
 #include "point.hpp"
 
+// a flag for invalid index
+#define WILT_OUTSIDE_ARRAY PTRDIFF_MIN
+
 namespace wilt
 {
   template <class T, dim_t N, class U, dim_t M, class Operator>

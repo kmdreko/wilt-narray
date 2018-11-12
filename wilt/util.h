@@ -28,9 +28,6 @@
 #ifndef WILT_UTIL_H
 #define WILT_UTIL_H
 
-// a flag for invalid index
-#define WILT_OUTSIDE_ARRAY PTRDIFF_MIN
-
 // libraries
 #include <utility>
 // - std::move
