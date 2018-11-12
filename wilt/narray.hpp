@@ -1843,7 +1843,7 @@ WILT_COMMON_BEGIN
   }
 
   template <class T, dim_t N>
-  typename std::remove_const<T>::type max(const NArray<T, N>& src)
+  T max(const NArray<T, N>& src)
   {
     typename std::remove_const<T>::type max = src.at(Point<N>());
     src.apply([&max](const T& t){ if (t > max) max = t; });
@@ -1860,7 +1860,7 @@ WILT_COMMON_BEGIN
   }
 
   template <class T, dim_t N>
-  typename std::remove_const<T>::type min(const NArray<T, N>& src)
+  T min(const NArray<T, N>& src)
   {
     typename std::remove_const<T>::type min = src.at(Point<N>());
     src.apply([&min](const T& t){ if (t < min) min = t; });
@@ -1877,13 +1877,13 @@ WILT_COMMON_BEGIN
   }
 
   template <class T, dim_t N>
-  typename mean_t<T>::type mean(const NArray<T, N>& src)
+  typename sum_t<T>::type mean(const NArray<T, N>& src)
   {
-    return (mean_t<T>::type)sum(src) / src.size();
+    return sum(src) / src.size();
   }
 
   template <class T, dim_t N>
-  typename std::remove_const<T>::type median(const NArray<T, N>& src)
+  T median(const NArray<T, N>& src)
   {
     int n = src.size();
     const T** ptrs = new const T*[n];

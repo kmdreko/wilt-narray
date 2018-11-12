@@ -222,8 +222,8 @@ WILT_COMMON_BEGIN
           max[i] = m_size[i];
         }
 
-        mins[i] = std::max<pos_t>(m_offs[i], 0l);
-        maxs[i] = std::min<pos_t>(m_arr.length(i), m_size[i] + m_offs[i]);
+        mins[i] = std::max(m_offs[i], 0l);
+        maxs[i] = std::min(m_arr.length(i), m_size[i] + m_offs[i]);
       }
 
       if (enclosed)
@@ -415,7 +415,7 @@ WILT_COMMON_BEGIN
   template <class T, dim_t N>
   NArray<T, N> padArray(const NArray<T, N>& src, const Point<N>& width, BorderType<T> border)
   {
-    return NArrayWindow<T, N>(src, src.dims() + 2 * width, Point<N>()-width, border).clone();
+    return NArrayWindow<T, N>(src, -width, src.dims() + 2 * width, border).clone();
   }
 
   template <class T, dim_t N>

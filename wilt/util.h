@@ -88,20 +88,23 @@ WILT_BEGIN
   template <class T, class U> struct bit_xor_ret { typedef decltype(std::declval<T>() ^ std::declval<U>()) type; };
 
   template <class T> struct sum_t { typedef T type; };
-  template <class T> struct mean_t { typedef T type; };
   template <class T> struct raw_t { static bool value() { return false; } };
   
+  
   template <> struct sum_t<uint8_t> { typedef int type; };
-  template <> struct mean_t<uint8_t> { typedef double type; };
 
-  template <> struct raw_t<uint8_t> { static bool value() { return true; } };
-  template <> struct raw_t<uint16_t> { static bool value() { return true; } };
-  template <> struct raw_t<uint32_t> { static bool value() { return true; } };
-  template <> struct raw_t<uint64_t> { static bool value() { return true; } };
-  template <> struct raw_t<int8_t> { static bool value() { return true; } };
+  template <> struct raw_t<int8_t>  { static bool value() { return true; } };
   template <> struct raw_t<int16_t> { static bool value() { return true; } };
   template <> struct raw_t<int32_t> { static bool value() { return true; } };
   template <> struct raw_t<int64_t> { static bool value() { return true; } };
+  template <> struct raw_t<uint8_t>  { static bool value() { return true; } };
+  template <> struct raw_t<uint16_t> { static bool value() { return true; } };
+  template <> struct raw_t<uint32_t> { static bool value() { return true; } };
+  template <> struct raw_t<uint64_t> { static bool value() { return true; } };
+
+  template <> struct raw_t<float> { static bool value() { return true; } };
+  template <> struct raw_t<double> { static bool value() { return true; } };
+  template <> struct raw_t<long double> { static bool value() { return true; } };
 
 WILT_END
 
