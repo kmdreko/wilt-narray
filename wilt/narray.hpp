@@ -1319,7 +1319,7 @@ namespace wilt
     //!             or other references exist
     bool isUnique() const
     {
-      return m_data._ptr() && m_data->refs == 1;
+      return m_data._ptr() && m_data.unique();
     }
 
     //! @brief      returns an iterator pointing to the beginning

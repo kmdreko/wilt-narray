@@ -30,6 +30,8 @@
 
 #include <memory>
 // - std::allocator
+// - std::shared_ptr
+// - std::make_shared
 #include <cstddef>
 // - std::size_t
 
@@ -51,14 +53,12 @@ namespace wilt
     public:
       T* data;
       std::size_t size;
-      std::size_t refs;
       A alloc;
       bool owned;
 
       Node()
         : data(nullptr),
         size(0),
-        refs(0),
         alloc(),
         owned(true)
       {
@@ -68,7 +68,6 @@ namespace wilt
       Node(std::size_t _size)
         : data(nullptr),
         size(_size),
-        refs(1),
         alloc(),
         owned(true)
       {
@@ -81,7 +80,6 @@ namespace wilt
       Node(std::size_t _size, const T& val)
         : data(nullptr),
         size(_size),
-        refs(1),
         alloc(),
         owned(true)
       {
@@ -93,7 +91,6 @@ namespace wilt
       Node(std::size_t _size, T* _data, PTR ltype)
         : data(nullptr),
         size(_size),
-        refs(1),
         alloc(),
         owned(true)
       {
@@ -118,7 +115,6 @@ namespace wilt
       Node(std::size_t _size, Generator gen)
         : data(nullptr),
         size(_size),
-        refs(1),
         alloc(),
         owned(true)
       {
@@ -141,93 +137,85 @@ namespace wilt
     }; // class Node
 
     NArrayDataRef()
-      : m_node(nullptr)
+      : m_node()
     {
 
     }
 
     NArrayDataRef(pos_t size)
-      : m_node(nullptr)
+      : m_node()
     {
       if (size > 0)
-        m_node = new Node(size);
+        m_node = std::make_shared<Node>(size);
     }
 
     NArrayDataRef(pos_t size, const T& val)
-      : m_node(nullptr)
+      : m_node()
     {
       if (size > 0)
-        m_node = new Node(size, val);
+        m_node = std::make_shared<Node>(size, val);
     }
 
     NArrayDataRef(pos_t size, T* ptr, PTR ltype)
-      : m_node(nullptr)
+      : m_node()
     {
       if (size > 0)
-        m_node = new Node(size, ptr, ltype);
+        m_node = std::make_shared<Node>(size, ptr, ltype);
     }
 
     template <class Generator>
     NArrayDataRef(pos_t size, Generator gen)
-      : m_node(nullptr)
+      : m_node()
     {
       if (size > 0)
-        m_node = new Node(size, gen);
+        m_node = std::make_shared<Node>(size, gen);
     }
 
 
     NArrayDataRef(const NArrayDataRef<T, A>& header)
       : m_node(header.m_node)
     {
-      _incref();
+
     }
 
     ~NArrayDataRef()
     {
-      _decref();
+
     }
 
     NArrayDataRef<T, A>& operator= (const NArrayDataRef<T, A>& header)
     {
-      _decref();
       m_node = header.m_node;
-      _incref();
+
       return *this;
     }
 
     void clear()
     {
-      _decref();
-      m_node = nullptr;
+      m_node.reset();
+    }
+
+    bool unique() const
+    {
+      return m_node.unique();
     }
 
     Node& operator* () const
     {
-      return *m_node;
+      return *m_node.get();
     }
     Node* operator-> () const
     {
-      return m_node;
+      return m_node.get();
     }
 
     Node* _ptr() const
     {
-      return m_node;
+      return m_node.get();
     }
 
   private:
-    Node* m_node;
-
-    void _incref()
-    {
-      if (m_node)
-        ++m_node->refs;
-    }
-    void _decref()
-    {
-      if (m_node && --m_node->refs == 0)
-        delete m_node;
-    }
+    std::shared_ptr<Node> m_node;
 
   }; // class NArrayDataRef
 
