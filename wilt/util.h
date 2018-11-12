@@ -57,21 +57,8 @@
   #define WILT_BRACE_INITIALIZATION_ENABLED 0
 #endif
 
-// disabling inline namepaces is useful for compiling without c++11 support
-#ifndef WILT_DISABLE_INLINE_NAMESPACES
-  #define WILT_COMMON_BEGIN inline namespace common {
-  #define WILT_COMMON_END } 
-#else
-  #define WILT_COMMON_BEGIN
-  #define WILT_COMMON_END
-#endif
-
 // a flag for invalid index
 #define WILT_OUTSIDE_ARRAY PTRDIFF_MIN
-
-// macros for namespace
-#define WILT_BEGIN namespace wilt {
-#define WILT_END }
 
 // libraries
 #include <utility>
@@ -94,9 +81,8 @@
 typedef std::size_t    dim_t;
 typedef std::ptrdiff_t pos_t;
 
-//! @brief  wilt scope
-WILT_BEGIN
-
+namespace wilt
+{
   // operation type returns
   template <class T, class U> struct add_ret { typedef decltype(std::declval<T>() + std::declval<U>()) type; };
   template <class T, class U> struct sub_ret { typedef decltype(std::declval<T>() - std::declval<U>()) type; };
@@ -127,7 +113,7 @@ WILT_BEGIN
   template <> struct raw_t<double> { static bool value() { return true; } };
   template <> struct raw_t<long double> { static bool value() { return true; } };
 
-WILT_END
+} // namespace wilt
 
 namespace std
 {

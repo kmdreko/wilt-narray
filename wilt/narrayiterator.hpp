@@ -35,10 +35,8 @@
 #include "point.hpp"
 #include "narray.hpp"
 
-// @brief wilt scope
-WILT_BEGIN
-WILT_COMMON_BEGIN
-
+namespace wilt
+{
   //! @class  NArrayIterator
   //!
   //! The iterator class retains its own reference to the array data, meaning
@@ -309,7 +307,6 @@ WILT_COMMON_BEGIN
 
   }; // class NArrayIterator
 
-WILT_COMMON_END
-WILT_END
+} // namespace wilt
 
 #endif // !WILT_NARRAYITERATOR_HPP

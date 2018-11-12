@@ -32,10 +32,8 @@
 #include "narray.hpp"
 #include "point.hpp"
 
-//! @brief  wilt scope
-WILT_BEGIN
-WILT_COMMON_BEGIN
-
+namespace wilt
+{
   // forward declaration
   template <class T> class BorderType;
 
@@ -445,7 +443,6 @@ WILT_COMMON_BEGIN
     return padArray(src, width, BorderType<T>(border));
   }
 
-WILT_COMMON_END
-WILT_END
+} // namespace wilt
 
 #endif // !WILT_BORDERS_HPP

@@ -33,10 +33,8 @@
 
 #include "util.h"
 
-//! @brief  wilt scope
-WILT_BEGIN
-WILT_COMMON_BEGIN
-
+namespace wilt
+{
   //! @class  Point
   //! @brief  An integer point class with arithmetic operations
   template <dim_t N>
@@ -179,8 +177,6 @@ WILT_COMMON_BEGIN
     std::array<pos_t, N> m_size;
     
   }; // class Point
-
-WILT_COMMON_END
 
   //! @brief      Slices a point by removing an index
   //! @param[in]  pt - point to slice
@@ -363,7 +359,7 @@ WILT_COMMON_END
     return idx;
   }
 
-WILT_END
+} // namespace wilt
 
 //! @brief      Compares the two points
 //! @param[in]  lhs - point to compare

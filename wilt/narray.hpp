@@ -36,9 +36,8 @@
 #include "util.h"
 #include "point.hpp"
 
-//! @brief  wilt scope
-WILT_BEGIN
-
+namespace wilt
+{
   //! @brief         applies an operation on two source arrays and stores the
   //!                result in a destination array
   //! @param[out]    dst - the destination array
@@ -365,8 +364,6 @@ WILT_BEGIN
     return true;
   }
 
-WILT_COMMON_BEGIN
-
   template <class T, dim_t N> class NArray;
 
   enum PTR
@@ -375,8 +372,6 @@ WILT_COMMON_BEGIN
     COPY,
     REF
   };
-
-WILT_COMMON_END
 
   template <class T, dim_t N>
   struct slice_t
@@ -577,8 +572,6 @@ WILT_COMMON_END
     }
 
   }; // class NArrayHeader
-
-WILT_COMMON_BEGIN
 
   // forward declaration
   template <class T, dim_t N> class NArrayIterator;
@@ -1945,8 +1938,7 @@ WILT_COMMON_BEGIN
     return cnt;
   }
 
-WILT_COMMON_END
-WILT_END
+} // namespace wilt
 
 #include "narrayiterator.hpp"
 #include "operators.hpp"

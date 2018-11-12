@@ -81,9 +81,7 @@ Various other functions are available such as max, min, mean, and median that ac
 You would normally initialize the library as such
 
     #include "wilt/core.hpp"
-    using namespace wilt::common;
-
-Using the inline namespace common in this manner means that you can use the common objects and functions without infecting the scope with internal wilt functions. All functions and object are still available by `wilt::` if you so choose. (I hadn't seen this use of inline namespaces yet to hopefully this is revolutionary :D)
+    using wilt::NArray;
 
 This library was designed with C++11 features but you can disable some features (brace-list-initialization, inline namespaces) for environments without full support (namely VS 2012) by using special defines in core.hpp
 

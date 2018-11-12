@@ -31,9 +31,8 @@
 #include "util.h"
 #include "narray.hpp"
 
-//! @brief  wilt scope
-WILT_BEGIN
-
+namespace wilt
+{
   // helper structures for applying move semantics to operators
   template <class Ret, class T, class U, dim_t N>
   struct move_op
@@ -313,8 +312,6 @@ WILT_BEGIN
       return none(rhs, op);
     }
   };
-
-WILT_COMMON_BEGIN
 
   template <class Ret, class T, class U, dim_t N>
   NArray<Ret, N> add(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
@@ -1290,8 +1287,7 @@ WILT_COMMON_BEGIN
     }
   }
 
-WILT_COMMON_END
-WILT_END
+} // namespace wilt
 
 template <class T, class U, dim_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)

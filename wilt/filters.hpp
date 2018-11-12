@@ -35,8 +35,8 @@
 #include "narray.hpp"
 #include "point.hpp"
 
-WILT_BEGIN
-
+namespace wilt
+{
   template <class T, dim_t N, class U, dim_t M, class Operator>
   void _compress(NArray<T, N>& dst, const NArray<U, M>& src, Point<N> pos, pos_t n, Operator op)
   {
@@ -364,8 +364,6 @@ WILT_BEGIN
       for (int i = 0; i < dims[0]; ++i, dst += dstep[0], src += sstep[0])
         _filterNone(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
   }
-
-WILT_COMMON_BEGIN
 
   enum Filter
   {
@@ -1177,7 +1175,6 @@ WILT_COMMON_BEGIN
     return filterCustom<T>(src, size, op, BorderType<U>(border));
   }
 
-WILT_COMMON_END
-WILT_END
+} // namespace wilt
 
 #endif // !WILT_FILTERS_HPP
