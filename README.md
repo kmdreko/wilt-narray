@@ -1,4 +1,4 @@
-# Wilt Library
+# NArray Library
 
 ## Overview
 This library is designed to reference and modify N-dimensional data in an efficient manor. The primary class of the library is `NArray<T, N>` where `T` is the type and `N` is the number of dimensions which provides many methods for accessing the data. This library is similar to Boost::MultiArray and OpenCV cv::Mat but focuses on ease-of-use with simple interfaces and consistent operations without sacrificing performance. 
@@ -80,7 +80,7 @@ Various other functions are available such as max, min, mean, and median that ac
 
 You would normally initialize the library as such
 
-    #include "wilt/core.hpp"
+    #include "wilt/narray.hpp"
     using wilt::NArray;
 
 This library was designed with C++11 features but you can disable some features (brace-list-initialization, inline namespaces) for environments without full support (namely VS 2012) by using special defines in core.hpp
