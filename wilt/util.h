@@ -28,13 +28,6 @@
 #ifndef WILT_UTIL_H
 #define WILT_UTIL_H
 
-// disabling static assert is useful for forcing template instatiations
-#ifndef WILT_DISABLE_STATIC_ASSERT
-  #define WILT_STATIC_ASSERT(cond, msg) static_assert(cond, msg)
-#else
-  #define WILT_STATIC_ASSERT(cond, msg) if (!(cond)) throw std::domain_error(msg)
-#endif
-
 // disabling loop unrolling is useful for reducing code size
 #ifndef WILT_DISABLE_LOOP_UNROLLING
   #define WILT_LOOP_UNROLLING_ENABLED 1

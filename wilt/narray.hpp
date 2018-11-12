@@ -590,7 +590,7 @@ namespace wilt
     typedef       T& reference;
     typedef const T& creference;
 
-    typedef NArrayIterator<value,  N> iterator;
+    typedef NArrayIterator<value, N> iterator;
     typedef NArrayIterator<cvalue, N> const_iterator;
 
     //! @brief  Default constructor. Makes an empty NArray
@@ -821,7 +821,7 @@ namespace wilt
     //! @return     reference to this object
     NArray<T, N>& operator+= (const NArray<cvalue, N>& arr)
     {
-      WILT_STATIC_ASSERT(!std::is_const<T>::value, "operator+= invalid on const type");
+      static_assert(!std::is_const<T>::value, "operator+= invalid on const type");
 
       if (m_dims != arr.m_dims)
         throw std::invalid_argument("NArray+=(arr) dimensions must match");
@@ -839,7 +839,7 @@ namespace wilt
     //! @return     reference to this object
     NArray<T, N>& operator+= (const T& val)
     {
-      WILT_STATIC_ASSERT(!std::is_const<T>::value, "operator+= invalid on const type");
+      static_assert(!std::is_const<T>::value, "operator+= invalid on const type");
 
       if (empty())
         return *this;
@@ -856,7 +856,7 @@ namespace wilt
     //! @return     reference to this object
     NArray<T, N>& operator-= (const NArray<cvalue, N>& arr)
     {
-      WILT_STATIC_ASSERT(!std::is_const<T>::value, "operator-= invalid on const type");
+      static_assert(!std::is_const<T>::value, "operator-= invalid on const type");
 
       if (m_dims != arr.m_dims)
         throw std::invalid_argument("NArray-=(arr) dimensions must match");
@@ -874,7 +874,7 @@ namespace wilt
     //! @return     reference to this object
     NArray<T, N>& operator-= (const T& val)
     {
-      WILT_STATIC_ASSERT(!std::is_const<T>::value, "operator-= invalid on const type");
+      static_assert(!std::is_const<T>::value, "operator-= invalid on const type");
 
       if (empty())
         return *this;
@@ -890,7 +890,7 @@ namespace wilt
     //! @return     reference to this object
     NArray<T, N>& operator*= (const T& val)
     {
-      WILT_STATIC_ASSERT(!std::is_const<T>::value, "operator*= invalid on const type");
+      static_assert(!std::is_const<T>::value, "operator*= invalid on const type");
 
       if (empty())
         return *this;
@@ -906,7 +906,7 @@ namespace wilt
     //! @return     reference to this object
     NArray<T, N>& operator/= (const T& val)
     {
-      WILT_STATIC_ASSERT(!std::is_const<T>::value, "operator/= invalid on const type");
+      static_assert(!std::is_const<T>::value, "operator/= invalid on const type");
 
       if (empty())
         return *this;
@@ -1000,7 +1000,7 @@ namespace wilt
     //! static_assert triggered if N < 2
     pos_t height() const
     {
-      WILT_STATIC_ASSERT(N >= 2, "height(): unavailable for N < 2");
+      static_assert(N >= 2, "height() only valid when N >= 2");
 
       return m_dims[1];
     }
@@ -1012,7 +1012,7 @@ namespace wilt
     //! static_assert triggered if N < 3
     pos_t depth() const
     {
-      WILT_STATIC_ASSERT(N >= 3, "depth(): unavailable for N < 3");
+      static_assert(N >= 3, "depth() only valid when N >= 3");
 
       return m_dims[2];
     }
@@ -1074,9 +1074,9 @@ namespace wilt
 
       return _nSlice(x, 0);
     }
-    NArray<value , N-1> sliceY(pos_t y)
+    NArray<value, N-1> sliceY(pos_t y)
     {
-      WILT_STATIC_ASSERT(N >= 2, "sliceY() only valid when N >= 2");
+      static_assert(N >= 2, "sliceY() only valid when N >= 2");
 
       if (y >= m_dims[1] || y < 0)
         throw std::out_of_range("sliceY(y) index out of bounds");
@@ -1085,16 +1085,16 @@ namespace wilt
     }
     const NArray<cvalue, N-1> sliceY(pos_t y) const
     {
-      WILT_STATIC_ASSERT(N >= 2, "sliceY() only valid when N >= 2");
+      static_assert(N >= 2, "sliceY() only valid when N >= 2");
 
       if (y >= m_dims[1] || y < 0)
         throw std::out_of_range("sliceY(y) index out of bounds");
 
       return _nSlice(y, 1);
     }
-    NArray<value , N-1> sliceZ(pos_t z)
+    NArray<value, N-1> sliceZ(pos_t z)
     {
-      WILT_STATIC_ASSERT(N >= 3, "sliceZ() only valid when N >= 3");
+      static_assert(N >= 3, "sliceZ() only valid when N >= 3");
 
       if (z >= m_dims[2] || z < 0)
         throw std::out_of_range("sliceZ(z) index out of bounds");
@@ -1103,16 +1103,16 @@ namespace wilt
     }
     const NArray<cvalue, N-1> sliceZ(pos_t z) const
     {
-      WILT_STATIC_ASSERT(N >= 3, "sliceZ() only valid when N >= 3");
+      static_assert(N >= 3, "sliceZ() only valid when N >= 3");
 
       if (z >= m_dims[2] || z < 0)
         throw std::out_of_range("sliceZ(z) index out of bounds");
 
       return _nSlice(z, 2);
     }
-    NArray<value , N-1> sliceW(pos_t w)
+    NArray<value, N-1> sliceW(pos_t w)
     {
-      WILT_STATIC_ASSERT(N >= 4, "sliceW() only valid when N >= 4");
+      static_assert(N >= 4, "sliceW() only valid when N >= 4");
 
       if (w >= m_dims[3] || w < 0)
         throw std::out_of_range("sliceW(w) index out of bounds");
@@ -1121,7 +1121,7 @@ namespace wilt
     }
     const NArray<cvalue, N-1> sliceW(pos_t w) const
     {
-      WILT_STATIC_ASSERT(N >= 4, "sliceW() only valid when N >= 4");
+      static_assert(N >= 4, "sliceW() only valid when N >= 4");
 
       if (w >= m_dims[3] || w < 0)
         throw std::out_of_range("sliceW(w) index out of bounds");
@@ -1158,7 +1158,7 @@ namespace wilt
     template <dim_t M>
     NArray<value, N-M> arrayAt(const Point<M>& pos)
     {
-      WILT_STATIC_ASSERT(M<N && M>0, "arrayAt(): pos is not less than N");
+      static_assert(M<N && M>0, "arrayAt(): pos is not less than N");
 
       type* base = m_base;
       for (dim_t i = 0; i < M; ++i)
@@ -1173,7 +1173,7 @@ namespace wilt
     template <dim_t M>
     const NArray<cvalue, N-M> arrayAt(const Point<M>& pos) const
     {
-      WILT_STATIC_ASSERT(M<N && M>0, "arrayAt(): pos is not less than N");
+      static_assert(M<N && M>0, "arrayAt(): pos is not less than N");
 
       type* base = m_base;
       for (dim_t i = 0; i < M; ++i)
@@ -1193,7 +1193,7 @@ namespace wilt
     //! @exception  std::domain_error if call for invalid N
     //!
     //! Equivalent to rangeN(x|y|z|w, length, n)
-    NArray<value , N> rangeX(pos_t x, pos_t length)
+    NArray<value, N> rangeX(pos_t x, pos_t length)
     {
       if (x >= m_dims[0] || x+length > m_dims[0] || length <= 0 || x < 0)
         throw std::out_of_range("xRange(x, length) index out of bounds");
@@ -1207,9 +1207,9 @@ namespace wilt
 
       return _nRange(x, length, 0);
     }
-    NArray<value , N> rangeY(pos_t y, pos_t length)
+    NArray<value, N> rangeY(pos_t y, pos_t length)
     {
-      WILT_STATIC_ASSERT(N >= 2, "rangeY() only valid when N >= 2");
+      static_assert(N >= 2, "rangeY() only valid when N >= 2");
 
       if (y >= m_dims[1] || y+length > m_dims[1] || length <= 0 || y < 0)
         throw std::out_of_range("yRange(y, length) index out of bounds");
@@ -1218,16 +1218,16 @@ namespace wilt
     }
     const NArray<cvalue, N> rangeY(pos_t y, pos_t length) const
     {
-      WILT_STATIC_ASSERT(N >= 2, "rangeY() only valid when N >= 2");
+      static_assert(N >= 2, "rangeY() only valid when N >= 2");
 
       if (y >= m_dims[1] || y+length > m_dims[1] || length <= 0 || y < 0)
         throw std::out_of_range("yRange(y, length) index out of bounds");
 
       return _nRange(y, length, 1);
     }
-    NArray<value , N> rangeZ(pos_t z, pos_t length)
+    NArray<value, N> rangeZ(pos_t z, pos_t length)
     {
-      WILT_STATIC_ASSERT(N >= 3, "rangeZ() only valid when N >= 3");
+      static_assert(N >= 3, "rangeZ() only valid when N >= 3");
 
       if (z >= m_dims[2] || z+length > m_dims[2] || length <= 0 || z < 0)
         throw std::out_of_range("zRange(z, length) index out of bounds");
@@ -1236,16 +1236,16 @@ namespace wilt
     }
     const NArray<cvalue, N> rangeZ(pos_t z, pos_t length) const
     {
-      WILT_STATIC_ASSERT(N >= 3, "rangeZ() only valid when N >= 3");
+      static_assert(N >= 3, "rangeZ() only valid when N >= 3");
 
       if (z >= m_dims[2] || z+length > m_dims[2] || length <= 0 || z < 0)
         throw std::out_of_range("zRange(z, length) index out of bounds");
 
       return _nRange(z, length, 2);
     }
-    NArray<value , N> rangeW(pos_t w, pos_t length)
+    NArray<value, N> rangeW(pos_t w, pos_t length)
     {
-      WILT_STATIC_ASSERT(N >= 4, "rangeW() only valid when N >= 4");
+      static_assert(N >= 4, "rangeW() only valid when N >= 4");
 
       if (w >= m_dims[3] || w+length > m_dims[3] || length <= 0 || w < 0)
         throw std::out_of_range("wRange(w, length) index out of bounds");
@@ -1254,7 +1254,7 @@ namespace wilt
     }
     const NArray<cvalue, N> rangeW(pos_t w, pos_t length) const
     {
-      WILT_STATIC_ASSERT(N >= 4, "rangeW() only valid when N >= 4");
+      static_assert(N >= 4, "rangeW() only valid when N >= 4");
 
       if (w >= m_dims[3] || w+length > m_dims[3] || length <= 0 || w < 0)
         throw std::out_of_range("wRange(w, length) index out of bounds");
@@ -1268,7 +1268,7 @@ namespace wilt
     //! @param[in]  dim - the dimension of the range
     //! @return     N-1 NArray that references the same data
     //! @exception  std::out_of_range if dim, n, or length invalid
-    NArray<value , N> rangeN(pos_t n, pos_t length, dim_t dim)
+    NArray<value, N> rangeN(pos_t n, pos_t length, dim_t dim)
     {
       if (n >= m_dims[dim] || n+length > m_dims[dim] || length <= 0 || n < 0 || dim >= N)
         throw std::out_of_range("nRange(n, length, dim) index out of bounds");
@@ -1288,15 +1288,15 @@ namespace wilt
     //! @exception  std::domain_error if call for invalid N
     //!
     //! t() is identical to t(0, 1)
-    NArray<value , N> t()
+    NArray<value, N> t()
     {
-      WILT_STATIC_ASSERT(N >= 2, "t() only valid when N >= 2");
+      static_assert(N >= 2, "t() only valid when N >= 2");
 
       return t(0, 1);
     }
     const NArray<cvalue, N> t() const
     {
-      WILT_STATIC_ASSERT(N >= 2, "t() only valid when N >= 2");
+      static_assert(N >= 2, "t() only valid when N >= 2");
 
       return t(0, 1);
     }
@@ -1306,7 +1306,7 @@ namespace wilt
     //! @param[in]  dim2 - second dimension to swap
     //! @return     NArray that references the same data
     //! @exception  std::out_of_range if dim1 or dim2 invalid
-    NArray<value , N> t(dim_t dim1, dim_t dim2)
+    NArray<value, N> t(dim_t dim1, dim_t dim2)
     {
       if (dim1 >= N || dim2 >= N)
         throw std::out_of_range("t(dim1, dim2) index out of bounds");
@@ -1326,7 +1326,7 @@ namespace wilt
     //! @exception  std::domain_error if call for invalid N
     //!
     //! Equivalent to flipN(0|1|2|3)
-    NArray<value , N> flipX()
+    NArray<value, N> flipX()
     {
       return _nFlip(0);
     }
@@ -1334,39 +1334,39 @@ namespace wilt
     {
       return _nFlip(0);
     }
-    NArray<value , N> flipY()
+    NArray<value, N> flipY()
     {
-      WILT_STATIC_ASSERT(N >= 2, "flipY() only valid when N >= 2");
+      static_assert(N >= 2, "flipY() only valid when N >= 2");
 
       return _nFlip(1);
     }
     const NArray<cvalue, N> flipY() const
     {
-      WILT_STATIC_ASSERT(N >= 2, "flipY() only valid when N >= 2");
+      static_assert(N >= 2, "flipY() only valid when N >= 2");
 
       return _nFlip(1);
     }
-    NArray<value , N> flipZ()
+    NArray<value, N> flipZ()
     {
-      WILT_STATIC_ASSERT(N >= 3, "flipZ() only valid when N >= 3");
+      static_assert(N >= 3, "flipZ() only valid when N >= 3");
 
       return _nFlip(2);
     }
     const NArray<cvalue, N> flipZ() const
     {
-      WILT_STATIC_ASSERT(N >= 3, "flipZ() only valid when N >= 3");
+      static_assert(N >= 3, "flipZ() only valid when N >= 3");
 
       return _nFlip(2);
     }
-    NArray<value , N> flipW()
+    NArray<value, N> flipW()
     {
-      WILT_STATIC_ASSERT(N >= 4, "flipW() only valid when N >= 4");
+      static_assert(N >= 4, "flipW() only valid when N >= 4");
 
       return _nFlip(3);
     }
     const NArray<cvalue, N> flipW() const
     {
-      WILT_STATIC_ASSERT(N >= 4, "flipW() only valid when N >= 4");
+      static_assert(N >= 4, "flipW() only valid when N >= 4");
 
       return _nFlip(3);
     }
@@ -1375,7 +1375,7 @@ namespace wilt
     //! @param[in]  dim - the dimension to flip
     //! @return     NArray that references the same data
     //! @exception  std::out_of_range if dim1 or dim2 invalid
-    NArray<value , N> flipN(dim_t dim)
+    NArray<value, N> flipN(dim_t dim)
     {
       if (dim >= N)
         throw std::out_of_range("nFlip(dim) index out of bounds");
@@ -1508,7 +1508,7 @@ namespace wilt
     //! @return     NArray that references the data
     //!
     //! Usefull for traversing data efficiently when order doesn't matter
-    NArray<value , N> aligned()
+    NArray<value, N> aligned()
     {
       Point<N> dims = m_dims;
       Point<N> step = m_step;
@@ -1666,7 +1666,7 @@ namespace wilt
     {
       return NArray<cvalue, N-1>(m_header, m_base+m_step[dim]*n, _slice(m_dims, dim), _slice(m_step, dim));
     }
-    NArray<value,  N> _nRange(pos_t n, pos_t length, dim_t dim)
+    NArray<value, N> _nRange(pos_t n, pos_t length, dim_t dim)
     {
       Point<N> temp = m_dims;
       temp[dim] = length;
@@ -1678,7 +1678,7 @@ namespace wilt
       temp[dim] = length;
       return NArray<cvalue, N>(m_header, m_base+m_step[dim]*n, temp, m_step);
     }
-    NArray<value,  N> _nFlip(dim_t dim)
+    NArray<value, N> _nFlip(dim_t dim)
     {
       Point<N> temp = m_step;
       temp[dim] = -temp[dim];

@@ -376,7 +376,7 @@ namespace wilt
   template <class T, dim_t N, class U, dim_t M, class Operator>
   NArray<T, N> compress(const NArray<U, M>& src, Operator op)
   {
-    WILT_STATIC_ASSERT(N < M, "compress(): return must be smaller than src");
+    static_assert(N < M, "compress(): return must be smaller than src");
 
     NArray<T, N> ret(_chopLow<N>(src.dims()));
     _compress<T, M-N>(ret, src, Point<N>(), 0, op);
