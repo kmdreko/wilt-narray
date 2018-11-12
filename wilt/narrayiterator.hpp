@@ -55,7 +55,7 @@ namespace wilt
 
     //! @brief  Default constructor. Useless
     NArrayIterator()
-      : m_header(),
+      : m_data(),
         m_base(nullptr),
         m_dims(),
         m_step(),
@@ -68,7 +68,7 @@ namespace wilt
     //! @param[in]  arr - array whose data to reference
     //! @param[in]  pos - data offset value, defaults to 0
     NArrayIterator(const wilt::NArray<T, N>& arr, pos_t pos = 0)
-      : m_header(arr.m_header),
+      : m_data(arr.m_data),
         m_base(arr.m_base),
         m_dims(arr.m_dims),
         m_step(arr.m_step),
@@ -80,7 +80,7 @@ namespace wilt
     //! @brief      Copy constructor
     //! @param[in]  iter - iterator to copy from
     NArrayIterator(const NArrayIterator<T, N>& iter)
-      : m_header(iter.m_header),
+      : m_data(iter.m_data),
         m_base(iter.m_base),
         m_dims(iter.m_dims),
         m_step(iter.m_step),
@@ -93,7 +93,7 @@ namespace wilt
     //! @param[in]  iter - iterator to copy from
     //! @param[in]  pos - data offset value
     NArrayIterator(const NArrayIterator<T, N>& iter, pos_t pos)
-      : m_header(iter.m_header),
+      : m_data(iter.m_data),
         m_base(iter.m_base),
         m_dims(iter.m_dims),
         m_step(iter.m_step),
@@ -107,7 +107,7 @@ namespace wilt
     //! @return     reference to this object
     NArrayIterator<T, N>& operator= (const NArrayIterator<T, N>& iter)
     {
-      m_header = iter.m_header;
+      m_data = iter.m_data;
       m_base = iter.m_base;
       m_dims = iter.m_dims;
       m_step = iter.m_step;
@@ -286,7 +286,7 @@ namespace wilt
     }
 
   private:
-    NArrayHeader<type> m_header;
+    NArrayDataRef<type> m_data;
     type* m_base;
     Point<N> m_dims;
     Point<N> m_step;

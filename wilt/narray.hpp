@@ -35,6 +35,7 @@
 
 #include "util.h"
 #include "point.hpp"
+#include "narraydataref.hpp"
 
 namespace wilt
 {
@@ -300,13 +301,6 @@ namespace wilt
 
   template <class T, dim_t N> class NArray;
 
-  enum PTR
-  {
-    ASSUME,
-    COPY,
-    REF
-  };
-
   template <class T, dim_t N>
   struct slice_t
   {
@@ -317,195 +311,6 @@ namespace wilt
   {
     typedef T& type;
   };
-
-  template <class T, class A = std::allocator<T>>
-  class NArrayHeader
-  {
-  public:
-    class Node
-    {
-    public:
-      T* data;
-      std::size_t size;
-      std::size_t refs;
-      A alloc;
-      bool owned;
-
-      Node()
-        : data(nullptr),
-          size(0),
-          refs(0),
-          alloc(),
-          owned(true)
-      {
-
-      }
-
-      Node(std::size_t _size)
-        : data(nullptr),
-          size(_size),
-          refs(1),
-          alloc(),
-          owned(true)
-      {
-        data = alloc.allocate(_size);
-        if (!raw_t<T>::value())
-          for (size_t i = 0; i < _size; ++i)
-            alloc.construct(data+i);
-      }
-
-      Node(std::size_t _size, const T& val)
-        : data(nullptr),
-          size(_size),
-          refs(1),
-          alloc(),
-          owned(true)
-      {
-        data = alloc.allocate(_size);
-        for (size_t i = 0; i < _size; ++i)
-          alloc.construct(data+i, val);
-      }
-
-      Node(std::size_t _size, T* _data, PTR ltype)
-        : data(nullptr),
-          size(_size),
-          refs(1),
-          alloc(),
-          owned(true)
-      {
-        switch (ltype)
-        {
-        case PTR::ASSUME:
-          data = _data;
-          break;
-        case PTR::COPY:
-          data = alloc.allocate(_size);
-          for (size_t i = 0; i < _size; ++i)
-            alloc.construct(data+i, _data[i]);
-          break;
-        case PTR::REF:
-          data = _data;
-          owned = false;
-          break;
-        }
-      }
-
-      template <class Generator>
-      Node(std::size_t _size, Generator gen)
-        : data(nullptr),
-          size(_size),
-          refs(1),
-          alloc(),
-          owned(true)
-      {
-        data = alloc.allocate(_size);
-        for (size_t i = 0; i < _size; ++i)
-          alloc.construct(data+i, gen());
-      }
-
-      ~Node()
-      {
-        if (data && owned)
-        {
-          if (!raw_t<T>::value())
-            for (std::size_t i = 0; i < size; ++i)
-              alloc.destroy(data+i);
-          alloc.deallocate(data, size);
-        }
-      }
-
-    }; // class Node
-
-    NArrayHeader()
-      : m_node(nullptr)
-    {
-
-    }
-
-    NArrayHeader(pos_t size)
-      : m_node(nullptr)
-    {
-      if (size > 0)
-        m_node = new Node(size);
-    }
-
-    NArrayHeader(pos_t size, const T& val)
-      : m_node(nullptr)
-    {
-      if (size > 0)
-        m_node = new Node(size, val);
-    }
-
-    NArrayHeader(pos_t size, T* ptr, PTR ltype)
-      : m_node(nullptr)
-    {
-      if (size > 0)
-        m_node = new Node(size, ptr, ltype);
-    }
-
-    template <class Generator>
-    NArrayHeader(pos_t size, Generator gen)
-      : m_node(nullptr)
-    {
-      if (size > 0)
-        m_node = new Node(size, gen);
-    }
-
-
-    NArrayHeader(const NArrayHeader<T, A>& header)
-      : m_node(header.m_node)
-    {
-      _incref();
-    }
-
-    ~NArrayHeader()
-    {
-      _decref();
-    }
-
-    NArrayHeader<T, A>& operator= (const NArrayHeader<T, A>& header)
-    {
-      _decref();
-      m_node = header.m_node;
-      _incref();
-      return *this;
-    }
-
-    void clear()
-    {
-      _decref();
-      m_node = nullptr;
-    }
-
-    Node& operator* () const
-    {
-      return *m_node;
-    }
-    Node* operator-> () const
-    {
-      return m_node;
-    }
-
-    Node* _ptr() const
-    {
-      return m_node;
-    }
-
-  private:
-    Node* m_node;
-
-    void _incref()
-    {
-      if (m_node)
-        ++m_node->refs;
-    }
-    void _decref()
-    {
-      if (m_node && --m_node->refs == 0)
-        delete m_node;
-    }
-
-  }; // class NArrayHeader
 
   // forward declaration
   template <class T, dim_t N> class NArrayIterator;
@@ -529,7 +334,7 @@ namespace wilt
 
     //! @brief  Default constructor. Makes an empty NArray
     NArray()
-      : m_header(),
+      : m_data(),
         m_base(nullptr),
         m_dims(),
         m_step()
@@ -541,7 +346,7 @@ namespace wilt
     //!             are defaulted. 
     //! @param[in]  size - list of dimension lengths
     explicit NArray(const Point<N>& size)
-      : m_header(),
+      : m_data(),
         m_base(nullptr),
         m_dims(size),
         m_step(_step(size))
@@ -553,7 +358,7 @@ namespace wilt
     }
 
     NArray(const Point<N>& size, const T& val)
-      : m_header(),
+      : m_data(),
         m_base(nullptr),
         m_dims(size),
         m_step(_step(size))
@@ -565,7 +370,7 @@ namespace wilt
     }
 
     NArray(const Point<N>& size, T* ptr, PTR ltype)
-      : m_header(),
+      : m_data(),
         m_base(nullptr),
         m_dims(size),
         m_step(_step(size))
@@ -577,7 +382,7 @@ namespace wilt
     }
 
     NArray(const Point<N>& size, std::initializer_list<T> list)
-      : m_header(),
+      : m_data(),
         m_base(nullptr),
         m_dims(size),
         m_step(_step(size))
@@ -590,7 +395,7 @@ namespace wilt
 
     template <class Generator>
     NArray(const Point<N>& size, Generator gen)
-      : m_header(),
+      : m_data(),
         m_base(nullptr),
         m_dims(size),
         m_step(_step(size))
@@ -606,7 +411,7 @@ namespace wilt
     //!             counter (if data exists)
     //! @param[in]  arr - NArray to copy from
     NArray(const NArray<type, N>& arr)
-      : m_header(arr.m_header),
+      : m_data(arr.m_data),
         m_base(arr.m_base),
         m_dims(arr.m_dims),
         m_step(arr.m_step)
@@ -617,7 +422,7 @@ namespace wilt
     //! @brief      Move constructor. Assumes the data from arr. 
     //! @param[in]  arr - NArray to move
     NArray(NArray<type, N>&& arr)
-      : m_header(arr.m_header),
+      : m_data(arr.m_data),
         m_base(arr.m_base),
         m_dims(arr.m_dims),
         m_step(arr.m_step)
@@ -631,14 +436,14 @@ namespace wilt
     //!             and deep copy
     //! @param[in]  arr - const NArray to copy from
     NArray(const NArray<cvalue, N>& arr)
-      : m_header(),
+      : m_data(),
         m_base(nullptr),
         m_dims(arr.m_dims),
         m_step(arr.m_step)
     {
       if (std::is_const<T>::value)
       {
-        m_header = arr.m_header;
+        m_data = arr.m_data;
         m_base = arr.m_base;
       }
       else
@@ -655,14 +460,14 @@ namespace wilt
     //! NArray moved as the only reference should not ever exist, its possible
     //! but not under normal operation of the library
     NArray(NArray<cvalue, N>&& arr)
-      : m_header(),
+      : m_data(),
         m_base(nullptr),
         m_dims(arr.m_dims),
         m_step(arr.m_step)
     {
       if (std::is_const<T>::value || arr.isUnique())
       {
-        m_header = arr.m_header;
+        m_data = arr.m_data;
         m_base = arr.m_base;
       }
       else
@@ -682,7 +487,7 @@ namespace wilt
     //! @return     reference to this object
     NArray<T, N>& operator = (const NArray<type, N>& arr)
     {
-      m_header = arr.m_header;
+      m_data = arr.m_data;
       m_dims   = arr.m_dims;
       m_step   = arr.m_step;
       m_base   = arr.m_base;
@@ -692,7 +497,7 @@ namespace wilt
 
     NArray<T, N>& operator = (NArray<type, N>&& arr)
     {
-      m_header = arr.m_header;
+      m_data = arr.m_data;
       m_dims   = arr.m_dims;
       m_step   = arr.m_step;
       m_base   = arr.m_base;
@@ -715,7 +520,7 @@ namespace wilt
 
       if (std::is_const<T>::value)
       {
-        m_header = arr.m_header;
+        m_data = arr.m_data;
         m_base = arr.m_base;
       }
       else
@@ -734,7 +539,7 @@ namespace wilt
 
       if (std::is_const<T>::value || arr.isUnique())
       {
-        m_header = arr.m_header;
+        m_data = arr.m_data;
         m_base = arr.m_base;
       }
       else
@@ -913,7 +718,7 @@ namespace wilt
     //! @return     True if NArray references no data
     bool empty() const
     {
-      return m_header._ptr() == nullptr;
+      return m_data._ptr() == nullptr;
     }
 
     //! @brief      Gets the width of the NArray
@@ -1099,7 +904,7 @@ namespace wilt
         else
           base += m_step[i] * pos[i];
 
-      return NArray<value, N-M>(m_header, base, _chopHigh<N-M>(m_dims), _chopHigh<N-M>(m_step));
+      return NArray<value, N-M>(m_data, base, _chopHigh<N-M>(m_dims), _chopHigh<N-M>(m_step));
     }
 
     template <dim_t M>
@@ -1114,7 +919,7 @@ namespace wilt
         else
           base += m_step[i] * pos[i];
 
-      return NArray<cvalue, N-M>(m_header, base, _chopHigh<N-M>(m_dims), _chopHigh<N-M>(m_step));
+      return NArray<cvalue, N-M>(m_data, base, _chopHigh<N-M>(m_dims), _chopHigh<N-M>(m_step));
     }
 
     //! @brief      Gets a NArray within the range specified along the dimension
@@ -1243,14 +1048,14 @@ namespace wilt
       if (dim1 >= N || dim2 >= N)
         throw std::out_of_range("t(dim1, dim2) index out of bounds");
 
-      return NArray<value, N>(m_header, m_base, _swap(m_dims, dim1, dim2), _swap(m_step, dim1, dim2));
+      return NArray<value, N>(m_data, m_base, _swap(m_dims, dim1, dim2), _swap(m_step, dim1, dim2));
     }
     const NArray<cvalue, N> t(dim_t dim1, dim_t dim2) const
     {
       if (dim1 >= N || dim2 >= N)
         throw std::out_of_range("t(dim1, dim2) index out of bounds");
 
-      return NArray<cvalue, N>(m_header, m_base, _swap(m_dims, dim1, dim2), _swap(m_step, dim1, dim2));
+      return NArray<cvalue, N>(m_data, m_base, _swap(m_dims, dim1, dim2), _swap(m_step, dim1, dim2));
     }
 
     //! @brief      Gets an NArray with a dimension reversed
@@ -1332,7 +1137,7 @@ namespace wilt
         base += m_step[i] * loc[i];
       }
 
-      return NArray<value, N>(m_header, base, size, m_step);
+      return NArray<value, N>(m_data, base, size, m_step);
     }
     const NArray<cvalue, N> subarray(const Point<N>& loc, const Point<N>& size) const
     {
@@ -1344,7 +1149,7 @@ namespace wilt
         base += m_step[i] * loc[i];
       }
 
-      return NArray<cvalue, N>(m_header, base, size, m_step);
+      return NArray<cvalue, N>(m_data, base, size, m_step);
     }
 
     template <class Operator>
@@ -1446,7 +1251,7 @@ namespace wilt
       Point<N> step = m_step;
       pos_t offset = _align(dims, step);
 
-      return NArray<value, N>(m_header, m_base + offset, dims, step);
+      return NArray<value, N>(m_data, m_base + offset, dims, step);
     }
     const NArray<cvalue, N> aligned() const
     {
@@ -1454,14 +1259,14 @@ namespace wilt
       Point<N> step = m_step;
       pos_t offset = _align(dims, step);
 
-      return NArray<cvalue, N>(m_header, m_base + offset, dims, step);
+      return NArray<cvalue, N>(m_data, m_base + offset, dims, step);
     }
 
     //! @brief      clears this object, deallocates the data if its the last
     //!             reference
     void clear()
     {
-      m_header.clear();
+      m_data.clear();
       m_base = nullptr;
 
       _clean();
@@ -1489,7 +1294,7 @@ namespace wilt
       if (empty())
         return false;
       else
-        return (std::size_t)size() < m_header->size;
+        return (std::size_t)size() < m_data->size;
     }
 
     //! @brief      returns whether the data is accessed linearly in memory
@@ -1514,7 +1319,7 @@ namespace wilt
     //!             or other references exist
     bool isUnique() const
     {
-      return m_header._ptr() && m_header->refs == 1;
+      return m_data._ptr() && m_data->refs == 1;
     }
 
     //! @brief      returns an iterator pointing to the beginning
@@ -1574,14 +1379,14 @@ namespace wilt
     friend class NArrayIterator<cvalue, N>;
 
   protected:
-    NArrayHeader<type> m_header;
+    NArrayDataRef<type> m_data;
     type* m_base;
     Point<N> m_dims;
     Point<N> m_step;
 
     // Raw constructor
-    NArray(NArrayHeader<type> header, type* base, Point<N> dims, Point<N> step)
-      : m_header(header),
+    NArray(NArrayDataRef<type> header, type* base, Point<N> dims, Point<N> step)
+      : m_data(header),
         m_base(base),
         m_dims(dims),
         m_step(step)
@@ -1592,35 +1397,35 @@ namespace wilt
   private:
     typename slice_t<T, N>::type _nSlice(pos_t n, dim_t dim)
     {
-      return NArray<value, N-1>(m_header, m_base+m_step[dim]*n, _slice(m_dims, dim), _slice(m_step, dim));
+      return NArray<value, N-1>(m_data, m_base+m_step[dim]*n, _slice(m_dims, dim), _slice(m_step, dim));
     }
     const typename slice_t<T, N>::type _nSlice(pos_t n, dim_t dim) const
     {
-      return NArray<cvalue, N-1>(m_header, m_base+m_step[dim]*n, _slice(m_dims, dim), _slice(m_step, dim));
+      return NArray<cvalue, N-1>(m_data, m_base+m_step[dim]*n, _slice(m_dims, dim), _slice(m_step, dim));
     }
     NArray<value, N> _nRange(pos_t n, pos_t length, dim_t dim)
     {
       Point<N> temp = m_dims;
       temp[dim] = length;
-      return NArray<value, N>(m_header, m_base+m_step[dim]*n, temp, m_step);
+      return NArray<value, N>(m_data, m_base+m_step[dim]*n, temp, m_step);
     }
     const NArray<cvalue, N> _nRange(pos_t n, pos_t length, dim_t dim) const
     {
       Point<N> temp = m_dims;
       temp[dim] = length;
-      return NArray<cvalue, N>(m_header, m_base+m_step[dim]*n, temp, m_step);
+      return NArray<cvalue, N>(m_data, m_base+m_step[dim]*n, temp, m_step);
     }
     NArray<value, N> _nFlip(dim_t dim)
     {
       Point<N> temp = m_step;
       temp[dim] = -temp[dim];
-      return NArray<value, N>(m_header, m_base+m_step[dim]*(m_dims[dim]-1), m_dims, temp);
+      return NArray<value, N>(m_data, m_base+m_step[dim]*(m_dims[dim]-1), m_dims, temp);
     }
     const NArray<cvalue, N> _nFlip(dim_t dim) const
     {
       Point<N> temp = m_step;
       temp[dim] = -temp[dim];
-      return NArray<cvalue, N>(m_header, m_base+m_step[dim]*(m_dims[dim]-1), m_dims, temp);
+      return NArray<cvalue, N>(m_data, m_base+m_step[dim]*(m_dims[dim]-1), m_dims, temp);
     }
 
     bool _valid() const
@@ -1638,8 +1443,8 @@ namespace wilt
       pos_t size = _size(m_dims);
       if (size > 0)
       {
-        m_header = NArrayHeader<type>(size);
-        m_base = m_header->data;
+        m_data = NArrayDataRef<type>(size);
+        m_base = m_data->data;
       }
     }
 
@@ -1648,8 +1453,8 @@ namespace wilt
       pos_t size = _size(m_dims);
       if (size > 0)
       {
-        m_header = NArrayHeader<type>(size, val);
-        m_base = m_header->data;
+        m_data = NArrayDataRef<type>(size, val);
+        m_base = m_data->data;
       }
     }
     
@@ -1658,8 +1463,8 @@ namespace wilt
       pos_t size = _size(m_dims);
       if (size > 0)
       {
-        m_header = NArrayHeader<type>(size, ptr, ltype);
-        m_base = m_header->data;
+        m_data = NArrayDataRef<type>(size, ptr, ltype);
+        m_base = m_data->data;
       }
     }
 
@@ -1669,8 +1474,8 @@ namespace wilt
       pos_t size = _size(m_dims);
       if (size > 0)
       {
-        m_header = NArrayHeader<type>(size, gen);
-        m_base = m_header->data;
+        m_data = NArrayDataRef<type>(size, gen);
+        m_base = m_data->data;
       }
     }
 
@@ -1698,8 +1503,8 @@ namespace wilt
   public:
     typedef typename std::remove_const<T>::type type;
 
-    NArray(const NArrayHeader<T>& header, type* base, const Point<0>&, const Point<0>&)
-      : m_header(header),
+    NArray(const NArrayDataRef<T>& header, type* base, const Point<0>&, const Point<0>&)
+      : m_data(header),
         m_base(base)
     {
 
@@ -1707,7 +1512,7 @@ namespace wilt
 
     operator T&() const
     {
-      if (!m_header._ptr())
+      if (!m_data._ptr())
         throw std::runtime_error("Mat<T, 0> references no data");
 
       return *m_base;
@@ -1716,7 +1521,7 @@ namespace wilt
   private:
     NArray() { }
 
-    NArrayHeader<T> m_header;
+    NArrayDataRef<T> m_data;
     type* m_base;
 
   }; // class NArray<T, 0>
