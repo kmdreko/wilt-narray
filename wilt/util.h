@@ -28,13 +28,6 @@
 #ifndef WILT_UTIL_H
 #define WILT_UTIL_H
 
-// disabling loop unrolling is useful for reducing code size
-#ifndef WILT_DISABLE_LOOP_UNROLLING
-  #define WILT_LOOP_UNROLLING_ENABLED 1
-#else
-  #define WILT_LOOP_UNROLLING_ENABLED 0
-#endif
-
 // a flag for invalid index
 #define WILT_OUTSIDE_ARRAY PTRDIFF_MIN
 

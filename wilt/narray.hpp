@@ -62,17 +62,6 @@ namespace wilt
     T* end = dst + dims[0] * dstep[0];
     if (N == 1)
     {
-#if WILT_LOOP_UNROLLING_ENABLED
-      if (dstep[0] == 1 && s1step[0] == 1 && s2step[0] == 1)
-      for (T* endr = end - 3; dst < endr; dst += 4, src1 += 4, src2 += 4)
-      {
-        dst[0] = op(src1[0], src2[0]);
-        dst[1] = op(src1[1], src2[1]);
-        dst[2] = op(src1[2], src2[2]);
-        dst[3] = op(src1[3], src2[3]);
-      }
-#endif
-
       for ( ; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
         dst[0] = op(src1[0], src2[0]);
     }
@@ -107,17 +96,6 @@ namespace wilt
     T* end = dst + dims[0] * dstep[0];
     if (N == 1)
     {
-#if WILT_LOOP_UNROLLING_ENABLED
-      if (dstep[0] == 1 && s1step[0] == 1 && s2step[0] == 1)
-      for (T* endr = end - 3; dst < endr; dst += 4, src1 += 4, src2 += 4)
-      {
-        op(dst[0], src1[0], src2[0]);
-        op(dst[1], src1[1], src2[1]);
-        op(dst[2], src1[2], src2[2]);
-        op(dst[3], src1[3], src2[3]);
-      }
-#endif
-
       for ( ; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
         op(dst[0], src1[0], src2[0]);
     }
@@ -150,17 +128,6 @@ namespace wilt
     T* end = dst + dstep[0] * dims[0];
     if (N == 1)
     {
-#if WILT_LOOP_UNROLLING_ENABLED
-      if (dstep[0] == 1 && sstep[0] == 1)
-      for (T* endr = end - 3; dst < endr; dst += 4, src += 4)
-      {
-        dst[0] = op(src[0]);
-        dst[1] = op(src[1]);
-        dst[2] = op(src[2]);
-        dst[3] = op(src[3]);
-      }
-#endif
-
       for ( ; dst != end; dst += dstep[0], src += sstep[0])
         dst[0] = op(src[0]);
     }
@@ -193,17 +160,6 @@ namespace wilt
     T* end = dst + dstep[0] * dims[0];
     if (N == 1)
     {
-#if WILT_LOOP_UNROLLING_ENABLED
-      if (dstep[0] == 1 && sstep[0] == 1)
-      for (T* endr = end - 3; dst < endr; dst += 4, src += 4)
-      {
-        op(dst[0], src[0]);
-        op(dst[1], src[1]);
-        op(dst[2], src[2]);
-        op(dst[3], src[3]);
-      }
-#endif
-
       for ( ; dst < end; dst += dstep[0], src += sstep[0])
         op(dst[0], src[0]);
     }
@@ -233,17 +189,6 @@ namespace wilt
     T* end = dst + dims[0] * dstep[0];
     if (N == 1)
     {
-#if WILT_LOOP_UNROLLING_ENABLED
-      if (dstep[0] == 1)
-      for (T* endr = end - 3; dst < endr; dst += 4)
-      {
-        dst[0] = op();
-        dst[1] = op();
-        dst[2] = op();
-        dst[3] = op();
-      }
-#endif
-
       for ( ; dst != end; dst += dstep[0])
         dst[0] = op();
     }
@@ -273,17 +218,6 @@ namespace wilt
     T* end = dst + dims[0] * dstep[0];
     if (N == 1)
     {
-#if WILT_LOOP_UNROLLING_ENABLED
-      if (dstep[0] == 1)
-      for (T* endr = end - 3; dst < endr; dst += 4)
-      {
-        op(dst[0]);
-        op(dst[1]);
-        op(dst[2]);
-        op(dst[3]);
-      }
-#endif
-
       for ( ; dst != end; dst += dstep[0])
         op(dst[0]);
     }

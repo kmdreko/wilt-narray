@@ -25,8 +25,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// #define WILT_DISABLE_LOOP_UNROLLING
-
 #include "util.h"
 #include "point.hpp"
 #include "narray.hpp"
