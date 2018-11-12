@@ -35,14 +35,6 @@
   #define WILT_LOOP_UNROLLING_ENABLED 0
 #endif
 
-// disabling SSE2 is useful for compiling for systems where its not supported
-#ifndef WILT_DISABLE_SSE2
-  #define WILT_SSE2_ENABLED 1
-  #include <emmintrin.h>
-#else
-  #define WILT_SSE2_ENABLED 0
-#endif
-
 // disabling brace initialization is useful for compiling without c++11 support
 #ifndef WILT_DISABLE_BRACE_INITIALIZATION
   #define WILT_BRACE_INITIALIZATION_ENABLED 1

@@ -26,7 +26,6 @@
 // SOFTWARE.
 
 // #define WILT_DISABLE_LOOP_UNROLLING
-// #define WILT_DISABLE_SSE2
 // #define WILT_DISABLE_BRACE_INITIALIZATION
 
 #include "util.h"
