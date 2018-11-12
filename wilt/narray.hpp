@@ -1289,7 +1289,7 @@ namespace wilt
     //! @brief      returns whether the data is part of a larger NArray
     //! @return     true if data accessible is less than data shared, false if
     //!             otherwise or if empty
-    bool isSubmatrix() const
+    bool isSubarray() const
     {
       if (empty())
         return false;
