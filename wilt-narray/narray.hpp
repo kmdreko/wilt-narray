@@ -299,19 +299,6 @@ namespace wilt
     return true;
   }
 
-  template <class T, dim_t N> class NArray;
-
-  template <class T, dim_t N>
-  struct slice_t
-  {
-    typedef NArray<T, N-1> type;
-  };
-  template <class T>
-  struct slice_t<T, 1>
-  {
-    typedef T& type;
-  };
-
   // forward declaration
   template <class T, dim_t N> class NArrayIterator;
 
@@ -331,6 +318,8 @@ namespace wilt
 
     typedef NArrayIterator<value, N> iterator;
     typedef NArrayIterator<cvalue, N> const_iterator;
+
+    using slice_type = std::conditional_t<(N>1), NArray<T, N-1>, T&>;
 
     //! @brief  Default constructor. Makes an empty NArray
     NArray()
@@ -661,14 +650,14 @@ namespace wilt
     //! Identical function to sliceX(x)
     //! It is preferable to do arr.at({x, y, y, ...}) than arr[x][y][z]... 
     //! because the operator[] must make a new NArray for each use.
-    typename slice_t<T, N>::type operator[] (pos_t x)
+    typename slice_type operator[] (pos_t x)
     {
       if (x >= m_dims[0])
         throw std::out_of_range("operator[] index out of bounds");
 
       return _nSlice(x, 0);
     }
-    const typename slice_t<T, N>::type operator[] (pos_t x) const
+    const typename slice_type operator[] (pos_t x) const
     {
       if (x >= m_dims[0])
         throw std::out_of_range("operator[] index out of bounds");
@@ -761,7 +750,7 @@ namespace wilt
     //! @exception  std::out_of_range if loc element invalid
     //!
     //! Use arr.at({x, y, z, ...}) instead of arr[x][y][z][]... 
-    reference  at(const Point<N>& loc)
+    reference at(const Point<N>& loc)
     {
       if (empty()) 
         throw std::runtime_error("at() invalid call on empty NArray");
@@ -797,14 +786,14 @@ namespace wilt
     //! @exception  std::domain_error if call for invalid N
     //!
     //! Equivalent to sliceN(x|y|z|w, n)
-    typename slice_t<T, N>::type sliceX(pos_t x)
+    typename slice_type sliceX(pos_t x)
     {
       if (x >= m_dims[0] || x < 0)
         throw std::out_of_range("sliceX(x) index out of bounds");
 
       return _nSlice(x, 0);
     }
-    const typename slice_t<T, N>::type sliceX(pos_t x) const
+    const typename slice_type sliceX(pos_t x) const
     {
       if (x >= m_dims[0] || x < 0)
         throw std::out_of_range("sliceX(x) index out of bounds");
@@ -871,14 +860,14 @@ namespace wilt
     //! @param[in]  dim - the dimension of the slice
     //! @return     N-1 NArray that references the same data
     //! @exception  std::out_of_range if dim or n invalid
-    typename slice_t<T, N>::type sliceN(pos_t n, dim_t dim)
+    typename slice_type sliceN(pos_t n, dim_t dim)
     {
       if (dim >= N || n >= m_dims[dim] || n < 0)
         throw std::out_of_range("nSlice(n, dim) index out of bounds");
 
       return _nSlice(n, dim);
     }
-    const typename slice_t<T, N>::type sliceN(pos_t n, dim_t dim) const
+    const typename slice_type sliceN(pos_t n, dim_t dim) const
     {
       if (dim >= N || n >= m_dims[dim] || n < 0)
         throw std::out_of_range("nSlice(n, dim) index out of bounds");
@@ -1395,11 +1384,11 @@ namespace wilt
     }
 
   private:
-    typename slice_t<T, N>::type _nSlice(pos_t n, dim_t dim)
+    typename slice_type _nSlice(pos_t n, dim_t dim)
     {
       return NArray<value, N-1>(m_data, m_base+m_step[dim]*n, _slice(m_dims, dim), _slice(m_step, dim));
     }
-    const typename slice_t<T, N>::type _nSlice(pos_t n, dim_t dim) const
+    const typename slice_type _nSlice(pos_t n, dim_t dim) const
     {
       return NArray<cvalue, N-1>(m_data, m_base+m_step[dim]*n, _slice(m_dims, dim), _slice(m_step, dim));
     }
