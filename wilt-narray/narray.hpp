@@ -42,7 +42,50 @@ namespace wilt
   template <class T, dim_t N> class NArrayIterator;
   // - defined in "narrayiterator.hpp"
 
-  //! @class NArray
+  //////////////////////////////////////////////////////////////////////////////
+  // This class is designed to access a sequence of data and to manipulate it in
+  // an N-dimensional manner.
+
+  // This class works by keeping a reference to a sequence of Ts that is shared
+  // between NArrays to avoid copying data and allow separate slices and
+  // subarrays to manipulate the same data. It also keeps a separate pointer to
+  // the base of its own segment of the shared data.
+
+  // An NArray will keep its own size of each dimension as well as its own step
+  // values. By step value, I mean it keeps track of the distance to the next
+  // value in the shared data along that dimension. Keeping this for each 
+  // dimensions is what allows slicing, flipping, transposing, etc. without 
+  // needing to copy data. Slicing works by dropping a dimension/step. Flipping
+  // just negates its step value. Transposing swaps dimension/step values. 
+  // Ranges and subarrays just reduce the dimensions. Each operation does adjust
+  // its base pointer to ensure it still covers the proper segment of data.
+
+  // NArray<int, 3>({ 4, 3, 2 })        creates an NArray like so:
+  //   .rangeX(1, 3)
+  //   .flipY()                         dimensions = {  3,  2,  3 }
+  //   .transpose(1, 2);                steps      = {  6,  1, -2 }
+  // 
+  // x--x--x--x--x--x--2--5--1--4--0--3--8--11-7--10-6--9--14-17-13-16-12-15
+  // |data                         |base
+
+  // NArray<int, 2>({ 4, 6 })           creates an NArray like so:
+  //   .sliceY(1);
+  //                                    dimensions = {  4 }
+  //                                    steps      = {  6 }
+  //    |base
+  // x--0--x--x--x--x--x--1--x--x--x--x--x--2--x--x--x--x--x--3--x--x--x--x
+  // |data
+
+  // These cases show how a single data-set can have multiple representations
+  // but also how the data can be fragmented and unordered, but there are ways
+  // to see and adjust it. For example, isContiguous() will return whether there
+  // are gaps or not. The function isAligned() will return if the data would be
+  // accessed in increasing order and aligned() will return an NArray with the
+  // same view that would be accessed in increasing order.
+
+  // As a side note, all manipulations are thread-safe; two threads can safely
+  // use the same data-set, but modification of data is not protected.
+
   template <class T, dim_t N>
   class NArray
   {
