@@ -39,268 +39,8 @@
 
 namespace wilt
 {
-  //! @brief         applies an operation on two source arrays and stores the
-  //!                result in a destination array
-  //! @param[out]    dst - the destination array
-  //! @param[in]     src1 - pointer to 1st source array
-  //! @param[in]     src2 - pointer to 2nd source array
-  //! @param[in]     dims - pointer to dimension array
-  //! @param[in]     dstep - pointer to dst step array
-  //! @param[in]     s1step - pointer to 1st source step array
-  //! @param[in]     s2step - pointer to 2nd source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                T(U, V) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! arrays must be the same size (hence the single dimension array), and
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class U, class V, class Operator>
-  void _binaryOp(
-    T* dst, const U* src1, const V* src2, const pos_t* dims, 
-    const pos_t* dstep, const pos_t* s1step, const pos_t* s2step, 
-    Operator op, dim_t N)
-  {
-    T* end = dst + dims[0] * dstep[0];
-    if (N == 1)
-    {
-      for ( ; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
-        dst[0] = op(src1[0], src2[0]);
-    }
-    else
-    {
-      for ( ; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
-        _binaryOp(dst, src1, src2, dims+1, dstep+1, s1step+1, s2step+1, op, N-1);
-    }
-  }
-
-  //! @brief         applies an operation on two source arrays and stores the
-  //!                result in a destination array
-  //! @param[in,out] dst - the destination array
-  //! @param[in]     src1 - pointer to 1st source array
-  //! @param[in]     src2 - pointer to 2nd source array
-  //! @param[in]     dims - pointer to dimension array
-  //! @param[in]     dstep - pointer to dst step array
-  //! @param[in]     s1step - pointer to 1st source step array
-  //! @param[in]     s2step - pointer to 2nd source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                void(T&, U, V) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! arrays must be the same size (hence the single dimension array), and
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class U, class V, class Operator>
-  void _binaryOp2(
-    T* dst, const U* src1, const V* src2, const pos_t* dims, 
-    const pos_t* dstep, const pos_t* s1step, const pos_t* s2step, 
-    Operator op, dim_t N)
-  {
-    T* end = dst + dims[0] * dstep[0];
-    if (N == 1)
-    {
-      for ( ; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
-        op(dst[0], src1[0], src2[0]);
-    }
-    else
-    {
-      for ( ; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
-        _binaryOp2(dst, src1, src2, dims+1, dstep+1, s1step+1, s2step+1, op, N-1);
-    }
-  }
-
-  //! @brief         applies an operation on a source array and stores the
-  //!                result in a destination array
-  //! @param[out]    dst - the destination array
-  //! @param[in]     src - pointer to 1st source array
-  //! @param[in]     dims - pointer to dimension array
-  //! @param[in]     dstep - pointer to dst step array
-  //! @param[in]     sstep - pointer to source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                T(U) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! arrays must be the same size (hence the single dimension array), and
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class U, class Operator>
-  void _unaryOp(
-    T* dst, const U* src, const pos_t* dims, 
-    const pos_t* dstep, const pos_t* sstep, 
-    Operator op, dim_t N)
-  {
-    T* end = dst + dstep[0] * dims[0];
-    if (N == 1)
-    {
-      for ( ; dst != end; dst += dstep[0], src += sstep[0])
-        dst[0] = op(src[0]);
-    }
-    else
-    {
-      for ( ; dst != end; dst += dstep[0], src += sstep[0])
-        _unaryOp(dst, src, dims+1, dstep+1, sstep+1, op, N-1);
-    }
-  }
-
-  //! @brief         applies an operation on a source array and stores the
-  //!                result in a destination array
-  //! @param[in,out] dst - the destination array
-  //! @param[in]     src - pointer to 1st source array
-  //! @param[in]     dims - pointer to dimension array
-  //! @param[in]     dstep - pointer to dst step array
-  //! @param[in]     sstep - pointer to source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                void(T&, U) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! arrays must be the same size (hence the single dimension array), and
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class U, class Operator>
-  void _unaryOp2(
-    T* dst, const U* src, const pos_t* dims, 
-    const pos_t* dstep, const pos_t* sstep, 
-    Operator op, dim_t N)
-  {
-    T* end = dst + dstep[0] * dims[0];
-    if (N == 1)
-    {
-      for ( ; dst < end; dst += dstep[0], src += sstep[0])
-        op(dst[0], src[0]);
-    }
-    else
-    {
-      for ( ; dst < end; dst += dstep[0], src += sstep[0])
-        _unaryOp2(dst, src, dims+1, dstep+1, sstep+1, op, N-1);
-    }
-  }
-
-  //! @brief         applies an operation and stores the result in a destination
-  //!                array
-  //! @param[out]    dst - the destination array
-  //! @param[in]     dims - pointer to dimension array
-  //! @param[in]     dstep - pointer to dst step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                T() or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class Operator>
-  void _singleOp(
-    T* dst, const pos_t* dims, 
-    const pos_t* dstep, 
-    Operator op, dim_t N)
-  {
-    T* end = dst + dims[0] * dstep[0];
-    if (N == 1)
-    {
-      for ( ; dst != end; dst += dstep[0])
-        dst[0] = op();
-    }
-    else
-    {
-      for ( ; dst != end; dst += dstep[0])
-        _singleOp(dst, dims+1, dstep+1, op, N-1);
-    }
-  }
-
-  //! @brief         applies an operation and stores the result in a destination
-  //!                array
-  //! @param[in,out] dst - the destination array
-  //! @param[in]     dims - pointer to dimension array
-  //! @param[in]     dstep - pointer to dst step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                void(T&) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class Operator>
-  void _singleOp2(
-    T* dst, const pos_t* dims, 
-    const pos_t* dstep, 
-    Operator op, dim_t N)
-  {
-    T* end = dst + dims[0] * dstep[0];
-    if (N == 1)
-    {
-      for ( ; dst != end; dst += dstep[0])
-        op(dst[0]);
-    }
-    else
-    {
-      for ( ; dst != end; dst += dstep[0])
-        _singleOp2(dst, dims+1, dstep+1, op, N-1);
-    }
-  }
-
-  //! @brief         applies an operation between two source arrays and returns
-  //!                a bool. Returns false upon getting the first false, or
-  //!                or returns true if all operations return true
-  //! @param[in]     src1 - pointer to 1st source array
-  //! @param[in]     src2 - pointer to 2nd source array
-  //! @param[in]     dims - pointer to dimension array
-  //! @param[in]     s1step - pointer to 1st source step array
-  //! @param[in]     s2step - pointer to 2nd source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                bool(T, U) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //! @return        true if all operations return true, else false
-  //!
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class U, class Operator>
-  bool _allOf(
-    const T* src1, const U* src2, const pos_t* dims,
-    const pos_t* s1step, const pos_t* s2step,
-    Operator op, dim_t N)
-  {
-    T* end = src1 + dims[0] * s1step[0];
-    if (N == 1)
-    {
-      for ( ; src1 != end; src1 += s1step[0], src2 += s2step[0])
-        if (!op(src1[0], src2[0]))
-          return false;
-    }
-    else
-    {
-      for ( ; src1 != end; src1 += s1step[0], src2 += s2step[0])
-        if (!_allOf(src1, src2, dims+1, s1step+1, s2step+1, op, N-1))
-          return false;
-    }
-    return true;
-  }
-
-  //! @brief         applies an operation on a source array and returns a bool.
-  //!                Returns false upon getting the first false, or returns true
-  //!                if all operations return true
-  //! @param[in]     src - pointer to source array
-  //! @param[in]     dims - pointer to dimension array
-  //! @param[in]     sstep - pointer to source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                bool(T) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //! @return        true if all operations return true, else false
-  //!
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class Operator>
-  bool _allOf(
-    const T* src, const pos_t* dims,
-    const pos_t* sstep,
-    Operator op, dim_t N)
-  {
-    T* end = src + dims[0] * sstep[0];
-    if (N == 1)
-    {
-      for ( ; src != end; src += sstep[0])
-        if (!op(src[0]))
-          return false;
-    }
-    else
-    {
-      for ( ; src != end; src += sstep[0])
-        if (!_allOf(src, dims+1, sstep+1, op, N-1))
-          return false;
-    }
-    return true;
-  }
-
-  // forward declaration
   template <class T, dim_t N> class NArrayIterator;
+  // - defined in "narrayiterator.hpp"
 
   //! @class NArray
   template <class T, dim_t N>
@@ -1514,6 +1254,266 @@ namespace wilt
     type* m_base;
 
   }; // class NArray<T, 0>
+
+    //! @brief         applies an operation on two source arrays and stores the
+    //!                result in a destination array
+    //! @param[out]    dst - the destination array
+    //! @param[in]     src1 - pointer to 1st source array
+    //! @param[in]     src2 - pointer to 2nd source array
+    //! @param[in]     dims - pointer to dimension array
+    //! @param[in]     dstep - pointer to dst step array
+    //! @param[in]     s1step - pointer to 1st source step array
+    //! @param[in]     s2step - pointer to 2nd source step array
+    //! @param[in]     op - function or function object with the signature 
+    //!                T(U, V) or similar
+    //! @param[in]     N - the dimensionality of the arrays
+    //!
+    //! arrays must be the same size (hence the single dimension array), and
+    //! this function makes no checks whether the inputs are valid.
+  template <class T, class U, class V, class Operator>
+  void _binaryOp(
+    T* dst, const U* src1, const V* src2, const pos_t* dims,
+    const pos_t* dstep, const pos_t* s1step, const pos_t* s2step,
+    Operator op, dim_t N)
+  {
+    T* end = dst + dims[0] * dstep[0];
+    if (N == 1)
+    {
+      for (; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
+        dst[0] = op(src1[0], src2[0]);
+    }
+    else
+    {
+      for (; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
+        _binaryOp(dst, src1, src2, dims + 1, dstep + 1, s1step + 1, s2step + 1, op, N - 1);
+    }
+  }
+
+  //! @brief         applies an operation on two source arrays and stores the
+  //!                result in a destination array
+  //! @param[in,out] dst - the destination array
+  //! @param[in]     src1 - pointer to 1st source array
+  //! @param[in]     src2 - pointer to 2nd source array
+  //! @param[in]     dims - pointer to dimension array
+  //! @param[in]     dstep - pointer to dst step array
+  //! @param[in]     s1step - pointer to 1st source step array
+  //! @param[in]     s2step - pointer to 2nd source step array
+  //! @param[in]     op - function or function object with the signature 
+  //!                void(T&, U, V) or similar
+  //! @param[in]     N - the dimensionality of the arrays
+  //!
+  //! arrays must be the same size (hence the single dimension array), and
+  //! this function makes no checks whether the inputs are valid.
+  template <class T, class U, class V, class Operator>
+  void _binaryOp2(
+    T* dst, const U* src1, const V* src2, const pos_t* dims,
+    const pos_t* dstep, const pos_t* s1step, const pos_t* s2step,
+    Operator op, dim_t N)
+  {
+    T* end = dst + dims[0] * dstep[0];
+    if (N == 1)
+    {
+      for (; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
+        op(dst[0], src1[0], src2[0]);
+    }
+    else
+    {
+      for (; dst != end; dst += dstep[0], src1 += s1step[0], src2 += s2step[0])
+        _binaryOp2(dst, src1, src2, dims + 1, dstep + 1, s1step + 1, s2step + 1, op, N - 1);
+    }
+  }
+
+  //! @brief         applies an operation on a source array and stores the
+  //!                result in a destination array
+  //! @param[out]    dst - the destination array
+  //! @param[in]     src - pointer to 1st source array
+  //! @param[in]     dims - pointer to dimension array
+  //! @param[in]     dstep - pointer to dst step array
+  //! @param[in]     sstep - pointer to source step array
+  //! @param[in]     op - function or function object with the signature 
+  //!                T(U) or similar
+  //! @param[in]     N - the dimensionality of the arrays
+  //!
+  //! arrays must be the same size (hence the single dimension array), and
+  //! this function makes no checks whether the inputs are valid.
+  template <class T, class U, class Operator>
+  void _unaryOp(
+    T* dst, const U* src, const pos_t* dims,
+    const pos_t* dstep, const pos_t* sstep,
+    Operator op, dim_t N)
+  {
+    T* end = dst + dstep[0] * dims[0];
+    if (N == 1)
+    {
+      for (; dst != end; dst += dstep[0], src += sstep[0])
+        dst[0] = op(src[0]);
+    }
+    else
+    {
+      for (; dst != end; dst += dstep[0], src += sstep[0])
+        _unaryOp(dst, src, dims + 1, dstep + 1, sstep + 1, op, N - 1);
+    }
+  }
+
+  //! @brief         applies an operation on a source array and stores the
+  //!                result in a destination array
+  //! @param[in,out] dst - the destination array
+  //! @param[in]     src - pointer to 1st source array
+  //! @param[in]     dims - pointer to dimension array
+  //! @param[in]     dstep - pointer to dst step array
+  //! @param[in]     sstep - pointer to source step array
+  //! @param[in]     op - function or function object with the signature 
+  //!                void(T&, U) or similar
+  //! @param[in]     N - the dimensionality of the arrays
+  //!
+  //! arrays must be the same size (hence the single dimension array), and
+  //! this function makes no checks whether the inputs are valid.
+  template <class T, class U, class Operator>
+  void _unaryOp2(
+    T* dst, const U* src, const pos_t* dims,
+    const pos_t* dstep, const pos_t* sstep,
+    Operator op, dim_t N)
+  {
+    T* end = dst + dstep[0] * dims[0];
+    if (N == 1)
+    {
+      for (; dst < end; dst += dstep[0], src += sstep[0])
+        op(dst[0], src[0]);
+    }
+    else
+    {
+      for (; dst < end; dst += dstep[0], src += sstep[0])
+        _unaryOp2(dst, src, dims + 1, dstep + 1, sstep + 1, op, N - 1);
+    }
+  }
+
+  //! @brief         applies an operation and stores the result in a destination
+  //!                array
+  //! @param[out]    dst - the destination array
+  //! @param[in]     dims - pointer to dimension array
+  //! @param[in]     dstep - pointer to dst step array
+  //! @param[in]     op - function or function object with the signature 
+  //!                T() or similar
+  //! @param[in]     N - the dimensionality of the arrays
+  //!
+  //! this function makes no checks whether the inputs are valid.
+  template <class T, class Operator>
+  void _singleOp(
+    T* dst, const pos_t* dims,
+    const pos_t* dstep,
+    Operator op, dim_t N)
+  {
+    T* end = dst + dims[0] * dstep[0];
+    if (N == 1)
+    {
+      for (; dst != end; dst += dstep[0])
+        dst[0] = op();
+    }
+    else
+    {
+      for (; dst != end; dst += dstep[0])
+        _singleOp(dst, dims + 1, dstep + 1, op, N - 1);
+    }
+  }
+
+  //! @brief         applies an operation and stores the result in a destination
+  //!                array
+  //! @param[in,out] dst - the destination array
+  //! @param[in]     dims - pointer to dimension array
+  //! @param[in]     dstep - pointer to dst step array
+  //! @param[in]     op - function or function object with the signature 
+  //!                void(T&) or similar
+  //! @param[in]     N - the dimensionality of the arrays
+  //!
+  //! this function makes no checks whether the inputs are valid.
+  template <class T, class Operator>
+  void _singleOp2(
+    T* dst, const pos_t* dims,
+    const pos_t* dstep,
+    Operator op, dim_t N)
+  {
+    T* end = dst + dims[0] * dstep[0];
+    if (N == 1)
+    {
+      for (; dst != end; dst += dstep[0])
+        op(dst[0]);
+    }
+    else
+    {
+      for (; dst != end; dst += dstep[0])
+        _singleOp2(dst, dims + 1, dstep + 1, op, N - 1);
+    }
+  }
+
+  //! @brief         applies an operation between two source arrays and returns
+  //!                a bool. Returns false upon getting the first false, or
+  //!                or returns true if all operations return true
+  //! @param[in]     src1 - pointer to 1st source array
+  //! @param[in]     src2 - pointer to 2nd source array
+  //! @param[in]     dims - pointer to dimension array
+  //! @param[in]     s1step - pointer to 1st source step array
+  //! @param[in]     s2step - pointer to 2nd source step array
+  //! @param[in]     op - function or function object with the signature 
+  //!                bool(T, U) or similar
+  //! @param[in]     N - the dimensionality of the arrays
+  //! @return        true if all operations return true, else false
+  //!
+  //! this function makes no checks whether the inputs are valid.
+  template <class T, class U, class Operator>
+  bool _allOf(
+    const T* src1, const U* src2, const pos_t* dims,
+    const pos_t* s1step, const pos_t* s2step,
+    Operator op, dim_t N)
+  {
+    T* end = src1 + dims[0] * s1step[0];
+    if (N == 1)
+    {
+      for (; src1 != end; src1 += s1step[0], src2 += s2step[0])
+        if (!op(src1[0], src2[0]))
+          return false;
+    }
+    else
+    {
+      for (; src1 != end; src1 += s1step[0], src2 += s2step[0])
+        if (!_allOf(src1, src2, dims + 1, s1step + 1, s2step + 1, op, N - 1))
+          return false;
+    }
+    return true;
+  }
+
+  //! @brief         applies an operation on a source array and returns a bool.
+  //!                Returns false upon getting the first false, or returns true
+  //!                if all operations return true
+  //! @param[in]     src - pointer to source array
+  //! @param[in]     dims - pointer to dimension array
+  //! @param[in]     sstep - pointer to source step array
+  //! @param[in]     op - function or function object with the signature 
+  //!                bool(T) or similar
+  //! @param[in]     N - the dimensionality of the arrays
+  //! @return        true if all operations return true, else false
+  //!
+  //! this function makes no checks whether the inputs are valid.
+  template <class T, class Operator>
+  bool _allOf(
+    const T* src, const pos_t* dims,
+    const pos_t* sstep,
+    Operator op, dim_t N)
+  {
+    T* end = src + dims[0] * sstep[0];
+    if (N == 1)
+    {
+      for (; src != end; src += sstep[0])
+        if (!op(src[0]))
+          return false;
+    }
+    else
+    {
+      for (; src != end; src += sstep[0])
+        if (!_allOf(src, dims + 1, sstep + 1, op, N - 1))
+          return false;
+    }
+    return true;
+  }
 
   //! @brief         applies an operation on two source arrays and stores the
   //!                result in a destination array
