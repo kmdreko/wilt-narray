@@ -65,32 +65,32 @@ namespace wilt
 
       }
 
-      Node(std::size_t _size)
+      Node(std::size_t size_)
         : data(nullptr),
-        size(_size),
+        size(size_),
         alloc(),
         owned(true)
       {
-        data = alloc.allocate(_size);
+        data = alloc.allocate(size_);
         if (!raw_t<T>::value())
-          for (size_t i = 0; i < _size; ++i)
+          for (size_t i = 0; i < size_; ++i)
             alloc.construct(data + i);
       }
 
-      Node(std::size_t _size, const T& val)
+      Node(std::size_t size_, const T& val)
         : data(nullptr),
-        size(_size),
+        size(size_),
         alloc(),
         owned(true)
       {
-        data = alloc.allocate(_size);
-        for (size_t i = 0; i < _size; ++i)
+        data = alloc.allocate(size_);
+        for (size_t i = 0; i < size_; ++i)
           alloc.construct(data + i, val);
       }
 
-      Node(std::size_t _size, T* _data, PTR ltype)
+      Node(std::size_t size_, T* _data, PTR ltype)
         : data(nullptr),
-        size(_size),
+        size(size_),
         alloc(),
         owned(true)
       {
@@ -100,8 +100,8 @@ namespace wilt
           data = _data;
           break;
         case PTR::COPY:
-          data = alloc.allocate(_size);
-          for (size_t i = 0; i < _size; ++i)
+          data = alloc.allocate(size_);
+          for (size_t i = 0; i < size_; ++i)
             alloc.construct(data + i, _data[i]);
           break;
         case PTR::REF:
@@ -112,14 +112,14 @@ namespace wilt
       }
 
       template <class Generator>
-      Node(std::size_t _size, Generator gen)
+      Node(std::size_t size_, Generator gen)
         : data(nullptr),
-        size(_size),
+        size(size_),
         alloc(),
         owned(true)
       {
-        data = alloc.allocate(_size);
-        for (size_t i = 0; i < _size; ++i)
+        data = alloc.allocate(size_);
+        for (size_t i = 0; i < size_; ++i)
           alloc.construct(data + i, gen());
       }
 
@@ -209,7 +209,7 @@ namespace wilt
       return m_node.get();
     }
 
-    Node* _ptr() const
+    Node* ptr_() const
     {
       return m_node.get();
     }

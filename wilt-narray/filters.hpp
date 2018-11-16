@@ -41,7 +41,7 @@
 namespace wilt
 {
   template <class T, dim_t N, class U, dim_t M, class Operator>
-  void _compress(NArray<T, N>& dst, const NArray<U, M>& src, Point<N> pos, pos_t n, Operator op)
+  void compress_(NArray<T, N>& dst, const NArray<U, M>& src, Point<N> pos, pos_t n, Operator op)
   {
     if (n == N-1)
     {
@@ -56,13 +56,13 @@ namespace wilt
       for (int i = 0; i < dst.length(n); ++i)
       {
         pos[n] = i;
-        _compress(dst, src, pos, n+1, op);
+        compress_(dst, src, pos, n+1, op);
       }
     }
   }
 
   template <class T, class U, dim_t N, class Operator>
-  void _filter(NArray<T, N>& dst, const NArray<U, N>& src, Point<N> pos, Point<N> size, pos_t n, Operator op, const BorderType<U>& border)
+  void filter_(NArray<T, N>& dst, const NArray<U, N>& src, Point<N> pos, Point<N> size, pos_t n, Operator op, const BorderType<U>& border)
   {
     if (n == N-1)
     {
@@ -80,13 +80,13 @@ namespace wilt
       for (pos_t i = 0; i < dst.length(n); ++i)
       {
         pos[n] = i;
-        _filter(dst, src, pos, size, n+1, op, border);
+        filter_(dst, src, pos, size, n+1, op, border);
       }
     }
   }
 
   template <class T, class U, class Operator>
-  void _filterReplicate(
+  void filterReplicate_(
       T* dst,             // destination array pointer
       const U* src,       // source array pointer
       const pos_t* dims,  // inverted dimensions array pointer
@@ -131,12 +131,12 @@ namespace wilt
       if (n == 1)
         dst[0] = op(src, idx, length*size[0]);
       else
-        _filterReplicate(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
+        filterReplicate_(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
     }
   }
 
   template <class T, class U, class Operator>
-  void _filterReflect(
+  void filterReflect_(
       T* dst,             // destination array pointer
       const U* src,       // source array pointer
       const pos_t* dims,  // inverted dimensions array pointer
@@ -180,12 +180,12 @@ namespace wilt
       if (n == 1)
         dst[0] = op(src, idx, length*size[0]);
       else
-        _filterReflect(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
+        filterReflect_(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
     }
   }
 
   template <class T, class U, class Operator>
-  void _filterReflect101(
+  void filterReflect101_(
       T* dst,             // destination array pointer
       const U* src,       // source array pointer
       const pos_t* dims,  // inverted dimensions array pointer
@@ -229,12 +229,12 @@ namespace wilt
       if (n == 1)
         dst[0] = op(src, idx, length*size[0]);
       else
-        _filterReflect101(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
+        filterReflect101_(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
     }
   }
 
   template <class T, class U, class Operator>
-  void _filterWrap(
+  void filterWrap_(
       T* dst,             // destination array pointer
       const U* src,       // source array pointer
       const pos_t* dims,  // inverted dimensions array pointer
@@ -278,12 +278,12 @@ namespace wilt
       if (n == 1)
         dst[0] = op(src, idx, length*size[0]);
       else
-        _filterWrap(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
+        filterWrap_(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
     }
   }
 
   template <class T, class U, class Operator>
-  void _filterPadded(
+  void filterPadded_(
       T* dst,             // destination array pointer
       const U* src,       // source array pointer
       const pos_t* dims,  // inverted dimensions array pointer
@@ -334,12 +334,12 @@ namespace wilt
       if (n == 1)
         dst[0] = op(src, idx, length*size[0]);
       else
-        _filterPadded(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
+        filterPadded_(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
     }
   }
 
   template <class T, class U, class Operator>
-  void _filterNone(
+  void filterNone_(
       T* dst,             // destination array pointer
       const U* src,       // source array pointer
       const pos_t* dims,  // inverted dimensions array pointer
@@ -365,7 +365,7 @@ namespace wilt
         dst[0] = op(src, idx, length*size[0]);
     else
       for (int i = 0; i < dims[0]; ++i, dst += dstep[0], src += sstep[0])
-        _filterNone(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
+        filterNone_(dst, src, dims-1, dstep-1, sstep-1, size-1, idx, pos-width*length, length*size[0], op, n-1);
   }
 
   enum Filter
@@ -381,8 +381,8 @@ namespace wilt
   {
     static_assert(N < M, "compress(): return must be smaller than src");
 
-    NArray<T, N> ret(_chopLow<N>(src.dims()));
-    _compress<T, M-N>(ret, src, Point<N>(), 0, op);
+    NArray<T, N> ret(chopLow_<N>(src.dims()));
+    compress_<T, M-N>(ret, src, Point<N>(), 0, op);
     return ret;
   }
 
@@ -394,7 +394,7 @@ namespace wilt
       ret = NArray<T, N>(src.dims()-size+1);
     else
       ret = NArray<T, N>(src.dims());
-    _filter(ret, src, Point<N>(), size, 0, op, border);
+    filter_(ret, src, Point<N>(), size, 0, op, border);
     return ret;
   }
 
@@ -417,10 +417,10 @@ namespace wilt
     }
 
     NArray<T, N> ret;
-    const U* pad = border._padPtr();
+    const U* pad = border.padPtr_();
 
     // create sliding index window
-    pos_t length = _size(size);
+    pos_t length = size_(size);
     pos_t* idx = new pos_t[length];
     pos_t pos = length / 2;
     idx[pos] = 0;
@@ -459,50 +459,50 @@ namespace wilt
     {
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
-      _filterReplicate(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReplicate_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
-      _filterReflect(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
-      _filterReflect101(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect101_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
-      _filterWrap(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterWrap_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, ignoreOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
-      _filterNone(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterNone_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -539,7 +539,7 @@ namespace wilt
 
     // find start and end of the kernel
     int start = -1, end;
-    const uint8_t* kern = kernel._basePtr();
+    const uint8_t* kern = kernel.basePtr_();
     for (int i = 0; i < kernel.size(); ++i)
     {
       if (*kern != 0)
@@ -553,10 +553,10 @@ namespace wilt
       throw std::invalid_argument("filterMax(): kernel must not be blank");
 
     NArray<T, N> ret;
-    const T* pad = border._padPtr();
+    const T* pad = border.padPtr_();
 
     // create sliding index window
-    pos_t length = _size(size);
+    pos_t length = size_(size);
     pos_t* idx = new pos_t[length];
     pos_t pos = length / 2;
     idx[pos] = 0;
@@ -597,50 +597,50 @@ namespace wilt
     {
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
-      _filterReplicate(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReplicate_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
-      _filterReflect(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
-      _filterReflect101(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect101_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
-      _filterWrap(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterWrap_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, ignoreOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
-      _filterNone(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterNone_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -689,7 +689,7 @@ namespace wilt
 
     // find start and end of the kernel
     int start = -1, end;
-    const uint8_t* kern = kernel._basePtr();
+    const uint8_t* kern = kernel.basePtr_();
     for (int i = 0; i < kernel.size(); ++i)
     {
       if (*kern != 0)
@@ -703,10 +703,10 @@ namespace wilt
       throw std::invalid_argument("filterMin(): kernel must not be blank");
 
     NArray<T, N> ret;
-    const T* pad = border._padPtr();
+    const T* pad = border.padPtr_();
 
     // create sliding index window
-    pos_t length = _size(size);
+    pos_t length = size_(size);
     pos_t* idx = new pos_t[length];
     pos_t pos = length / 2;
     idx[pos] = 0;
@@ -747,50 +747,50 @@ namespace wilt
     {
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
-      _filterReplicate(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReplicate_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
-      _filterReflect(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
-      _filterReflect101(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect101_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
-      _filterWrap(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterWrap_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, ignoreOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
-      _filterNone(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterNone_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -835,10 +835,10 @@ namespace wilt
     }
 
     NArray<T, N> ret;
-    const U* pad = border._padPtr();
+    const U* pad = border.padPtr_();
 
     // create sliding index window
-    pos_t length = _size(size);
+    pos_t length = size_(size);
     pos_t* idx = new pos_t[length];
     pos_t pos = length / 2;
     idx[pos] = 0;
@@ -917,43 +917,43 @@ namespace wilt
     {
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
-      _filterReplicate(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReplicate_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
-      _filterReflect(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
-      _filterReflect101(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect101_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
-      _filterWrap(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterWrap_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
-      _filterNone(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterNone_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -989,11 +989,11 @@ namespace wilt
     }
 
     NArray<T, N> ret;
-    const U* pad = border._padPtr();
-    const V* kern = kernel._basePtr();
+    const U* pad = border.padPtr_();
+    const V* kern = kernel.basePtr_();
 
     // create sliding index window
-    pos_t length = _size(size);
+    pos_t length = size_(size);
     pos_t* idx = new pos_t[length];
     pos_t pos = length / 2;
     idx[pos] = 0;
@@ -1028,50 +1028,50 @@ namespace wilt
     {
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
-      _filterReplicate(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReplicate_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
-      _filterReflect(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
-      _filterReflect101(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect101_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
-      _filterWrap(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterWrap_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, ignoreOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
-      _filterNone(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterNone_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -1106,7 +1106,7 @@ namespace wilt
     NArray<T, N> ret;
 
     // create sliding index window
-    pos_t length = _size(size);
+    pos_t length = size_(size);
     pos_t* idx = new pos_t[length];
     pos_t pos = length / 2;
     idx[pos] = 0;
@@ -1115,50 +1115,50 @@ namespace wilt
     {
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
-      _filterReplicate(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReplicate_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
-      _filterReflect(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
-      _filterReflect101(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterReflect101_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
-      _filterWrap(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterWrap_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
-      _filterPadded(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterPadded_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
-      _filterNone(ret._basePtr(), src._basePtr(), 
-        ret._dimsPtr()+N-1, ret._stepPtr()+N-1, src._stepPtr()+N-1, 
+      filterNone_(ret.basePtr_(), src.basePtr_(), 
+        ret.dimsPtr_()+N-1, ret.stepPtr_()+N-1, src.stepPtr_()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 

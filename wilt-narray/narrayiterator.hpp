@@ -138,14 +138,14 @@ namespace wilt
     //! @return     reference to data at the iterator position
     reference operator* () const
     {
-      return *_at(m_pos);
+      return *at_(m_pos);
     }
 
     //! @brief      pointer operator, invalid if <begin or >=end
     //! @return     pointer to data at the iterator position
     pointer operator-> () const
     {
-      return _at(m_pos);
+      return at_(m_pos);
     }
 
     //! @brief      index operator
@@ -153,7 +153,7 @@ namespace wilt
     //! @return     reference to data at the iterator position + offset
     reference operator[] (pos_t pos) const
     {
-      return *_at(m_pos + pos);
+      return *at_(m_pos + pos);
     }
 
     //! @brief      equal operator, determines both if it references the same
@@ -282,7 +282,7 @@ namespace wilt
     //!             pointing to
     Point<N> position() const
     {
-      return _idx2pos(m_dims, m_pos);
+      return idx2pos_(m_dims, m_pos);
     }
 
   private:
@@ -295,9 +295,9 @@ namespace wilt
     //! @brief      gets the pointer at the data offset
     //! @param[in]  pos - data offset value
     //! @return     pointer to data at the offset
-    pointer _at(pos_t pos) const
+    pointer at_(pos_t pos) const
     {
-      Point<N> loc = _idx2pos(m_dims, m_pos);
+      Point<N> loc = idx2pos_(m_dims, m_pos);
       pointer ptr = m_base;
       for (dim_t i = 0; i < N; ++i)
         ptr += loc[i] * m_step[i];

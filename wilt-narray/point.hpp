@@ -184,7 +184,7 @@ namespace wilt
   //! Is used to simplify NArray::slice_() calls
   //! Will fail if N==0
   template <dim_t N>
-  Point<N-1> _slice(const Point<N>& pt, dim_t n)
+  Point<N-1> slice_(const Point<N>& pt, dim_t n)
   {
     Point<N-1> ret;
     for (dim_t i = 0, j = 0; i < N; ++i)
@@ -202,7 +202,7 @@ namespace wilt
   //! Is used to simplify NArray::t() calls
   //! Will fail if N==0
   template <dim_t N>
-  Point<N> _swap(const Point<N>& pt, dim_t a, dim_t b)
+  Point<N> swap_(const Point<N>& pt, dim_t a, dim_t b)
   {
     Point<N> ret = pt;
     std::swap(ret[a], ret[b]);
@@ -210,7 +210,7 @@ namespace wilt
   }
 
   template <dim_t N, dim_t M>
-  Point<N> _chopLow(const Point<M>& pt)
+  Point<N> chopLow_(const Point<M>& pt)
   {
     Point<N> ret;
     for (dim_t i = 0; i < N; ++i)
@@ -219,7 +219,7 @@ namespace wilt
   }
 
   template <dim_t N, dim_t M>
-  Point<N> _chopHigh(const Point<M>& pt)
+  Point<N> chopHigh_(const Point<M>& pt)
   {
     Point<N> ret;
     for (dim_t i = 0; i < N; ++i)
@@ -236,7 +236,7 @@ namespace wilt
   //! meaningful result
   //! Will fail if N==0
   template <dim_t N>
-  Point<N> _step(const Point<N>& dims)
+  Point<N> step_(const Point<N>& dims)
   {
     Point<N> ret;
     ret[N-1] = 1;
@@ -254,7 +254,7 @@ namespace wilt
   //! Will be zero if any dimension is zero
   //! Will fail if N==0
   template <dim_t N>
-  pos_t _size(const Point<N>& dims)
+  pos_t size_(const Point<N>& dims)
   {
     pos_t ret = dims[0];
     for (dim_t i = 1; i < N; ++i)
@@ -270,7 +270,7 @@ namespace wilt
   //!
   //! Is used exclusively in NArray::align() to create an aligned NArray
   template <dim_t N>
-  pos_t _align(Point<N>& dims, Point<N>& step)
+  pos_t align_(Point<N>& dims, Point<N>& step)
   {
     pos_t offset = 0;
     for (dim_t i = 0; i < N; ++i)
@@ -305,11 +305,11 @@ namespace wilt
   //! Is used when applying operations on arrays to effectively reduce the
   //! dimensionality of the data which will reduce loops and function calls.
   //! Condensing the dim and step arrays from an aligned and continuous NArray
-  //! should result in return=1, dims=_size(dims), step1={1}, step2={1}
+  //! should result in return=1, dims=size_(dims), step1={1}, step2={1}
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <dim_t N>
-  dim_t _condense(Point<N>& dims, Point<N>& step1, Point<N>& step2)
+  dim_t condense_(Point<N>& dims, Point<N>& step1, Point<N>& step2)
   {
     dim_t j = 0;
     for (dim_t i = 1; i < N; ++i)
@@ -333,7 +333,7 @@ namespace wilt
   //! @param[in]  idx - index to convert from
   //! @return     point that corresponds to the index
   template <dim_t N>
-  Point<N> _idx2pos(const Point<N>& dims, pos_t idx)
+  Point<N> idx2pos_(const Point<N>& dims, pos_t idx)
   {
     Point<N> ret;
     for (int i = N-1; i >= 0; --i)
@@ -349,7 +349,7 @@ namespace wilt
   //! @param[in]  pos - point to convert from
   //! @return     index that corresponds to the point
   template <dim_t N>
-  pos_t _pos2idx(const Point<N>& dims, const Point<N>& pos)
+  pos_t pos2idx_(const Point<N>& dims, const Point<N>& pos)
   {
     pos_t idx = pos[N-1];
     for (int i = N-2; i >= 0; --i)

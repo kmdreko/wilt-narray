@@ -118,7 +118,7 @@ namespace wilt
       return *m_pad;
     }
 
-    T* _padPtr()
+    T* padPtr_()
     {
       return m_pad;
     }
@@ -264,16 +264,16 @@ namespace wilt
         switch (m_border.type())
         {
         case Border::REPLICATE:
-          _cloneReplicate(ret, min, max);
+          cloneReplicate_(ret, min, max);
           return ret;
         case Border::REFLECT:
-          _cloneReflect(ret, min, max);
+          cloneReflect_(ret, min, max);
           return ret;
         case Border::REFLECT_101:
-          _cloneReflect101(ret, min, max);
+          cloneReflect101_(ret, min, max);
           return ret;
         case Border::WRAP:
-          _cloneWrap(ret, min, max);
+          cloneWrap_(ret, min, max);
           return ret;
         case Border::PADDED:
           return ret;
@@ -296,14 +296,14 @@ namespace wilt
     BorderType<T> m_border;
 
   private:
-    NArray<T, N> _wrapArea(const Point<N>& loc, const Point<N>& size) const
+    NArray<T, N> wrapArea_(const Point<N>& loc, const Point<N>& size) const
     {
       NArray<T, N> ret(size);
-      _wrapArea(ret, Point<N>(), loc, 0);
+      wrapArea_(ret, Point<N>(), loc, 0);
       return ret;
     }
 
-    void _wrapArea(NArray<T, N>& arr, Point<N> dloc, Point<N> sloc, dim_t n) const
+    void wrapArea_(NArray<T, N>& arr, Point<N> dloc, Point<N> sloc, dim_t n) const
     {
       if (n == N-1)
       {
@@ -313,11 +313,11 @@ namespace wilt
       else
       {
         for (pos_t i = 0; i < arr.length(n); ++i, ++dloc[n], ++sloc[n])
-          _wrapArea(arr, dloc, sloc, n+1);
+          wrapArea_(arr, dloc, sloc, n+1);
       }
     }
 
-    void _cloneReplicate(NArray<T, N>& window, const Point<N>& min, const Point<N>& max) const
+    void cloneReplicate_(NArray<T, N>& window, const Point<N>& min, const Point<N>& max) const
     {
       Point<N> s_min = min;
       Point<N> s_max = max;
@@ -341,7 +341,7 @@ namespace wilt
       }
     }
 
-    void _cloneReflect(NArray<T, N>& window, const Point<N>& min, const Point<N>& max) const
+    void cloneReflect_(NArray<T, N>& window, const Point<N>& min, const Point<N>& max) const
     {
       Point<N> s_min = min;
       Point<N> s_max = max;
@@ -364,7 +364,7 @@ namespace wilt
       }
     }
 
-    void _cloneReflect101(NArray<T, N>& window, const Point<N>& min, const Point<N>& max) const
+    void cloneReflect101_(NArray<T, N>& window, const Point<N>& min, const Point<N>& max) const
     {
       Point<N> s_min = min;
       Point<N> s_max = max;
@@ -387,7 +387,7 @@ namespace wilt
       }
     }
 
-    void _cloneWrap(NArray<T, N>& window, const Point<N>& min, const Point<N>& max) const
+    void cloneWrap_(NArray<T, N>& window, const Point<N>& min, const Point<N>& max) const
     {
       Point<N> s_min = min;
       Point<N> s_max = max;
@@ -407,7 +407,7 @@ namespace wilt
           else
           {
             NArray<T, N> minside = sub.rangeN(0, min[i], i);
-            minside.setTo(_wrapArea(s_min, minside.dims()));
+            minside.setTo(wrapArea_(s_min, minside.dims()));
           }
         }
         
@@ -423,7 +423,7 @@ namespace wilt
             Point<N> loc = s_min;
             loc[i] = max[i];
             NArray<T, N> maxside = sub.rangeN(max[i], width, i);
-            maxside.setTo(_wrapArea(loc, maxside.dims()));
+            maxside.setTo(wrapArea_(loc, maxside.dims()));
           }
         }
       }
