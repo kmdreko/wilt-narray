@@ -80,7 +80,7 @@ Various other functions are available such as max, min, mean, and median that ac
 
 You would normally initialize the library as such
 
-    #include "narray/narray.hpp"
+    #include "wilt-narray/narray.hpp"
     using wilt::NArray;
 
 This library was designed with C++11 features but you can disable some features (brace-list-initialization, inline namespaces) for environments without full support (namely VS 2012) by using special defines in core.hpp
