@@ -199,7 +199,7 @@ namespace wilt
   //! @param[in]  b - second index to swap
   //! @return     point with the indices swapped
   //!
-  //! Is used to simplify NArray::t() calls
+  //! Is used to simplify NArray::transpose() calls
   //! Will fail if N==0
   template <dim_t N>
   Point<N> swap_(const Point<N>& pt, dim_t a, dim_t b)

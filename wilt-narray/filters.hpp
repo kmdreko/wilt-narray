@@ -48,7 +48,7 @@ namespace wilt
       for (int i = 0; i < dst.length(n); ++i)
       {
         pos[n] = i;
-        dst.at(pos) = op(src.arrayAt(pos));
+        dst.at(pos) = op(src.subarrayAt(pos));
       }
     }
     else

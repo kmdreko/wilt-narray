@@ -31,7 +31,12 @@
 #include <memory>
 // - std::allocator
 #include <type_traits>
+// - std::enable_if
+// - std::is_const
 // - std::remove_const
+// - std::is_same
+#include <initializer_list>
+// - std::initializer list
 
 #include "util.h"
 #include "point.hpp"
@@ -103,7 +108,7 @@ namespace wilt
     typedef NArrayIterator<value, N> iterator;
     typedef NArrayIterator<cvalue, N> const_iterator;
 
-    using slice_type = std::conditional_t<(N>1), NArray<T, N-1>, T&>;
+    using exposed_type = NArray<T, N>;
 
   private:
     ////////////////////////////////////////////////////////////////////////////
@@ -132,9 +137,9 @@ namespace wilt
 
     // Creates an array of the given size, elements are constructed or not 
     // based on 'type'
-    //   - ASSUME: uses provided data, will delete when complete
-    //   - COPY: copies the data
-    //   - REF: uses provided data, will not delete when complete
+    //   - ASSUME = uses provided data, will delete when complete
+    //   - COPY   = copies the data
+    //   - REF:   = uses provided data, will not delete when complete
     //
     // NOTE: ptr must be at least the size indicated by 'size'
     NArray(const Point<N>& size, T* ptr, PTR type);
@@ -152,21 +157,21 @@ namespace wilt
     template <class Generator>
     NArray(const Point<N>& size, Generator gen);
 
-    // Copy constructor, shares data and uses the same data segment as 'arr'
-    NArray(const NArray<T, N>& arr);
-
-    // Copy constructor, assumes the same data segment as 'arr'
+    // Copy and move constructor, shares data and uses the same data segment as
+    // 'arr'
     //
     // NOTE: 'arr' is empty after being moved
+
+    NArray(const NArray<T, N>& arr);
     NArray(NArray<T, N>&& arr);
 
-    // Copy constructor from 'T' to 'const T'
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
-    NArray(const NArray<U, N>& arr);
-
-    // Move constructor from 'T' to 'const T'
+    // Copy and move constructor from 'T' to 'const T'
     //
     // NOTE: 'arr' is empty after being moved
+    // NOTE: only exists on 'const T' arrays
+
+    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
+    NArray(const NArray<U, N>& arr);
     template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
     NArray(NArray<U, N>&& arr);
 
@@ -239,7 +244,7 @@ namespace wilt
     //   - height = dimension 1
     //   - depth  = dimension 2
     //
-    // NOTE: functions are only available if they have that dimension
+    // NOTE: some functions are only available if they have that dimension
 
     pos_t width() const;
     pos_t height() const;
@@ -259,48 +264,21 @@ namespace wilt
     ////////////////////////////////////////////////////////////////////////////
     // ACCESS FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
+    // Functions for accessing different segments of the array.
+    //
+    // NOTE: any function that would return an NArray of dimension 0, will
+    // instead return a T&.
 
-    //! @brief      returns whether the data is unique to this object
-    //! @return     true if only this references the shared data, false if empty
-    //!             or other references exist
+    // Gets the element at that location.
+    reference at(const Point<N>& loc) const;
 
-    //! @brief      Indexing operator to return an N-1 NArray at the x location
-    //! @param[in]  x - the dimension 0 location
-    //! @return     N-1 NArray referencing the same data
-    //! @exception  std::out_of_range if x < length
-    //! 
-    //! Identical function to sliceX(x)
-    //! It is preferable to do arr.at({x, y, y, ...}) than arr[x][y][z]... 
-    //! because the operator[] must make a new NArray for each use.
-    typename slice_type operator[] (pos_t x) const
-    {
-      if (x >= m_dims[0])
-        throw std::out_of_range("operator[] index out of bounds");
-
-      return sliceN_(x, 0);
-    }
-
-    //! @brief      Gets the element at the location
-    //! @param[in]  loc - the location of the element to get
-    //! @return     reference to the element at the location
-    //! @exception  std::runtime_error if NArray is empty
-    //! @exception  std::out_of_range if loc element invalid
-    //!
-    //! Use arr.at({x, y, z, ...}) instead of arr[x][y][z][]... 
-    reference at(const Point<N>& loc) const
-    {
-      if (empty()) 
-        throw std::runtime_error("at() invalid call on empty NArray");
-
-      T* ptr = m_base;
-      for (dim_t i = 0; i < N; ++i)
-        if (loc[i] >= m_dims[i] || loc[i] < 0)
-          throw std::out_of_range("at() element larger then dimensions");
-        else
-          ptr += loc[i] * m_step[i];
-
-      return *ptr;
-    }
+    // Indexing operator, will return an N-1 NArray at the location 'x' along
+    // the 0th dimension.
+    //
+    // NOTE: identical to 'sliceX(n)'
+    // NOTE: 'arr.at({ x, y, z, ... })' is preferred over 'arr[x][y][z]' to
+    // access elements because '[]' will create temporary NArrays
+    typename NArray<T, N-1>::exposed_type operator[] (pos_t n) const;
 
     //! @brief      Gets the N-1 dimension slice at the location
     //! @param[in]  x, y, z, w - the location to get the slice
@@ -309,209 +287,77 @@ namespace wilt
     //! @exception  std::domain_error if call for invalid N
     //!
     //! Equivalent to sliceN(x|y|z|w, n)
-    typename slice_type sliceX(pos_t x) const
-    {
-      if (x >= m_dims[0] || x < 0)
-        throw std::out_of_range("sliceX(x) index out of bounds");
 
-      return sliceN_(x, 0);
-    }
-    NArray<value, N-1> sliceY(pos_t y) const
-    {
-      static_assert(N >= 2, "sliceY() only valid when N >= 2");
+    // Gets the N-1 dimension slice along the specified dimension
+    //   - X = 0th dimension
+    //   - Y = 1st dimension
+    //   - Z = 2nd dimension
+    //   - W = 3rd dimension
+    //   - N = specified dimension
+    //
+    // NOTE: some functions are only available if they have that dimension
 
-      if (y >= m_dims[1] || y < 0)
-        throw std::out_of_range("sliceY(y) index out of bounds");
+    typename NArray<T, N-1>::exposed_type sliceX(pos_t x) const;
+    NArray<value, N-1> sliceY(pos_t y) const;
+    NArray<value, N-1> sliceZ(pos_t z) const;
+    NArray<value, N-1> sliceW(pos_t w) const;
+    typename NArray<T, N-1>::exposed_type sliceN(pos_t n, dim_t dim) const;
 
-      return sliceN_(y, 1);
-    }
-    NArray<value, N-1> sliceZ(pos_t z) const
-    {
-      static_assert(N >= 3, "sliceZ() only valid when N >= 3");
+    // Gets the subarray with range along the specified dimension
+    //   - X = 0th dimension
+    //   - Y = 1st dimension
+    //   - Z = 2nd dimension
+    //   - W = 3rd dimension
+    //   - N = specified dimension
+    //
+    // NOTE: some functions are only available if they have that dimension
 
-      if (z >= m_dims[2] || z < 0)
-        throw std::out_of_range("sliceZ(z) index out of bounds");
+    NArray<value, N> rangeX(pos_t x, pos_t length) const;
+    NArray<value, N> rangeY(pos_t y, pos_t length) const;
+    NArray<value, N> rangeZ(pos_t z, pos_t length) const;
+    NArray<value, N> rangeW(pos_t w, pos_t length) const;
+    NArray<value, N> rangeN(pos_t n, pos_t length, dim_t dim) const;
 
-      return sliceN_(z, 2);
-    }
-    NArray<value, N-1> sliceW(pos_t w) const
-    {
-      static_assert(N >= 4, "sliceW() only valid when N >= 4");
+    // Gets an NArray with the specified dimension reversed
+    //   - X = 0th dimension
+    //   - Y = 1st dimension
+    //   - Z = 2nd dimension
+    //   - W = 3rd dimension
+    //   - N = specified dimension
+    //
+    // NOTE: some functions are only available if they have that dimension
 
-      if (w >= m_dims[3] || w < 0)
-        throw std::out_of_range("sliceW(w) index out of bounds");
+    NArray<value, N> flipX() const;
+    NArray<value, N> flipY() const;
+    NArray<value, N> flipZ() const;
+    NArray<value, N> flipW() const;
+    NArray<value, N> flipN(dim_t dim) const;
 
-      return sliceN_(w, 3);
-    }
+    // Gets an NArray with two dimensions swapped
+    //
+    // NOTE: 'transpose()' is identical to 'transpose(0, 1)'
 
-    //! @brief      Gets the N-1 dimension slice at the location
-    //! @param[in]  n - the location to get the slice
-    //! @param[in]  dim - the dimension of the slice
-    //! @return     N-1 NArray that references the same data
-    //! @exception  std::out_of_range if dim or n invalid
-    typename slice_type sliceN(pos_t n, dim_t dim) const
-    {
-      if (dim >= N || n >= m_dims[dim] || n < 0)
-        throw std::out_of_range("nSlice(n, dim) index out of bounds");
+    NArray<value, N> transpose() const;
+    NArray<value, N> transpose(dim_t dim1, dim_t dim2) const;
 
-      return sliceN_(n, dim);
-    }
+    // Gets the subarray at that location and size
+    //
+    // NOTE: can use chain of 'rangeN()' to get the same result
+    NArray<value, N> subarray(const Point<N>& loc, const Point<N>& size) const;
 
-    //! @brief      Gets the NArray at the position
-    //! @param[in]  pos - position of the NArray, dimensionality must be less
-    //!             than N and positive
-    //! @return     the NArray at the position
-    //! @exception  std::domain_error if incorrect M
-    //! @exception  std::out_of_range if pos element invalid
+    // Gets the array at that location. M must be less than N.
     template <dim_t M>
-    NArray<value, N-M> arrayAt(const Point<M>& pos) const
-    {
-      static_assert(M<N && M>0, "arrayAt(): pos is not less than N");
+    NArray<T, N-M> subarrayAt(const Point<M>& pos) const;
 
-      type* base = m_base;
-      for (dim_t i = 0; i < M; ++i)
-        if (pos[i] >= m_dims[i] || pos[i] < 0)
-          throw std::out_of_range("arrayAt(): pos out of range");
-        else
-          base += m_step[i] * pos[i];
+    // Iterators for all the elements in-order
 
-      return NArray<value, N-M>(m_data, base, chopHigh_<N-M>(m_dims), chopHigh_<N-M>(m_step));
-    }
+    iterator begin();
+    iterator end();
 
-    //! @brief      Gets a NArray within the range specified along the dimension
-    //! @param[in]  x, y, z, w - the starting index of the range
-    //! @param[in]  length - the length of the range
-    //! @return     N-1 NArray that references the same data
-    //! @exception  std::out_of_range if x|y|z|w invalid
-    //! @exception  std::domain_error if call for invalid N
-    //!
-    //! Equivalent to rangeN(x|y|z|w, length, n)
-    NArray<value, N> rangeX(pos_t x, pos_t length) const
-    {
-      if (x >= m_dims[0] || x+length > m_dims[0] || length <= 0 || x < 0)
-        throw std::out_of_range("xRange(x, length) index out of bounds");
-
-      return rangeN_(x, length, 0);
-    }
-    NArray<value, N> rangeY(pos_t y, pos_t length) const
-    {
-      static_assert(N >= 2, "rangeY() only valid when N >= 2");
-
-      if (y >= m_dims[1] || y+length > m_dims[1] || length <= 0 || y < 0)
-        throw std::out_of_range("yRange(y, length) index out of bounds");
-
-      return rangeN_(y, length, 1);
-    }
-    NArray<value, N> rangeZ(pos_t z, pos_t length) const
-    {
-      static_assert(N >= 3, "rangeZ() only valid when N >= 3");
-
-      if (z >= m_dims[2] || z+length > m_dims[2] || length <= 0 || z < 0)
-        throw std::out_of_range("zRange(z, length) index out of bounds");
-
-      return rangeN_(z, length, 2);
-    }
-    NArray<value, N> rangeW(pos_t w, pos_t length) const
-    {
-      static_assert(N >= 4, "rangeW() only valid when N >= 4");
-
-      if (w >= m_dims[3] || w+length > m_dims[3] || length <= 0 || w < 0)
-        throw std::out_of_range("wRange(w, length) index out of bounds");
-
-      return rangeN_(w, length, 3);
-    }
-
-    //! @brief      Gets a NArray within the range specified along the dimension
-    //! @param[in]  n - the starting index of the range
-    //! @param[in]  length - the length of the range
-    //! @param[in]  dim - the dimension of the range
-    //! @return     N-1 NArray that references the same data
-    //! @exception  std::out_of_range if dim, n, or length invalid
-    NArray<value, N> rangeN(pos_t n, pos_t length, dim_t dim) const
-    {
-      if (n >= m_dims[dim] || n+length > m_dims[dim] || length <= 0 || n < 0 || dim >= N)
-        throw std::out_of_range("nRange(n, length, dim) index out of bounds");
-
-      return rangeN_(n, length, dim);
-    }
-
-    //! @brief      Gets an NArray withthe first two dimensions swapped
-    //! @return     NArray that references the data
-    //! @exception  std::domain_error if call for invalid N
-    //!
-    //! t() is identical to t(0, 1)
-    NArray<value, N> transpose() const
-    {
-      static_assert(N >= 2, "t() only valid when N >= 2");
-
-      return transpose(0, 1);
-    }
-
-    //! @brief      Gets an NArray with two dimensions swapped
-    //! @param[in]  dim1 - first dimension to swap
-    //! @param[in]  dim2 - second dimension to swap
-    //! @return     NArray that references the same data
-    //! @exception  std::out_of_range if dim1 or dim2 invalid
-    NArray<value, N> t(dim_t dim1, dim_t dim2) const
-    {
-      if (dim1 >= N || dim2 >= N)
-        throw std::out_of_range("t(dim1, dim2) index out of bounds");
-
-      return NArray<value, N>(m_data, m_base, swap_(m_dims, dim1, dim2), swap_(m_step, dim1, dim2));
-    }
-
-    //! @brief      Gets an NArray with a dimension reversed
-    //! @return     NArray that references the same data
-    //! @exception  std::domain_error if call for invalid N
-    //!
-    //! Equivalent to flipN(0|1|2|3)
-    NArray<value, N> flipX() const
-    {
-      return flipN_(0);
-    }
-    NArray<value, N> flipY() const
-    {
-      static_assert(N >= 2, "flipY() only valid when N >= 2");
-
-      return flipN_(1);
-    }
-    NArray<value, N> flipZ() const
-    {
-      static_assert(N >= 3, "flipZ() only valid when N >= 3");
-
-      return flipN_(2);
-    }
-    NArray<value, N> flipW() const
-    {
-      static_assert(N >= 4, "flipW() only valid when N >= 4");
-
-      return flipN_(3);
-    }
-
-    //! @brief      Gets an NArray with a dimension reversed
-    //! @param[in]  dim - the dimension to flip
-    //! @return     NArray that references the same data
-    //! @exception  std::out_of_range if dim1 or dim2 invalid
-    NArray<value, N> flipN(dim_t dim) const
-    {
-      if (dim >= N)
-        throw std::out_of_range("nFlip(dim) index out of bounds");
-
-      return flipN_(dim);
-    }
-
-    NArray<value, N> subarray(const Point<N>& loc, const Point<N>& size) const
-    {
-      type* base = m_base;
-      for (dim_t i = 0; i < N; ++i)
-      {
-        if (size[i]+loc[i] > m_dims[i] || size[i] <= 0 || loc[i] < 0 || loc[i] >= m_dims[i])
-          throw std::out_of_range("subarray() index out of bounds");
-        base += m_step[i] * loc[i];
-      }
-
-      return NArray<value, N>(m_data, base, size, m_step);
-    }
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // MODIFIER FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
 
     template <class Operator>
     void apply(Operator op)
@@ -625,34 +471,6 @@ namespace wilt
       clean_();
     }
 
-    //! @brief      returns an iterator pointing to the beginning
-    iterator begin()
-    {
-      return iterator(*this);
-    }
-    const_iterator begin() const
-    {
-      return const_iterator(*this);
-    }
-    const_iterator cbegin() const
-    {
-      return const_iterator(*this);
-    }
-
-    //! @brief      returns an iterator pointing past the end
-    iterator end()
-    {
-      return iterator(*this, size());
-    }
-    const_iterator end() const
-    {
-      return const_iterator(*this, size());
-    }
-    const_iterator cend() const
-    {
-      return const_iterator(*this, size());
-    }
-
     //! @brief      gets a pointer to the start of the referenced data
     pointer  basePtr_()
     {
@@ -694,7 +512,7 @@ namespace wilt
     }
 
   private:
-    typename slice_type sliceN_(pos_t n, dim_t dim) const
+    typename NArray<T, N-1>::exposed_type sliceN_(pos_t n, dim_t dim) const
     {
       return NArray<value, N-1>(m_data, m_base+m_step[dim]*n, slice_(m_dims, dim), slice_(m_step, dim));
     }
@@ -785,6 +603,7 @@ namespace wilt
   {
   public:
     typedef typename std::remove_const<T>::type type;
+    using exposed_type = T&;
 
     NArray(const NArrayDataRef<T>& header, type* base, const Point<0>&, const Point<0>&)
       : m_data(header),
@@ -1601,6 +1420,231 @@ namespace wilt
       if (m_step[i - 1] < m_step[i])
         return false;
     return true;
+  }
+
+  template <class T, dim_t N>
+  typename NArray<T, N>::reference NArray<T, N>::at(const Point<N>& loc) const
+  {
+    if (empty())
+      throw std::runtime_error("at() invalid call on empty NArray");
+
+    T* ptr = m_base;
+    for (dim_t i = 0; i < N; ++i)
+      if (loc[i] >= m_dims[i] || loc[i] < 0)
+        throw std::out_of_range("at() element larger then dimensions");
+      else
+        ptr += loc[i] * m_step[i];
+
+    return *ptr;
+  }
+
+  template <class T, dim_t N>
+  typename NArray<T, N - 1>::exposed_type NArray<T, N>::operator[] (pos_t n) const
+  {
+    if (n >= m_dims[0])
+      throw std::out_of_range("operator[] index out of bounds");
+
+    return sliceN_(n, 0);
+  }
+
+  template <class T, dim_t N>
+  typename NArray<T, N-1>::exposed_type NArray<T, N>::sliceX(pos_t x) const
+  {
+    if (x >= m_dims[0] || x < 0)
+      throw std::out_of_range("sliceX(x) index out of bounds");
+
+    return sliceN_(x, 0);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N-1> NArray<T, N>::sliceY(pos_t y) const
+  {
+    static_assert(N >= 2, "sliceY() only valid when N >= 2");
+
+    if (y >= m_dims[1] || y < 0)
+      throw std::out_of_range("sliceY(y) index out of bounds");
+
+    return sliceN_(y, 1);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N-1> NArray<T, N>::sliceZ(pos_t z) const
+  {
+    static_assert(N >= 3, "sliceZ() only valid when N >= 3");
+
+    if (z >= m_dims[2] || z < 0)
+      throw std::out_of_range("sliceZ(z) index out of bounds");
+
+    return sliceN_(z, 2);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N-1> NArray<T, N>::sliceW(pos_t w) const
+  {
+    static_assert(N >= 4, "sliceW() only valid when N >= 4");
+
+    if (w >= m_dims[3] || w < 0)
+      throw std::out_of_range("sliceW(w) index out of bounds");
+
+    return sliceN_(w, 3);
+  }
+
+  template <class T, dim_t N>
+  typename NArray<T, N-1>::exposed_type NArray<T, N>::sliceN(pos_t n, dim_t dim) const
+  {
+    if (dim >= N || n >= m_dims[dim] || n < 0)
+      throw std::out_of_range("nSlice(n, dim) index out of bounds");
+
+    return sliceN_(n, dim);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::rangeX(pos_t x, pos_t length) const
+  {
+    if (x >= m_dims[0] || x + length > m_dims[0] || length <= 0 || x < 0)
+      throw std::out_of_range("xRange(x, length) index out of bounds");
+
+    return rangeN_(x, length, 0);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::rangeY(pos_t y, pos_t length) const
+  {
+    static_assert(N >= 2, "rangeY() only valid when N >= 2");
+
+    if (y >= m_dims[1] || y + length > m_dims[1] || length <= 0 || y < 0)
+      throw std::out_of_range("yRange(y, length) index out of bounds");
+
+    return rangeN_(y, length, 1);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::rangeZ(pos_t z, pos_t length) const
+  {
+    static_assert(N >= 3, "rangeZ() only valid when N >= 3");
+
+    if (z >= m_dims[2] || z + length > m_dims[2] || length <= 0 || z < 0)
+      throw std::out_of_range("zRange(z, length) index out of bounds");
+
+    return rangeN_(z, length, 2);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::rangeW(pos_t w, pos_t length) const
+  {
+    static_assert(N >= 4, "rangeW() only valid when N >= 4");
+
+    if (w >= m_dims[3] || w + length > m_dims[3] || length <= 0 || w < 0)
+      throw std::out_of_range("wRange(w, length) index out of bounds");
+
+    return rangeN_(w, length, 3);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::rangeN(pos_t n, pos_t length, dim_t dim) const
+  {
+    if (n >= m_dims[dim] || n + length > m_dims[dim] || length <= 0 || n < 0 || dim >= N)
+      throw std::out_of_range("nRange(n, length, dim) index out of bounds");
+
+    return rangeN_(n, length, dim);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::flipX() const
+  {
+    return flipN_(0);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::flipY() const
+  {
+    static_assert(N >= 2, "flipY() only valid when N >= 2");
+
+    return flipN_(1);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::flipZ() const
+  {
+    static_assert(N >= 3, "flipZ() only valid when N >= 3");
+
+    return flipN_(2);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::flipW() const
+  {
+    static_assert(N >= 4, "flipW() only valid when N >= 4");
+
+    return flipN_(3);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::flipN(dim_t dim) const
+  {
+    if (dim >= N)
+      throw std::out_of_range("nFlip(dim) index out of bounds");
+
+    return flipN_(dim);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::transpose() const
+  {
+    static_assert(N >= 2, "transpose() only valid when N >= 2");
+
+    return transpose(0, 1);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::transpose(dim_t dim1, dim_t dim2) const
+  {
+    if (dim1 >= N || dim2 >= N)
+      throw std::out_of_range("transpose(dim1, dim2) index out of bounds");
+
+    return NArray<value, N>(m_data, m_base, swap_(m_dims, dim1, dim2), swap_(m_step, dim1, dim2));
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::subarray(const Point<N>& loc, const Point<N>& size) const
+  {
+    type* base = m_base;
+    for (dim_t i = 0; i < N; ++i)
+    {
+      if (size[i] + loc[i] > m_dims[i] || size[i] <= 0 || loc[i] < 0 || loc[i] >= m_dims[i])
+        throw std::out_of_range("subarray() index out of bounds");
+      base += m_step[i] * loc[i];
+    }
+
+    return NArray<value, N>(m_data, base, size, m_step);
+  }
+
+  template <class T, dim_t N>
+  template <dim_t M>
+  NArray<T, N-M> NArray<T, N>::subarrayAt(const Point<M>& pos) const
+  {
+    static_assert(M<N && M>0, "subarrayAt(): pos is not less than N");
+
+    type* base = m_base;
+    for (dim_t i = 0; i < M; ++i)
+      if (pos[i] >= m_dims[i] || pos[i] < 0)
+        throw std::out_of_range("subarrayAt(): pos out of range");
+      else
+        base += m_step[i] * pos[i];
+
+    return NArray<value, N - M>(m_data, base, chopHigh_<N - M>(m_dims), chopHigh_<N - M>(m_step));
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N>::iterator NArray<T, N>::begin()
+  {
+    return iterator(*this);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N>::iterator NArray<T, N>::end()
+  {
+    return iterator(*this, size());
   }
 
 } // namespace wilt
