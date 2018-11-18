@@ -175,145 +175,44 @@ namespace wilt
     // ASSIGNMENT OPERATORS
     ////////////////////////////////////////////////////////////////////////////
 
-    //! @brief      Assignment operator. References the data from arr. Copies
-    //!             all internal structures and increments internal reference
-    //!             counter (if data exists). Deletes previous data if last
-    //!             reference
-    //! @param[in]  arr - NArray to copy from
-    //! @return     reference to this object
-    NArray<T, N>& operator= (const NArray<T, N>& arr);
+    // standard copy and assignment, assumes the same data segment as 'arr'. 
+    // Original data reference is abandoned (if it doesn't hold the last 
+    // reference) or destroyed (if it holds the last reference).
+    //
+    // NOTE: 'arr' is empty after being moved
 
+    NArray<T, N>& operator= (const NArray<T, N>& arr);
     NArray<T, N>& operator= (NArray<T, N>&& arr);
 
-    //! @brief      Assignment operator for const NArray. If T is also const,
-    //!             then perform shallow copy and increment reference counter
-    //!             (if data exists), otherwise construct new NArray of same 
-    //!             size and deep copy. Deletes previous data if last reference
-    //! @param[in]  arr - const NArray to copy from
-    //! @return     reference to this object
+    // copy and assignment from 'T' to 'const T', only on non-const T templates.
+    // Original data reference is abandoned (if it doesn't hold the last 
+    // reference) or destroyed (if it holds the last reference).
+    //
+    // NOTE: 'arr' is empty after being moved
+
     template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
     NArray<T, N>& operator= (const NArray<U, N>& arr);
-
     template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
     NArray<T, N>& operator= (NArray<U, N>&& arr);
 
-    //! @brief      In-place addition operator, dimensions of both NArrays must
-    //!             match, should trigger compiler error if attempted on const
-    //!             type
-    //! @param[in]  arr - NArray to add
-    //! @return     reference to this object
-    NArray<T, N>& operator+= (const NArray<cvalue, N>& arr)
-    {
-      static_assert(!std::is_const<T>::value, "operator+= invalid on const type");
+    // Element-wise modifying assigment operators, modifies the underlying data,
+    // arrays must have the same dimensions
 
-      if (m_dims != arr.m_dims)
-        throw std::invalid_argument("NArray+=(arr) dimensions must match");
-      if (empty())
-        return *this;
+    NArray<T, N>& operator+= (const NArray<cvalue, N>& arr);
+    NArray<T, N>& operator-= (const NArray<cvalue, N>& arr);
 
-      unaryOp2_(m_base, arr.m_base, &m_dims[0], &m_step[0], &arr.m_step[0], [](T& lhs, const T& rhs){lhs+=rhs;}, N);
+    // Element-wise modifying assigment operators, modifies the underlying data
 
-      return *this;
-    }
+    NArray<T, N>& operator+= (const T& val);
+    NArray<T, N>& operator-= (const T& val);
+    NArray<T, N>& operator*= (const T& val);
+    NArray<T, N>& operator/= (const T& val);
 
-    //! @brief      In-place addition operator, should trigger compiler error if
-    //!             attempted on const type
-    //! @param[in]  val - value to add to each element
-    //! @return     reference to this object
-    NArray<T, N>& operator+= (const T& val)
-    {
-      static_assert(!std::is_const<T>::value, "operator+= invalid on const type");
-
-      if (empty())
-        return *this;
-
-      singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs){lhs+=val;}, N);
-
-      return *this;
-    }
-
-    //! @brief      In-place subtraction operator, dimensions of both NArrays 
-    //!             must match, should trigger compiler error if attempted on
-    //!             const type
-    //! @param[in]  arr - NArray to subtract
-    //! @return     reference to this object
-    NArray<T, N>& operator-= (const NArray<cvalue, N>& arr)
-    {
-      static_assert(!std::is_const<T>::value, "operator-= invalid on const type");
-
-      if (m_dims != arr.m_dims)
-        throw std::invalid_argument("NArray-=(arr) dimensions must match");
-      if (empty())
-        return *this;
-
-      unaryOp2_(m_base, arr.m_base, &m_dims[0], &m_step[0], &arr.m_step[0], [](T& lhs, const T& rhs){lhs-=rhs;}, N);
-
-      return *this;
-    }
-
-    //! @brief      In-place subtraction operator, should trigger compiler error
-    //!             if attempted on const type
-    //! @param[in]  val - value to subtract from each element
-    //! @return     reference to this object
-    NArray<T, N>& operator-= (const T& val)
-    {
-      static_assert(!std::is_const<T>::value, "operator-= invalid on const type");
-
-      if (empty())
-        return *this;
-
-      singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs){lhs-=val;}, N);
-
-      return *this;
-    }
-
-    //! @brief      In-place multiplication operator, should trigger compiler
-    //!             error if attempted on const type
-    //! @param[in]  val - value to multiply each element by
-    //! @return     reference to this object
-    NArray<T, N>& operator*= (const T& val)
-    {
-      static_assert(!std::is_const<T>::value, "operator*= invalid on const type");
-
-      if (empty())
-        return *this;
-
-      singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs){lhs*=val;}, N);
-
-      return *this;
-    }
-
-    //! @brief      In-place division operator, should trigger compiler error
-    //!             if attempted on const type
-    //! @param[in]  val - value to divide each element by
-    //! @return     reference to this object
-    NArray<T, N>& operator/= (const T& val)
-    {
-      static_assert(!std::is_const<T>::value, "operator/= invalid on const type");
-
-      if (empty())
-        return *this;
-
-      singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs){lhs/=val;}, N);
-
-      return *this;
-    }
-
-    //! @brief      Indexing operator to return an N-1 NArray at the x location
-    //! @param[in]  x - the dimension 0 location
-    //! @return     N-1 NArray referencing the same data
-    //! @exception  std::out_of_range if x < length
-    //! 
-    //! Identical function to sliceX(x)
-    //! It is preferable to do arr.at({x, y, y, ...}) than arr[x][y][z]... 
-    //! because the operator[] must make a new NArray for each use.
-    typename slice_type operator[] (pos_t x) const
-    {
-      if (x >= m_dims[0])
-        throw std::out_of_range("operator[] index out of bounds");
-
-      return sliceN_(x, 0);
-    }
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // QUERY FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
+    // functions only report the state of the array
 
     //! @brief      Gets the dimensions of the NArray
     //! @return     Point containing the length of each dimension
@@ -1582,6 +1481,88 @@ namespace wilt
       create_();
       setTo(arr);
     }
+
+    return *this;
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N>& NArray<T, N>::operator+= (const NArray<cvalue, N>& arr)
+  {
+    static_assert(!std::is_const<T>::value, "operator+= invalid on const type");
+
+    if (m_dims != arr.m_dims)
+      throw std::invalid_argument("NArray+=(arr) dimensions must match");
+    if (empty())
+      return *this;
+
+    unaryOp2_(m_base, arr.m_base, &m_dims[0], &m_step[0], &arr.m_step[0], [](T& lhs, const T& rhs) {lhs += rhs; }, N);
+
+    return *this;
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N>& NArray<T, N>::operator+= (const T& val)
+  {
+    static_assert(!std::is_const<T>::value, "operator+= invalid on const type");
+
+    if (empty())
+      return *this;
+
+    singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs) {lhs += val; }, N);
+
+    return *this;
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N>& NArray<T, N>::operator-= (const NArray<cvalue, N>& arr)
+  {
+    static_assert(!std::is_const<T>::value, "operator-= invalid on const type");
+
+    if (m_dims != arr.m_dims)
+      throw std::invalid_argument("NArray-=(arr) dimensions must match");
+    if (empty())
+      return *this;
+
+    unaryOp2_(m_base, arr.m_base, &m_dims[0], &m_step[0], &arr.m_step[0], [](T& lhs, const T& rhs) {lhs -= rhs; }, N);
+
+    return *this;
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N>& NArray<T, N>::operator-= (const T& val)
+  {
+    static_assert(!std::is_const<T>::value, "operator-= invalid on const type");
+
+    if (empty())
+      return *this;
+
+    singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs) {lhs -= val; }, N);
+
+    return *this;
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N>& NArray<T, N>::operator*= (const T& val)
+  {
+    static_assert(!std::is_const<T>::value, "operator*= invalid on const type");
+
+    if (empty())
+      return *this;
+
+    singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs) {lhs *= val; }, N);
+
+    return *this;
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N>& NArray<T, N>::operator/= (const T& val)
+  {
+    static_assert(!std::is_const<T>::value, "operator/= invalid on const type");
+
+    if (empty())
+      return *this;
+
+    singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs) {lhs /= val; }, N);
 
     return *this;
   }
