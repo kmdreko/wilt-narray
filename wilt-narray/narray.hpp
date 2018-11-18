@@ -214,82 +214,70 @@ namespace wilt
     ////////////////////////////////////////////////////////////////////////////
     // functions only report the state of the array
 
-    //! @brief      Gets the dimensions of the NArray
-    //! @return     Point containing the length of each dimension
-    Point<N> dims() const
-    {
-      return m_dims;
-    }
+    // Gets the dimension sizes and step values, see class description. They
+    // determine the size of data and how that data is accessed.
 
-    //! @brief      Gets the step sizes of the NArray
-    //! @return     Point containing the step sizes
-    //!
-    //! A step value is the offset from one element to the next, therefore the
-    //! step sizes correspond the the step values for each dimension
-    Point<N> step() const
-    {
-      return m_step;
-    }
+    Point<N> dims() const;
+    Point<N> step() const;
 
-    //! @brief      Gets the number of elements accessible by the NArray
-    //! @return     The size of the NArray
-    pos_t size() const
-    {
-      return size_(m_dims);
-    }
+    // The total count of elements that can be accessed. This is simply the
+    // compound of the dimension sizes.
+    pos_t size() const;
 
-    //! @brief      Gets the length of the data in a dimension
-    //! @param[in]  dim - the dimension to get the length of
-    //! @return     the length of the dimension dim
-    //! @exception  std::out_of_range if dim < N
+    // Functions for data reference
+    //   - empty  = no data is referenced
+    //   - unique = data is referenced and hold the only reference
+    //   - shared = data is referenced and doesn't hold the only reference
+
+    bool empty() const;
+    bool unique() const;
+    bool shared() const;
+
+    // Convenience functions for dimension sizes (though may be confusing
+    // depending on how the array is used)
+    //   - width  = dimension 0
+    //   - height = dimension 1
+    //   - depth  = dimension 2
+    //
+    // NOTE: functions are only available if they have that dimension
+
+    pos_t width() const;
+    pos_t height() const;
+    pos_t depth() const;
+    pos_t length(dim_t dim) const;
+
+    // Functions for determining the data organization for this array.
+    //   - isContinuous = the array accesses data with no gaps
+    //   - isSubarray   = the array accesses all data in the reference data
+    //   - isAligned    = the array accesses data linearly
+
+    bool isContinuous() const;
+    bool isSubarray() const;
+    bool isAligned() const;
+
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // ACCESS FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
+
+    //! @brief      returns whether the data is unique to this object
+    //! @return     true if only this references the shared data, false if empty
+    //!             or other references exist
+
+    //! @brief      Indexing operator to return an N-1 NArray at the x location
+    //! @param[in]  x - the dimension 0 location
+    //! @return     N-1 NArray referencing the same data
+    //! @exception  std::out_of_range if x < length
     //! 
-    //! Return value undefined for empty Mats; might be 0, last value, or junk.
-    pos_t length(dim_t dim) const
+    //! Identical function to sliceX(x)
+    //! It is preferable to do arr.at({x, y, y, ...}) than arr[x][y][z]... 
+    //! because the operator[] must make a new NArray for each use.
+    typename slice_type operator[] (pos_t x) const
     {
-      if (dim >= N)
-        throw std::out_of_range("length() argument out of bounds");
+      if (x >= m_dims[0])
+        throw std::out_of_range("operator[] index out of bounds");
 
-      return m_dims[dim];
-    }
-
-    //! @brief      Returns whether the NArray is empty
-    //! @return     True if NArray references no data
-    bool empty() const
-    {
-      return m_data.ptr_() == nullptr;
-    }
-
-    //! @brief      Gets the width of the NArray
-    //! @return     the x dimension size of the NArray
-    //!
-    //! Equivalent to length(0). Refer to length() description for caveats.
-    pos_t width() const
-    {
-      return m_dims[0];
-    }
-
-    //! @brief      Gets the height of the NArray
-    //! @return     the y dimension size of the NArray
-    //!
-    //! Equivalent to length(1). Refer to length() description for caveats.
-    //! static_assert triggered if N < 2
-    pos_t height() const
-    {
-      static_assert(N >= 2, "height() only valid when N >= 2");
-
-      return m_dims[1];
-    }
-
-    //! @brief      Gets the depth of the NArray
-    //! @return     the z dimension size of the NArray
-    //!
-    //! Equivalent to length(2). Refer to length() description for caveats.
-    //! static_assert triggered if N < 3
-    pos_t depth() const
-    {
-      static_assert(N >= 3, "depth() only valid when N >= 3");
-
-      return m_dims[2];
+      return sliceN_(x, 0);
     }
 
     //! @brief      Gets the element at the location
@@ -635,56 +623,6 @@ namespace wilt
       m_base = nullptr;
 
       clean_();
-    }
-
-    //! @brief      returns whether the data is continuous
-    //! @return     true if data is continuous, false if gaps exist
-    //!
-    //! if the NArray is continuous and aligned, you can traverse the data
-    //! linearly starting from basePtr_()
-    bool isContinuous() const
-    {
-      pos_t stepSize = 0;
-      for (dim_t i = 0; i < N; ++i)
-        stepSize += m_step[i]*(m_dims[i]-1);
-
-      return stepSize+1 == this->size();
-    }
-
-    //! @brief      returns whether the data is part of a larger NArray
-    //! @return     true if data accessible is less than data shared, false if
-    //!             otherwise or if empty
-    bool isSubarray() const
-    {
-      if (empty())
-        return false;
-      else
-        return (std::size_t)size() < m_data->size;
-    }
-
-    //! @brief      returns whether the data is accessed linearly in memory
-    //! @return     true if internal steps are positive and descreasing, false
-    //!             otherwise
-    //!
-    //! if the NArray is continuous and aligned, you can traverse the data
-    //! linearly starting from basePtr_()
-    bool isAligned() const
-    {
-      for (dim_t i = 0; i < N; ++i)
-        if (m_step[i] <= 0)
-          return false;
-      for (dim_t i = 1; i < N; ++i)
-        if (m_step[i-1] < m_step[i])
-          return false;
-      return true;
-    }
-
-    //! @brief      returns whether the data is unique to this object
-    //! @return     true if only this references the shared data, false if empty
-    //!             or other references exist
-    bool isUnique() const
-    {
-      return m_data.ptr_() && m_data.unique();
     }
 
     //! @brief      returns an iterator pointing to the beginning
@@ -1405,7 +1343,7 @@ namespace wilt
     , m_dims(arr.m_dims)
     , m_step(arr.m_step)
   {
-    if (std::is_const<T>::value || arr.isUnique())
+    if (std::is_const<T>::value || arr.unique())
     {
       m_data = arr.m_data;
       m_base = arr.m_base;
@@ -1471,7 +1409,7 @@ namespace wilt
     m_dims = arr.m_dims;
     m_step = arr.m_step;
 
-    if (std::is_const<T>::value || arr.isUnique())
+    if (std::is_const<T>::value || arr.unique())
     {
       m_data = arr.m_data;
       m_base = arr.m_base;
@@ -1565,6 +1503,104 @@ namespace wilt
     singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs) {lhs /= val; }, N);
 
     return *this;
+  }
+
+  template <class T, dim_t N>
+  Point<N> NArray<T, N>::dims() const
+  {
+    return m_dims;
+  }
+
+  template <class T, dim_t N>
+  Point<N> NArray<T, N>::step() const
+  {
+    return m_step;
+  }
+
+  template <class T, dim_t N>
+  pos_t NArray<T, N>::size() const
+  {
+    return size_(m_dims);
+  }
+
+  template <class T, dim_t N>
+  bool NArray<T, N>::empty() const
+  {
+    return m_data.ptr_() == nullptr;
+  }
+
+  template <class T, dim_t N>
+  bool NArray<T, N>::unique() const
+  {
+    return m_data.ptr_() && m_data.unique();
+  }
+
+  template <class T, dim_t N>
+  bool NArray<T, N>::shared() const
+  {
+    return m_data.ptr_() && !m_data.unique();
+  }
+
+  template <class T, dim_t N>
+  pos_t NArray<T, N>::width() const
+  {
+    return m_dims[0];
+  }
+
+  template <class T, dim_t N>
+  pos_t NArray<T, N>::height() const
+  {
+    static_assert(N >= 2, "height() only valid when N >= 2");
+
+    return m_dims[1];
+  }
+
+  template <class T, dim_t N>
+  pos_t NArray<T, N>::depth() const
+  {
+    static_assert(N >= 3, "depth() only valid when N >= 3");
+
+    return m_dims[2];
+  }
+
+  template <class T, dim_t N>
+  pos_t NArray<T, N>::length(dim_t dim) const
+  {
+    if (dim >= N)
+      throw std::out_of_range("length() argument out of bounds");
+
+    return m_dims[dim];
+  }
+
+  template <class T, dim_t N>
+  bool NArray<T, N>::isContinuous() const
+  {
+    pos_t stepSize = 0;
+    for (dim_t i = 0; i < N; ++i)
+      stepSize += m_step[i] * (m_dims[i] - 1);
+
+    return stepSize + 1 == this->size();
+  }
+
+  template <class T, dim_t N>
+  bool NArray<T, N>::isSubarray() const
+  {
+    if (empty())
+      return false;
+    else
+      return (std::size_t)size() < m_data->size;
+  }
+
+  template <class T, dim_t N>
+  bool NArray<T, N>::isAligned() const
+  {
+    for (dim_t i = 0; i < N; ++i)
+      if (m_step[i] <= 0)
+        return false;
+    for (dim_t i = 1; i < N; ++i)
+      if (m_step[i - 1] < m_step[i])
+        return false;
+    return true;
   }
 
 } // namespace wilt
