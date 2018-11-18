@@ -222,8 +222,8 @@ namespace wilt
     // Gets the dimension sizes and step values, see class description. They
     // determine the size of data and how that data is accessed.
 
-    Point<N> dims() const;
-    Point<N> step() const;
+    const Point<N>& dims() const;
+    const Point<N>& step() const;
 
     // The total count of elements that can be accessed. This is simply the
     // compound of the dimension sizes.
@@ -298,9 +298,9 @@ namespace wilt
     // NOTE: some functions are only available if they have that dimension
 
     typename NArray<T, N-1>::exposed_type sliceX(pos_t x) const;
-    NArray<value, N-1> sliceY(pos_t y) const;
-    NArray<value, N-1> sliceZ(pos_t z) const;
-    NArray<value, N-1> sliceW(pos_t w) const;
+    NArray<T, N-1> sliceY(pos_t y) const;
+    NArray<T, N-1> sliceZ(pos_t z) const;
+    NArray<T, N-1> sliceW(pos_t w) const;
     typename NArray<T, N-1>::exposed_type sliceN(pos_t n, dim_t dim) const;
 
     // Gets the subarray with range along the specified dimension
@@ -312,11 +312,11 @@ namespace wilt
     //
     // NOTE: some functions are only available if they have that dimension
 
-    NArray<value, N> rangeX(pos_t x, pos_t length) const;
-    NArray<value, N> rangeY(pos_t y, pos_t length) const;
-    NArray<value, N> rangeZ(pos_t z, pos_t length) const;
-    NArray<value, N> rangeW(pos_t w, pos_t length) const;
-    NArray<value, N> rangeN(pos_t n, pos_t length, dim_t dim) const;
+    NArray<T, N> rangeX(pos_t x, pos_t length) const;
+    NArray<T, N> rangeY(pos_t y, pos_t length) const;
+    NArray<T, N> rangeZ(pos_t z, pos_t length) const;
+    NArray<T, N> rangeW(pos_t w, pos_t length) const;
+    NArray<T, N> rangeN(pos_t n, pos_t length, dim_t dim) const;
 
     // Gets an NArray with the specified dimension reversed
     //   - X = 0th dimension
@@ -327,23 +327,23 @@ namespace wilt
     //
     // NOTE: some functions are only available if they have that dimension
 
-    NArray<value, N> flipX() const;
-    NArray<value, N> flipY() const;
-    NArray<value, N> flipZ() const;
-    NArray<value, N> flipW() const;
-    NArray<value, N> flipN(dim_t dim) const;
+    NArray<T, N> flipX() const;
+    NArray<T, N> flipY() const;
+    NArray<T, N> flipZ() const;
+    NArray<T, N> flipW() const;
+    NArray<T, N> flipN(dim_t dim) const;
 
     // Gets an NArray with two dimensions swapped
     //
     // NOTE: 'transpose()' is identical to 'transpose(0, 1)'
 
-    NArray<value, N> transpose() const;
-    NArray<value, N> transpose(dim_t dim1, dim_t dim2) const;
+    NArray<T, N> transpose() const;
+    NArray<T, N> transpose(dim_t dim1, dim_t dim2) const;
 
     // Gets the subarray at that location and size
     //
     // NOTE: can use chain of 'rangeN()' to get the same result
-    NArray<value, N> subarray(const Point<N>& loc, const Point<N>& size) const;
+    NArray<T, N> subarray(const Point<N>& loc, const Point<N>& size) const;
 
     // Gets the array at that location. M must be less than N.
     template <dim_t M>
@@ -354,6 +354,11 @@ namespace wilt
     iterator begin();
     iterator end();
 
+    // Gets a pointer to the segment base. Can be used to access the whole
+    // segment if isContinuous() and isAligned() or by respecting dims() and 
+    // step()
+    T* base() const;
+
   public:
     ////////////////////////////////////////////////////////////////////////////
     // MODIFIER FUNCTIONS
@@ -362,13 +367,13 @@ namespace wilt
     template <class Operator>
     void apply(Operator op)
     {
-      singleOp2_((pointer)m_base, dimsPtr_(), stepPtr_(), op, N);
+      singleOp2_((pointer)m_base, &m_dims[0], &m_step[0], op, N);
     }
 
     template <class Operator>
     void apply(Operator op) const
     {
-      singleOp2_((cpointer)m_base, dimsPtr_(), stepPtr_(), op, N);
+      singleOp2_((cpointer)m_base, &m_dims[0], &m_step[0], op, N);
     }
 
     //! @brief      Converts the data to a new type using static_cast or custom
@@ -402,7 +407,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(arr): cannot set to const type");
 
-      unaryOp2_(m_base, arr.basePtr_(), dimsPtr_(), stepPtr_(), arr.stepPtr_(), 
+      unaryOp2_(m_base, arr.base(), &m_dims[0], &m_step[0], arr.step().data(),
         [](type& r, const type& v){r = v;}, N);
     }
     void setTo(const T& val)
@@ -410,7 +415,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(val): cannot set to const type");
 
-      singleOp2_(m_base, dimsPtr_(), stepPtr_(), [&val](type& r){r = val;}, N);
+      singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](type& r){r = val;}, N);
     }
 
     //! @brief      Sets the data currently refenced to values in arr or a
@@ -426,7 +431,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(arr, mask): cannot set to const type");
 
-      binaryOp2_(m_base, arr.basePtr_(), mask.basePtr_(), dimsPtr_(), stepPtr_(), arr.stepPtr_(), mask.stepPtr_(), 
+      binaryOp2_(m_base, arr.base(), mask.base(), &m_dims[0], &m_step[0], arr.step().data(), mask.step().data(),
         [](type& r, const type& v, uint8_t m){if (m != 0) r = v;}, N);
     }
     void setTo(const T& val, const NArray<uint8_t, N>& mask)
@@ -434,7 +439,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(val): cannot set to const type");
 
-      unaryOp2_(m_base, mask.basePtr_(), dimsPtr_(), stepPtr_(), mask.stepPtr_(), 
+      unaryOp2_(m_base, mask.base(), &m_dims[0], &m_step[0], mask.step().data(),
         [&val](type& r, uint8_t m){if (m != 0) r = val;}, N);
     }
 
@@ -469,28 +474,6 @@ namespace wilt
       m_base = nullptr;
 
       clean_();
-    }
-
-    //! @brief      gets a pointer to the start of the referenced data
-    pointer  basePtr_()
-    {
-      return m_base;
-    }
-    cpointer basePtr_() const
-    {
-      return m_base;
-    }
-
-    //! @brief      gets the pointer to the array array, size N
-    const pos_t* dimsPtr_() const
-    {
-      return &m_dims[0];
-    }
-
-    //! @brief      gets the pointer of the step array, size N
-    const pos_t* stepPtr_() const
-    {
-      return &m_step[0];
     }
 
     friend class NArray<value, N+1>;
@@ -593,7 +576,7 @@ namespace wilt
       Point<N> step1 = lhs.step();
       Point<N> step2 = rhs.step();
       dim_t n = condense_(dims, step1, step2);
-      unaryOp_(rhs.basePtr_(), lhs.basePtr_(), &dims[0], &step2[0], &step1[0], func, n);
+      unaryOp_(rhs.base(), lhs.base(), &dims[0], &step2[0], &step1[0], func, n);
     }
 
   }; // class NArray
@@ -899,8 +882,8 @@ namespace wilt
   NArray<T, N> binaryOp(const NArray<U, N>& src1, const NArray<V, N>& src2, Operator op)
   {
     NArray<T, N> ret(src1.dims());
-    binaryOp_(ret.basePtr_(), src1.basePtr_(), src2.basePtr_(), ret.dimsPtr_(), 
-              ret.stepPtr_(), src1.stepPtr_(), src2.stepPtr_(), op, N);
+    binaryOp_(ret.base(), src1.base(), src2.base(), ret.dims().data(), 
+              ret.step().data(), src1.step().data(), src2.step().data(), op, N);
     return ret;
   }
 
@@ -914,8 +897,8 @@ namespace wilt
   template <class T, class U, class V, dim_t N, class Operator>
   void binaryOp(NArray<T, N>& dst, const NArray<U, N>& src1, const NArray<V, N>& src2, Operator op)
   {
-    binaryOp2_(dst.basePtr_(), src1.basePtr_(), src2.basePtr_(), dst.dimsPtr_(), 
-               dst.stepPtr_(), src1.stepPtr_(), src2.stepPtr_(), op, N);
+    binaryOp2_(dst.base(), src1.base(), src2.base(), dst.dims().data(),
+               dst.step().data(), src1.step().data(), src2.step().data(), op, N);
   }
 
   //! @brief         applies an operation on a source array and stores the
@@ -928,8 +911,8 @@ namespace wilt
   NArray<T, N> unaryOp(const NArray<U, N>& src, Operator op)
   {
     NArray<T, N> ret(src.dims());
-    unaryOp_(ret.basePtr_(), src.basePtr_(), ret.dimsPtr_(), 
-             ret.stepPtr_(), src.stepPtr_(), op, N);
+    unaryOp_(ret.base(), src.base(), ret.dims().data(),
+             ret.step().data(), src.step().data(), op, N);
     return ret;
   }
 
@@ -942,8 +925,8 @@ namespace wilt
   template <class T, class U, dim_t N, class Operator>
   void unaryOp(NArray<T, N>& dst, const NArray<U, N>& src, Operator op)
   {
-    unaryOp2_(dst.basePtr_(), src.basePtr_(), dst.dimsPtr_(), 
-              dst.stepPtr_(), src.stepPtr_(), op, N);
+    unaryOp2_(dst.base(), src.base(), ret.dims().data(),
+              dst.step().data(), src.step().data(), op, N);
   }
 
   template <class T, dim_t N>
@@ -1325,13 +1308,13 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  Point<N> NArray<T, N>::dims() const
+  const Point<N>& NArray<T, N>::dims() const
   {
     return m_dims;
   }
 
   template <class T, dim_t N>
-  Point<N> NArray<T, N>::step() const
+  const Point<N>& NArray<T, N>::step() const
   {
     return m_step;
   }
@@ -1457,7 +1440,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N-1> NArray<T, N>::sliceY(pos_t y) const
+  NArray<T, N-1> NArray<T, N>::sliceY(pos_t y) const
   {
     static_assert(N >= 2, "sliceY() only valid when N >= 2");
 
@@ -1468,7 +1451,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N-1> NArray<T, N>::sliceZ(pos_t z) const
+  NArray<T, N-1> NArray<T, N>::sliceZ(pos_t z) const
   {
     static_assert(N >= 3, "sliceZ() only valid when N >= 3");
 
@@ -1479,7 +1462,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N-1> NArray<T, N>::sliceW(pos_t w) const
+  NArray<T, N-1> NArray<T, N>::sliceW(pos_t w) const
   {
     static_assert(N >= 4, "sliceW() only valid when N >= 4");
 
@@ -1499,7 +1482,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::rangeX(pos_t x, pos_t length) const
+  NArray<T, N> NArray<T, N>::rangeX(pos_t x, pos_t length) const
   {
     if (x >= m_dims[0] || x + length > m_dims[0] || length <= 0 || x < 0)
       throw std::out_of_range("xRange(x, length) index out of bounds");
@@ -1508,7 +1491,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::rangeY(pos_t y, pos_t length) const
+  NArray<T, N> NArray<T, N>::rangeY(pos_t y, pos_t length) const
   {
     static_assert(N >= 2, "rangeY() only valid when N >= 2");
 
@@ -1519,7 +1502,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::rangeZ(pos_t z, pos_t length) const
+  NArray<T, N> NArray<T, N>::rangeZ(pos_t z, pos_t length) const
   {
     static_assert(N >= 3, "rangeZ() only valid when N >= 3");
 
@@ -1530,7 +1513,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::rangeW(pos_t w, pos_t length) const
+  NArray<T, N> NArray<T, N>::rangeW(pos_t w, pos_t length) const
   {
     static_assert(N >= 4, "rangeW() only valid when N >= 4");
 
@@ -1541,7 +1524,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::rangeN(pos_t n, pos_t length, dim_t dim) const
+  NArray<T, N> NArray<T, N>::rangeN(pos_t n, pos_t length, dim_t dim) const
   {
     if (n >= m_dims[dim] || n + length > m_dims[dim] || length <= 0 || n < 0 || dim >= N)
       throw std::out_of_range("nRange(n, length, dim) index out of bounds");
@@ -1550,13 +1533,13 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::flipX() const
+  NArray<T, N> NArray<T, N>::flipX() const
   {
     return flipN_(0);
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::flipY() const
+  NArray<T, N> NArray<T, N>::flipY() const
   {
     static_assert(N >= 2, "flipY() only valid when N >= 2");
 
@@ -1564,7 +1547,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::flipZ() const
+  NArray<T, N> NArray<T, N>::flipZ() const
   {
     static_assert(N >= 3, "flipZ() only valid when N >= 3");
 
@@ -1572,7 +1555,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::flipW() const
+  NArray<T, N> NArray<T, N>::flipW() const
   {
     static_assert(N >= 4, "flipW() only valid when N >= 4");
 
@@ -1580,7 +1563,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::flipN(dim_t dim) const
+  NArray<T, N> NArray<T, N>::flipN(dim_t dim) const
   {
     if (dim >= N)
       throw std::out_of_range("nFlip(dim) index out of bounds");
@@ -1589,7 +1572,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::transpose() const
+  NArray<T, N> NArray<T, N>::transpose() const
   {
     static_assert(N >= 2, "transpose() only valid when N >= 2");
 
@@ -1597,7 +1580,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::transpose(dim_t dim1, dim_t dim2) const
+  NArray<T, N> NArray<T, N>::transpose(dim_t dim1, dim_t dim2) const
   {
     if (dim1 >= N || dim2 >= N)
       throw std::out_of_range("transpose(dim1, dim2) index out of bounds");
@@ -1606,7 +1589,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::subarray(const Point<N>& loc, const Point<N>& size) const
+  NArray<T, N> NArray<T, N>::subarray(const Point<N>& loc, const Point<N>& size) const
   {
     type* base = m_base;
     for (dim_t i = 0; i < N; ++i)
@@ -1636,15 +1619,21 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<T, N>::iterator NArray<T, N>::begin()
+  typename NArray<T, N>::iterator NArray<T, N>::begin()
   {
     return iterator(*this);
   }
 
   template <class T, dim_t N>
-  NArray<T, N>::iterator NArray<T, N>::end()
+  typename NArray<T, N>::iterator NArray<T, N>::end()
   {
     return iterator(*this, size());
+  }
+
+  template <class T, dim_t N>
+  T* NArray<T, N>::base() const
+  {
+    return m_base;
   }
 
 } // namespace wilt

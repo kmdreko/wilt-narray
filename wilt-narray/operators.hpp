@@ -42,8 +42,8 @@ namespace wilt
     {
       NArray<Ret, N> ret(lhs.dims());
       binaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -62,8 +62,8 @@ namespace wilt
     {
       NArray<Ret, N> ret(lhs.dims());
       unaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -71,8 +71,8 @@ namespace wilt
     {
       NArray<Ret, N> ret(rhs.dims());
       unaryOp2_(
-        ret.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -95,8 +95,8 @@ namespace wilt
     {
       NArray<T, N> ret(lhs.dims());
       binaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -104,8 +104,8 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<NArray<U, N>>(lhs));
       binaryOp2_(
-        ret.basePtr_(), ret.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), ret.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), ret.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), ret.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -119,8 +119,8 @@ namespace wilt
     {
       NArray<T, N> ret(lhs.dims());
       unaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -128,8 +128,8 @@ namespace wilt
     {
       NArray<T, N> ret(rhs.dims());
       unaryOp2_(
-        ret.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -137,8 +137,8 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(lhs)); 
       unaryOp2_(
-        ret.basePtr_(), ret.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), ret.stepPtr_(), op, N);
+        ret.base(), ret.base(), ret.dims().data(), 
+        ret.step().data(), ret.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -156,8 +156,8 @@ namespace wilt
     {
       NArray<U, N> ret(lhs.dims());
       binaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -170,8 +170,8 @@ namespace wilt
     {
       NArray<U, N> ret(std::forward<NArray<U, N>>(rhs));
       binaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), ret.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), ret.stepPtr_(), op, N);
+        ret.base(), lhs.base(), ret.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), ret.step().data(), op, N);
       return ret;
     }
   
@@ -180,8 +180,8 @@ namespace wilt
     {
       NArray<U, N> ret(lhs.dims());
       unaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -189,8 +189,8 @@ namespace wilt
     {
       NArray<U, N> ret(rhs.dims());
       unaryOp2_(
-        ret.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -203,8 +203,8 @@ namespace wilt
     {
       NArray<U, N> ret(std::forward<wilt::NArray<U, N>>(rhs)); 
       unaryOp2_(
-        ret.basePtr_(), ret.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), ret.stepPtr_(), op, N);
+        ret.base(), ret.base(), ret.dims().data(), 
+        ret.step().data(), ret.step().data(), op, N);
       return ret;
     }
   };
@@ -217,8 +217,8 @@ namespace wilt
     {
       NArray<T, N> ret(lhs.dims());
       binaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -226,8 +226,8 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(lhs));
       binaryOp2_(
-        ret.basePtr_(), ret.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), ret.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), ret.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), ret.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -235,8 +235,8 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(rhs));
       binaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), ret.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), ret.stepPtr_(), op, N);
+        ret.base(), lhs.base(), ret.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), ret.step().data(), op, N);
       return ret;
     }
   
@@ -245,8 +245,8 @@ namespace wilt
     {
       NArray<T, N> ret(lhs.dims());
       unaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -254,8 +254,8 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(lhs));
       unaryOp2_(
-        ret.basePtr_(), ret.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), ret.stepPtr_(), op, N);
+        ret.base(), ret.base(), ret.dims().data(), 
+        ret.step().data(), ret.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -263,8 +263,8 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<NArray<T, N>>(rhs)); 
       unaryOp2_(
-        ret.basePtr_(), ret.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), ret.stepPtr_(), op, N);
+        ret.base(), ret.base(), ret.dims().data(), 
+        ret.step().data(), ret.step().data(), op, N);
       return ret;
     }
   };
@@ -277,8 +277,8 @@ namespace wilt
     {
       NArray<Ret, N> ret(lhs.dims());
       binaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), rhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), rhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), rhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -297,8 +297,8 @@ namespace wilt
     {
       NArray<Ret, N> ret(lhs.dims());
       unaryOp2_(
-        ret.basePtr_(), lhs.basePtr_(), ret.dimsPtr_(), 
-        ret.stepPtr_(), lhs.stepPtr_(), op, N);
+        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.step().data(), lhs.step().data(), op, N);
       return ret;
     }
     template <class Operator>
@@ -1502,8 +1502,8 @@ template <class T, dim_t N>
 bool operator== (const wilt::NArray<T, N>& lhs, const wilt::NArray<T, N>& rhs)
 {
   return allOf_(
-    lhs.basePtr_(), rhs.basePtr_(), 
-    lhs.dimsPtr_(), lhs.stepPtr_(), rhs.stepPtr_(), 
+    lhs.base(), rhs.base(), 
+    lhs.dimsPtr_(), lhs.step().data(), rhs.step().data(), 
     [](const T& a, const T& b){return a == b;}, N);
 }
 template <class T, class U, dim_t N>

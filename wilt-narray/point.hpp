@@ -160,6 +160,16 @@ namespace wilt
       return m_size[n];
     }
 
+    pos_t* data()
+    {
+      return m_size.data();
+    }
+
+    const pos_t* data() const
+    {
+      return m_size.data();
+    }
+
     void clear()
     {
       m_size.fill(0);
