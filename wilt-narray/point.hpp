@@ -30,6 +30,8 @@
 
 #include <array>
 // - std::array
+#include <cmath>
+// - std::abs
 
 #include "util.h"
 
@@ -302,35 +304,43 @@ namespace wilt
     return offset;
   }
 
-  //! @brief         Condenses a dim array and step array into smaller arrays
+  //! @brief         Condenses a dim array and steps array into smaller arrays
   //!                if able to
   //! @param[in,out] dims - dimension array as a point
-  //! @param[in,out] step1 - step array as a point
+  //! @param[in,out] steps - step array as a point
   //! @return        the dimension of the arrays after condensing, values at or
   //!                after n in the arrays are junk
   //!
   //! Is used when applying operations on arrays to effectively reduce the
   //! dimensionality of the data which will reduce loops and function calls.
   //! Condensing the dim and step arrays from an aligned and continuous NArray
-  //! should result in return=1, dims=size_(dims), step1={1}
+  //! should result in return=1, dims=size_(dims), steps={1}
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <dim_t N>
-  dim_t condense_(Point<N>& dims, Point<N>& step1)
+  dim_t condense_(Point<N>& dims, Point<N>& steps)
   {
-    dim_t j = 0;
-    for (dim_t i = 1; i < N; ++i)
+    dim_t j = N-1;
+    for (int i = N-2; i >= 0; --i)
     {
-      if (dims[i] * step1[i] == step1[i - 1])
+      if (steps[j] * dims[j] == steps[i])
+      {
         dims[j] *= dims[i];
+      }
       else
       {
-        step1[j] = step1[i - 1];
-        dims[++j] = dims[i];
+        --j;
+        dims[j] = dims[i];
+        steps[j] = steps[i];
       }
     }
-    step1[j] = step1[N - 1];
-    return j + 1;
+    for (dim_t i = 0; i < j; ++i)
+    {
+      dims[i] = 1;
+      steps[i] = std::abs(dims[j] * steps[j]);
+    }
+
+    return N - j;
   }
 
   //! @brief         Condenses a dim array and step arrays into smaller arrays
