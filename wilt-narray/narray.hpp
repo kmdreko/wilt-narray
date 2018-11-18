@@ -88,7 +88,10 @@ namespace wilt
   class NArray
   {
   public:
-    // type definitions
+    ////////////////////////////////////////////////////////////////////////////
+    // TYPE DEFINITIONS
+    ////////////////////////////////////////////////////////////////////////////
+
     typedef typename std::remove_const<T>::type type;
     typedef       T  value;
     typedef const T  cvalue;
@@ -102,49 +105,75 @@ namespace wilt
 
     using slice_type = std::conditional_t<(N>1), NArray<T, N-1>, T&>;
 
-    //! @brief  Default constructor. Makes an empty NArray
+  private:
+    ////////////////////////////////////////////////////////////////////////////
+    // PRIVATE MEMBERS
+    ////////////////////////////////////////////////////////////////////////////
+
+    NArrayDataRef<type> m_data; // reference to shared data
+    type* m_base;               // base of current data segment
+    Point<N> m_dims;            // dimension sizes
+    Point<N> m_step;            // step sizes
+
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // CONSTRUCTORS
+    ////////////////////////////////////////////////////////////////////////////
+
+    // Default constructor, makes an empty NArray.
     NArray();
 
-    //! @brief      Value constructor. Constructs an NArray with size. Elements
-    //!             are defaulted. 
-    //! @param[in]  size - list of dimension lengths
+    // Creates an array of the given size, elements are default constructed.
     explicit NArray(const Point<N>& size);
 
+    // Creates an array of the given size, elements are copy constructed from
+    // 'val'.
     NArray(const Point<N>& size, const T& val);
 
-    NArray(const Point<N>& size, T* ptr, PTR ltype);
+    // Creates an array of the given size, elements are constructed or not 
+    // based on 'type'
+    //   - ASSUME: uses provided data, will delete when complete
+    //   - COPY: copies the data
+    //   - REF: uses provided data, will not delete when complete
+    //
+    // NOTE: ptr must be at least the size indicated by 'size'
+    NArray(const Point<N>& size, T* ptr, PTR type);
 
+    // Creates an array of the given size, elements are copy constructed from
+    // the list
+    //
+    // NOTE: ptr must be at least the size indicated by size
     NArray(const Point<N>& size, std::initializer_list<T> list);
 
+    // Creates an array of the given size, elements are constructed from the
+    // result of 'gen()'
+    //
+    // NOTE: 'gen()' is called once per element
     template <class Generator>
     NArray(const Point<N>& size, Generator gen);
 
-    //! @brief      Copy constructor. Just references the data from arr. copies
-    //!             all internal structures and increments internal reference
-    //!             counter (if data exists)
-    //! @param[in]  arr - NArray to copy from
+    // Copy constructor, shares data and uses the same data segment as 'arr'
     NArray(const NArray<T, N>& arr);
 
-    //! @brief      Move constructor. Assumes the data from arr. 
-    //! @param[in]  arr - NArray to move
+    // Copy constructor, assumes the same data segment as 'arr'
+    //
+    // NOTE: 'arr' is empty after being moved
     NArray(NArray<T, N>&& arr);
 
-    //! @brief      Copy constructor for const NArray. If T is also const, then
-    //!             perform shallow copy and increment reference counter (if
-    //!             data exists), otherwise construct new NArray of same size
-    //!             and deep copy
-    //! @param[in]  arr - const NArray to copy from
+    // Copy constructor from 'T' to 'const T'
     template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
     NArray(const NArray<U, N>& arr);
 
-    //! @brief      Move constructor. Assumes the data from arr if able to.
-    //! @param[in]  arr - NArray to move
-    //!
-    //! I actually don't think this will be utilized fully because a const T
-    //! NArray moved as the only reference should not ever exist, its possible
-    //! but not under normal operation of the library
+    // Move constructor from 'T' to 'const T'
+    //
+    // NOTE: 'arr' is empty after being moved
     template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
     NArray(NArray<U, N>&& arr);
+
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // ASSIGNMENT OPERATORS
+    ////////////////////////////////////////////////////////////////////////////
 
     //! @brief      Assignment operator. References the data from arr. Copies
     //!             all internal structures and increments internal reference
@@ -816,10 +845,6 @@ namespace wilt
     friend class NArrayIterator<cvalue, N>;
 
   protected:
-    NArrayDataRef<type> m_data;
-    type* m_base;
-    Point<N> m_dims;
-    Point<N> m_step;
 
     // Raw constructor
     NArray(NArrayDataRef<type> header, type* base, Point<N> dims, Point<N> step)
@@ -1394,14 +1419,14 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<T, N>::NArray(const Point<N>& size, T* ptr, PTR ltype)
+  NArray<T, N>::NArray(const Point<N>& size, T* ptr, PTR type)
     : m_data()
     , m_base(nullptr)
     , m_dims(size)
     , m_step(step_(size))
   {
     if (valid_())
-      create_(ptr, ltype);
+      create_(ptr, type);
     else
       clean_();
   }
