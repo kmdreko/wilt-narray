@@ -178,7 +178,7 @@ void testCopyConstructorSharesData()
   }
 }
 
-void testAsCondensedCreatesCorrectState()
+void testAsCondensedCreatesCorrectNArray()
 {
   { // T=int N=1
     wilt::NArray<int, 1> a({ 12 });
@@ -221,11 +221,43 @@ void testAsCondensedCreatesCorrectState()
   }
 }
 
+void testSkipNCreatesCorrectNArray()
+{
+  { // T=int N=1
+    wilt::NArray<int, 1> a({ 5 });
+
+    wilt::NArray<int, 1> b = a.skipX(2);
+    assert(b.dims() == wilt::Point<1>({ 3 }));
+    assert(b.steps() == wilt::Point<1>({ 2 }));
+
+    wilt::NArray<int, 1> c = a.skipX(2, 1);
+    assert(c.dims() == wilt::Point<1>({ 2 }));
+    assert(c.steps() == wilt::Point<1>({ 2 }));
+
+    wilt::NArray<int, 1> d = a.skipX(1);
+    assert(d.dims() == wilt::Point<1>({ 5 }));
+    assert(d.steps() == wilt::Point<1>({ 1 }));
+
+    wilt::NArray<int, 1> e = a.skipX(1, 2);
+    assert(e.dims() == wilt::Point<1>({ 3 }));
+    assert(e.steps() == wilt::Point<1>({ 1 }));
+  }
+
+  { // T=int N=3
+    wilt::NArray<int, 3> a({ 3, 3, 3 });
+
+    wilt::NArray<int, 3> b = a.skipY(2).skipZ(2);
+    assert(b.dims() == wilt::Point<3>({ 3, 2, 2 }));
+    assert(b.steps() == wilt::Point<3>({ 9, 6, 2 }));
+  }
+}
+
 void testNArray()
 {
   testDefaultConstructorHasSizeZero();
   testSizedConstructorHasConstructedSize();
   testSizedWithDefaultConstructorHasConstructedSize();
   testCopyConstructorSharesData();
-  testAsCondensedCreatesCorrectState();
+  testAsCondensedCreatesCorrectNArray();
+  testSkipNCreatesCorrectNArray();
 }

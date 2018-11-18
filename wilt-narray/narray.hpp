@@ -85,6 +85,13 @@ namespace wilt
   // are gaps or not. The function isAligned() will return if the data would be
   // accessed in increasing order and asAligned() will return an NArray with the
   // same view that would be accessed in increasing order.
+  //
+  // Because the data is a shared reference, NArrays have the semantics of
+  // shared_ptr meaning that even though the NArray is const, the data isn't and
+  // can still be modified. Which is why most functions, even those that modify
+  // the data are marked as const. To provide const protection, the NArray needs
+  // to be converted to a 'const T' array. This conversion is allowed implicitly
+  // but can be called more explicitly by 'asConst()'.
   // 
   // As a side note, all manipulations are thread-safe; two threads can safely
   // use the same data-set, but modification of data is not protected.
@@ -161,7 +168,6 @@ namespace wilt
     // 'arr'
     //
     // NOTE: 'arr' is empty after being moved
-
     NArray(const NArray<T, N>& arr);
     NArray(NArray<T, N>&& arr);
 
@@ -169,7 +175,6 @@ namespace wilt
     //
     // NOTE: 'arr' is empty after being moved
     // NOTE: only exists on 'const T' arrays
-
     template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
     NArray(const NArray<U, N>& arr);
     template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
@@ -185,7 +190,6 @@ namespace wilt
     // reference) or destroyed (if it holds the last reference).
     //
     // NOTE: 'arr' is empty after being moved
-
     NArray<T, N>& operator= (const NArray<T, N>& arr);
     NArray<T, N>& operator= (NArray<T, N>&& arr);
 
@@ -194,7 +198,6 @@ namespace wilt
     // reference) or destroyed (if it holds the last reference).
     //
     // NOTE: 'arr' is empty after being moved
-
     template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
     NArray<T, N>& operator= (const NArray<U, N>& arr);
     template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
@@ -202,12 +205,10 @@ namespace wilt
 
     // Element-wise modifying assigment operators, modifies the underlying data,
     // arrays must have the same dimensions
-
     NArray<T, N>& operator+= (const NArray<cvalue, N>& arr);
     NArray<T, N>& operator-= (const NArray<cvalue, N>& arr);
 
     // Element-wise modifying assigment operators, modifies the underlying data
-
     NArray<T, N>& operator+= (const T& val);
     NArray<T, N>& operator-= (const T& val);
     NArray<T, N>& operator*= (const T& val);
@@ -221,7 +222,6 @@ namespace wilt
 
     // Gets the dimension sizes and step values, see class description. They
     // determine the size of data and how that data is accessed.
-
     const Point<N>& dims() const;
     const Point<N>& steps() const;
 
@@ -233,7 +233,6 @@ namespace wilt
     //   - empty  = no data is referenced
     //   - unique = data is referenced and hold the only reference
     //   - shared = data is referenced and doesn't hold the only reference
-
     bool empty() const;
     bool unique() const;
     bool shared() const;
@@ -245,7 +244,6 @@ namespace wilt
     //   - depth  = dimension 2
     //
     // NOTE: some functions are only available if they have that dimension
-
     pos_t width() const;
     pos_t height() const;
     pos_t depth() const;
@@ -255,7 +253,6 @@ namespace wilt
     //   - isContinuous = the array accesses data with no gaps
     //   - isSubarray   = the array accesses all data in the reference data
     //   - isAligned    = the array accesses data linearly
-
     bool isContinuous() const;
     bool isSubarray() const;
     bool isAligned() const;
@@ -288,7 +285,6 @@ namespace wilt
     //   - N = specified dimension
     //
     // NOTE: some functions are only available if they have that dimension
-
     typename NArray<T, N-1>::exposed_type sliceX(pos_t x) const;
     NArray<T, N-1> sliceY(pos_t y) const;
     NArray<T, N-1> sliceZ(pos_t z) const;
@@ -303,7 +299,6 @@ namespace wilt
     //   - N = specified dimension
     //
     // NOTE: some functions are only available if they have that dimension
-
     NArray<T, N> rangeX(pos_t x, pos_t length) const;
     NArray<T, N> rangeY(pos_t y, pos_t length) const;
     NArray<T, N> rangeZ(pos_t z, pos_t length) const;
@@ -318,17 +313,30 @@ namespace wilt
     //   - N = specified dimension
     //
     // NOTE: some functions are only available if they have that dimension
-
     NArray<T, N> flipX() const;
     NArray<T, N> flipY() const;
     NArray<T, N> flipZ() const;
     NArray<T, N> flipW() const;
     NArray<T, N> flipN(dim_t dim) const;
 
+    // Gets an NArray with skipping every 'n' indexes along that dimension,
+    // optional 'start' that denotes where the skipping starts from
+    //   - X = 0th dimension
+    //   - Y = 1st dimension
+    //   - Z = 2nd dimension
+    //   - W = 3rd dimension
+    //   - N = specified dimension
+    //
+    // NOTE: some functions are only available if they have that dimension
+    NArray<T, N> skipX(pos_t n, pos_t start = 0) const;
+    NArray<T, N> skipY(pos_t n, pos_t start = 0) const;
+    NArray<T, N> skipZ(pos_t n, pos_t start = 0) const;
+    NArray<T, N> skipW(pos_t n, pos_t start = 0) const;
+    NArray<T, N> skipN(pos_t n, pos_t start, dim_t dim) const;
+
     // Gets an NArray with two dimensions swapped
     //
     // NOTE: 'transpose()' is identical to 'transpose(0, 1)'
-
     NArray<T, N> transpose() const;
     NArray<T, N> transpose(dim_t dim1, dim_t dim2) const;
 
@@ -342,7 +350,6 @@ namespace wilt
     NArray<T, N-M> subarrayAt(const Point<M>& pos) const;
 
     // Iterators for all the elements in-order
-
     iterator begin() const;
     iterator end() const;
 
@@ -385,7 +392,6 @@ namespace wilt
     // conversion function
     // 
     // NOTE: func should have the signature 'U(const T&)' or similar
-
     template <class U>
     NArray<U, N> convertTo() const;
     template <class U, class Converter>
@@ -398,7 +404,6 @@ namespace wilt
 
     // Sets the data referenced to a given value or that of an array of the same
     // size with an optional mask
-
     void setTo(const NArray<const T, N>& arr) const;
     void setTo(const T& val) const;
     void setTo(const NArray<const T, N>& arr, const NArray<uint8_t, N>& mask) const;
@@ -426,9 +431,10 @@ namespace wilt
 
     NArray(NArrayDataRef<T> header, T* base, Point<N> dims, Point<N> steps);
 
-    typename NArray<T, N - 1>::exposed_type sliceN_(pos_t n, dim_t dim) const;
-    NArray<value, N> rangeN_(pos_t n, pos_t length, dim_t dim) const;
-    NArray<value, N> flipN_(dim_t dim) const;
+    typename NArray<T, N-1>::exposed_type sliceN_(pos_t n, dim_t dim) const;
+    NArray<T, N> rangeN_(pos_t n, pos_t length, dim_t dim) const;
+    NArray<T, N> flipN_(dim_t dim) const;
+    NArray<T, N> skipN_(pos_t n, pos_t start, dim_t dim) const;
 
     template <class U, class Converter>
     static void convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func);
@@ -1417,19 +1423,11 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::rangeN_(pos_t n, pos_t length, dim_t dim) const
+  NArray<T, N> NArray<T, N>::rangeN_(pos_t n, pos_t length, dim_t dim) const
   {
     Point<N> temp = m_dims;
     temp[dim] = length;
     return NArray<value, N>(m_data, m_base + m_step[dim] * n, temp, m_step);
-  }
-
-  template <class T, dim_t N>
-  NArray<value, N> NArray<T, N>::flipN_(dim_t dim) const
-  {
-    Point<N> temp = m_step;
-    temp[dim] = -temp[dim];
-    return NArray<value, N>(m_data, m_base + m_step[dim] * (m_dims[dim] - 1), m_dims, temp);
   }
 
   template <class T, dim_t N>
@@ -1469,6 +1467,75 @@ namespace wilt
       throw std::out_of_range("nFlip(dim) index out of bounds");
 
     return flipN_(dim);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::flipN_(dim_t dim) const
+  {
+    Point<N> temp = m_step;
+    temp[dim] = -temp[dim];
+    return NArray<value, N>(m_data, m_base + m_step[dim] * (m_dims[dim] - 1), m_dims, temp);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::skipX(pos_t n, pos_t start) const
+  {
+    if (n < 1 || n >= m_dims[0] || start < 0)
+      throw std::out_of_range("skipN(n, start, dim) index out of bounds");
+
+    return skipN_(n, start, 0);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::skipY(pos_t n, pos_t start) const
+  {
+    static_assert(N >= 2, "skipY() only valid when N >= 2");
+
+    if (n < 1 || n >= m_dims[1] || start < 0)
+      throw std::out_of_range("skipY(n, start) index out of bounds");
+
+    return skipN_(n, start, 1);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::skipZ(pos_t n, pos_t start) const
+  {
+    static_assert(N >= 3, "skipZ() only valid when N >= 3");
+
+    if (n < 1 || n >= m_dims[2] || start < 0)
+      throw std::out_of_range("skipZ(n, start) index out of bounds");
+
+    return skipN_(n, start, 2);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::skipW(pos_t n, pos_t start) const
+  {
+    static_assert(N >= 4, "skipW() only valid when N >= 4");
+
+    if (n < 1 || n >= m_dims[3] || start < 0)
+      throw std::out_of_range("skipW(n, start) index out of bounds");
+
+    return skipN_(n, start, 3);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::skipN(pos_t n, pos_t start, dim_t dim) const
+  {
+    if (dim >= N || n < 1 || n >= m_dims[dim] || start < 0)
+      throw std::out_of_range("skipN(n, start, dim) index out of bounds");
+
+    return skipN_(n, start, dim);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::skipN_(pos_t n, pos_t start, dim_t dim) const
+  {
+    Point<N> newdims = m_dims;
+    Point<N> newsteps = m_step;
+    newdims[dim] = (m_dims[dim] - start + n - 1) / n;
+    newsteps[dim] = m_step[dim] * n;
+    return NArray<value, N>(m_data, m_base + m_step[dim] * n, newdims, newsteps);
   }
 
   template <class T, dim_t N>
