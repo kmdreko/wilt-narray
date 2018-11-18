@@ -83,7 +83,7 @@ namespace wilt
   // but also how the data can be fragmented and unordered, but there are ways
   // to see and adjust it. For example, isContiguous() will return whether there
   // are gaps or not. The function isAligned() will return if the data would be
-  // accessed in increasing order and aligned() will return an NArray with the
+  // accessed in increasing order and asAligned() will return an NArray with the
   // same view that would be accessed in increasing order.
   // 
   // As a side note, all manipulations are thread-safe; two threads can safely
@@ -351,30 +351,39 @@ namespace wilt
 
     // Iterators for all the elements in-order
 
-    iterator begin();
-    iterator end();
+    iterator begin() const;
+    iterator end() const;
+
+    // Iterates over all elements in-order and calls operator
+    template <class Operator>
+    void foreach(Operator op) const;
 
     // Gets a pointer to the segment base. Can be used to access the whole
     // segment if isContinuous() and isAligned() or by respecting dims() and 
     // steps()
     T* base() const;
 
+    // creates a constant version of the NArray, not strictly necessary since a
+    // conversion constructor exists but is still nice to have.
+    NArray<const T, N> asConst() const;
+
+    // creates a NArray that references the data in increasing order in memory
+    //
+    // NOTE: may get a performance increase if the access order doesn't matter
+    NArray<T, N> asAligned() const;
+
+    // Creates an NArray that has its dimension and step values merged to their
+    // most condensed form. A continuous and aligned array will be condensed to
+    // a single dimension with others being 1.
+    //
+    // NOTE: this isn't really intended to be used like this, but is used
+    // internally to reduce recursive calls and can be useful for reshaping.
+    NArray<T, N> asCondensed() const;
+
   public:
     ////////////////////////////////////////////////////////////////////////////
     // MODIFIER FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
-
-    template <class Operator>
-    void apply(Operator op)
-    {
-      singleOp2_((pointer)m_base, &m_dims[0], &m_step[0], op, N);
-    }
-
-    template <class Operator>
-    void apply(Operator op) const
-    {
-      singleOp2_((cpointer)m_base, &m_dims[0], &m_step[0], op, N);
-    }
 
     //! @brief      Converts the data to a new type using static_cast or custom
     //!             converter function
@@ -407,7 +416,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(arr): cannot set to const type");
 
-      unaryOp2_(m_base, arr.base(), &m_dims[0], &m_step[0], arr.steps().data(),
+      unaryOp2_(m_base, arr.base(), m_dims.data(), m_step.data(), arr.steps().data(),
         [](type& r, const type& v){r = v;}, N);
     }
     void setTo(const T& val)
@@ -415,7 +424,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(val): cannot set to const type");
 
-      singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](type& r){r = val;}, N);
+      singleOp2_(m_base, m_dims.data(), m_step.data(), [&val](type& r){r = val;}, N);
     }
 
     //! @brief      Sets the data currently refenced to values in arr or a
@@ -431,7 +440,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(arr, mask): cannot set to const type");
 
-      binaryOp2_(m_base, arr.base(), mask.base(), &m_dims[0], &m_step[0], arr.steps().data(), mask.steps().data(),
+      binaryOp2_(m_base, arr.base(), mask.base(), m_dims.data(), m_step.data(), arr.steps().data(), mask.steps().data(),
         [](type& r, const type& v, uint8_t m){if (m != 0) r = v;}, N);
     }
     void setTo(const T& val, const NArray<uint8_t, N>& mask)
@@ -439,7 +448,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(val): cannot set to const type");
 
-      unaryOp2_(m_base, mask.base(), &m_dims[0], &m_step[0], mask.steps().data(),
+      unaryOp2_(m_base, mask.base(), m_dims.data(), m_step.data(), mask.steps().data(),
         [&val](type& r, uint8_t m){if (m != 0) r = val;}, N);
     }
 
@@ -450,20 +459,6 @@ namespace wilt
       NArray<type, N> ret(m_dims);
       ret.setTo(*this);
       return ret;
-    }
-
-    //! @brief      creates a NArray that references the data in increasing order
-    //!             in memory
-    //! @return     NArray that references the data
-    //!
-    //! Usefull for traversing data efficiently when order doesn't matter
-    NArray<value, N> aligned() const
-    {
-      Point<N> dims = m_dims;
-      Point<N> steps = m_step;
-      pos_t offset = align_(dims, steps);
-
-      return NArray<value, N>(m_data, m_base + offset, dims, steps);
     }
 
     //! @brief      clears this object, deallocates the data if its the last
@@ -576,7 +571,7 @@ namespace wilt
       Point<N> step1 = lhs.steps();
       Point<N> step2 = rhs.steps();
       dim_t n = condense_(dims, step1, step2);
-      unaryOp_(rhs.base(), lhs.base(), &dims[0], &step2[0], &step1[0], func, n);
+      unaryOp_(rhs.base(), lhs.base(), dims.data(), step2.data(), step1.data(), func, n);
     }
 
   }; // class NArray
@@ -933,7 +928,7 @@ namespace wilt
   typename sum_t<T>::type sum(const NArray<T, N>& src)
   {
     typename sum_t<T>::type sum = typename sum_t<T>::type();
-    src.apply([&sum](const T& t){ sum += t; });
+    src.foreach([&sum](const T& t){ sum += t; });
     return sum;
   }
 
@@ -941,7 +936,7 @@ namespace wilt
   T max(const NArray<T, N>& src)
   {
     typename std::remove_const<T>::type max = src.at(Point<N>());
-    src.apply([&max](const T& t){ if (t > max) max = t; });
+    src.foreach([&max](const T& t){ if (t > max) max = t; });
     return max;
   }
 
@@ -950,7 +945,7 @@ namespace wilt
   {
     typename std::remove_const<T>::type max = src.at(Point<N>());
     pos_t i = 0, idx = 0;
-    src.apply([&max,&idx,&i](const T& t){ if (t > max) { max = t; idx = i; } ++i; });
+    src.foreach([&max,&idx,&i](const T& t){ if (t > max) { max = t; idx = i; } ++i; });
     return idx2pos_(src.dims(), idx);
   }
 
@@ -958,7 +953,7 @@ namespace wilt
   T min(const NArray<T, N>& src)
   {
     typename std::remove_const<T>::type min = src.at(Point<N>());
-    src.apply([&min](const T& t){ if (t < min) min = t; });
+    src.foreach([&min](const T& t){ if (t < min) min = t; });
     return min;
   }
 
@@ -967,7 +962,7 @@ namespace wilt
   {
     typename std::remove_const<T>::type min = src.at(Point<N>());
     pos_t i = 0, idx = 0;
-    src.apply([&min,&idx,&i](const T& t){ if (t < min) { min = t; idx = i; } ++i; });
+    src.foreach([&min,&idx,&i](const T& t){ if (t < min) { min = t; idx = i; } ++i; });
     return idx2pos_(src.dims(), idx);
   }
 
@@ -983,7 +978,7 @@ namespace wilt
     int n = src.size();
     const T** ptrs = new const T*[n];
     pos_t i = 0;
-    src.apply([&i,&ptrs](const T& t){ ptrs[i] = &t; ++i; });
+    src.foreach([&i,&ptrs](const T& t){ ptrs[i] = &t; ++i; });
 
     // fastNth algorithm with N = n/2
     int A = 0;
@@ -1016,7 +1011,7 @@ namespace wilt
   pos_t count(const NArray<T, N>& src)
   {
     pos_t cnt = 0;
-    src.apply([&cnt](const T& t){ if(t) ++cnt; });
+    src.foreach([&cnt](const T& t){ if(t) ++cnt; });
     return cnt;
   }
 
@@ -1235,7 +1230,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    unaryOp2_(m_base, arr.m_base, &m_dims[0], &m_step[0], &arr.m_step[0], [](T& lhs, const T& rhs) {lhs += rhs; }, N);
+    unaryOp2_(m_base, arr.m_base, m_dims.data(), m_step.data(), arr.m_step.data(), [](T& lhs, const T& rhs) {lhs += rhs; }, N);
 
     return *this;
   }
@@ -1248,7 +1243,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs) {lhs += val; }, N);
+    singleOp2_(m_base, m_dims.data(), m_step.data(), [&val](T& lhs) {lhs += val; }, N);
 
     return *this;
   }
@@ -1263,7 +1258,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    unaryOp2_(m_base, arr.m_base, &m_dims[0], &m_step[0], &arr.m_step[0], [](T& lhs, const T& rhs) {lhs -= rhs; }, N);
+    unaryOp2_(m_base, arr.m_base, m_dims.data(), m_step.data(), arr.m_step.data(), [](T& lhs, const T& rhs) {lhs -= rhs; }, N);
 
     return *this;
   }
@@ -1276,7 +1271,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs) {lhs -= val; }, N);
+    singleOp2_(m_base, m_dims.data(), m_step.data(), [&val](T& lhs) {lhs -= val; }, N);
 
     return *this;
   }
@@ -1289,7 +1284,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs) {lhs *= val; }, N);
+    singleOp2_(m_base, m_dims.data(), m_step.data(), [&val](T& lhs) {lhs *= val; }, N);
 
     return *this;
   }
@@ -1302,7 +1297,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    singleOp2_(m_base, &m_dims[0], &m_step[0], [&val](T& lhs) {lhs /= val; }, N);
+    singleOp2_(m_base, m_dims.data(), m_step.data(), [&val](T& lhs) {lhs /= val; }, N);
 
     return *this;
   }
@@ -1615,25 +1610,58 @@ namespace wilt
       else
         base += m_step[i] * pos[i];
 
-    return NArray<value, N - M>(m_data, base, chopHigh_<N - M>(m_dims), chopHigh_<N - M>(m_step));
+    return NArray<value, N-M>(m_data, base, chopHigh_<N - M>(m_dims), chopHigh_<N - M>(m_step));
   }
 
   template <class T, dim_t N>
-  typename NArray<T, N>::iterator NArray<T, N>::begin()
+  typename NArray<T, N>::iterator NArray<T, N>::begin() const
   {
     return iterator(*this);
   }
 
   template <class T, dim_t N>
-  typename NArray<T, N>::iterator NArray<T, N>::end()
+  typename NArray<T, N>::iterator NArray<T, N>::end() const
   {
     return iterator(*this, size());
+  }
+
+  template <class T, dim_t N>
+  template <class Operator>
+  void NArray<T, N>::foreach(Operator op) const
+  {
+    singleOp2_(m_base, m_dims.data(), m_step.data(), op, N);
   }
 
   template <class T, dim_t N>
   T* NArray<T, N>::base() const
   {
     return m_base;
+  }
+
+  template<class T, dim_t N>
+  NArray<const T, N> NArray<T, N>::asConst() const
+  {
+    return NArray<const T, N>(*this);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::asAligned() const
+  {
+    Point<N> dims = m_dims;
+    Point<N> steps = m_step;
+    pos_t offset = align_(dims, steps);
+
+    return NArray<T, N>(m_data, m_base + offset, dims, steps);
+  }
+
+  template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::asCondensed() const
+  {
+    Point<N> dims = m_dims;
+    Point<N> steps = m_step;
+    dim_t n = condense_(dims, steps);
+
+    return NArray<T, N>(m_data, m_base, dims, steps);
   }
 
 } // namespace wilt

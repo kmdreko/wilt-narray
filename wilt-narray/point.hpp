@@ -302,6 +302,37 @@ namespace wilt
     return offset;
   }
 
+  //! @brief         Condenses a dim array and step array into smaller arrays
+  //!                if able to
+  //! @param[in,out] dims - dimension array as a point
+  //! @param[in,out] step1 - step array as a point
+  //! @return        the dimension of the arrays after condensing, values at or
+  //!                after n in the arrays are junk
+  //!
+  //! Is used when applying operations on arrays to effectively reduce the
+  //! dimensionality of the data which will reduce loops and function calls.
+  //! Condensing the dim and step arrays from an aligned and continuous NArray
+  //! should result in return=1, dims=size_(dims), step1={1}
+  //! Dimension array should all be positive and non-zero and step arrays must 
+  //! be valid to produce a meaningful result
+  template <dim_t N>
+  dim_t condense_(Point<N>& dims, Point<N>& step1)
+  {
+    dim_t j = 0;
+    for (dim_t i = 1; i < N; ++i)
+    {
+      if (dims[i] * step1[i] == step1[i - 1])
+        dims[j] *= dims[i];
+      else
+      {
+        step1[j] = step1[i - 1];
+        dims[++j] = dims[i];
+      }
+    }
+    step1[j] = step1[N - 1];
+    return j + 1;
+  }
+
   //! @brief         Condenses a dim array and step arrays into smaller arrays
   //!                if able to
   //! @param[in,out] dims - dimension array as a point
