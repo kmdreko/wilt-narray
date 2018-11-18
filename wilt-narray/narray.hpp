@@ -280,14 +280,6 @@ namespace wilt
     // access elements because '[]' will create temporary NArrays
     typename NArray<T, N-1>::exposed_type operator[] (pos_t n) const;
 
-    //! @brief      Gets the N-1 dimension slice at the location
-    //! @param[in]  x, y, z, w - the location to get the slice
-    //! @return     N-1 NArray that references the same data
-    //! @exception  std::out_of_range if x|y|z|w invalid
-    //! @exception  std::domain_error if call for invalid N
-    //!
-    //! Equivalent to sliceN(x|y|z|w, n)
-
     // Gets the N-1 dimension slice along the specified dimension
     //   - X = 0th dimension
     //   - Y = 1st dimension
@@ -382,94 +374,44 @@ namespace wilt
 
   public:
     ////////////////////////////////////////////////////////////////////////////
+    // TRANSFORMATION FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
+    // Functions designed to create a new dataset
+
+    // Copies the data referenced into a new NArray
+    NArray<typename std::remove_const<T>::type, N> clone() const;
+
+    // Converts the NArray to a new data type either directly or with a
+    // conversion function
+    // 
+    // NOTE: func should have the signature 'U(const T&)' or similar
+
+    template <class U>
+    NArray<U, N> convertTo() const;
+    template <class U, class Converter>
+    NArray<U, N> convertTo(Converter func) const;
+
+  public:
+    ////////////////////////////////////////////////////////////////////////////
     // MODIFIER FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    //! @brief      Converts the data to a new type using static_cast or custom
-    //!             converter function
-    //! @param[in]  func - the function or function object with the signature
-    //!             U(const T&) or U(T)
-    //! @return     NArray that references the converted data
-    template <class U>
-    NArray<U, N> convertTo() const
-    {
-      NArray<U, N> ret(m_dims);
-      convertTo_(*this, ret, [](const T& t){return static_cast<U>(t);});
-      return ret;
-    }
-    template <class U, class Converter>
-    NArray<U, N> convertTo(Converter func) const
-    {
-      NArray<U, N> ret(m_dims);
-      convertTo_(*this, ret, func);
-      return ret;
-    }
+    // Sets the data referenced to a given value or that of an array of the same
+    // size with an optional mask
 
-    //! @brief      Sets the data currently refenced to values in arr or a
-    //!             constant
-    //! @param[in]  arr - NArray to set values from, dimensions must match
-    //! @param[in]  val - value to set to each element
-    void setTo(const NArray<cvalue, N>& arr)
-    {
-      if (m_dims != arr.dims())
-        throw std::invalid_argument("setTo(arr): dimensions must match");
-      if (std::is_const<T>::value)
-        throw std::domain_error("setTo(arr): cannot set to const type");
+    void setTo(const NArray<const T, N>& arr) const;
+    void setTo(const T& val) const;
+    void setTo(const NArray<const T, N>& arr, const NArray<uint8_t, N>& mask) const;
+    void setTo(const T& val, const NArray<uint8_t, N>& mask) const;
 
-      unaryOp2_(m_base, arr.base(), m_dims.data(), m_step.data(), arr.steps().data(),
-        [](type& r, const type& v){r = v;}, N);
-    }
-    void setTo(const T& val)
-    {
-      if (std::is_const<T>::value)
-        throw std::domain_error("setTo(val): cannot set to const type");
+    // Clears the array by dropping its reference to the data, destructing it if
+    // it was the last reference.
+    void clear();
 
-      singleOp2_(m_base, m_dims.data(), m_step.data(), [&val](type& r){r = val;}, N);
-    }
-
-    //! @brief      Sets the data currently refenced to values in arr or a
-    //!             constant where the mask != 0
-    //! @param[in]  arr - NArray to set values from, dimensions must match
-    //! @param[in]  val - value to set to each element
-    //! @param[in]  mask - uchar array where != 0 sets the corresponding value,
-    //!             dimensions must match
-    void setTo(const NArray<cvalue, N>& arr, const NArray<uint8_t, N>& mask)
-    {
-      if (m_dims != arr.dims() || m_dims != mask.dims())
-        throw std::invalid_argument("setTo(arr, mask): dimensions must match");
-      if (std::is_const<T>::value)
-        throw std::domain_error("setTo(arr, mask): cannot set to const type");
-
-      binaryOp2_(m_base, arr.base(), mask.base(), m_dims.data(), m_step.data(), arr.steps().data(), mask.steps().data(),
-        [](type& r, const type& v, uint8_t m){if (m != 0) r = v;}, N);
-    }
-    void setTo(const T& val, const NArray<uint8_t, N>& mask)
-    {
-      if (std::is_const<T>::value)
-        throw std::domain_error("setTo(val): cannot set to const type");
-
-      unaryOp2_(m_base, mask.base(), m_dims.data(), m_step.data(), mask.steps().data(),
-        [&val](type& r, uint8_t m){if (m != 0) r = val;}, N);
-    }
-
-    //! @brief      copies the data referenced into a new NArray
-    //! @return     NArray that references a copy of the data
-    NArray<type, N> clone() const
-    {
-      NArray<type, N> ret(m_dims);
-      ret.setTo(*this);
-      return ret;
-    }
-
-    //! @brief      clears this object, deallocates the data if its the last
-    //!             reference
-    void clear()
-    {
-      m_data.clear();
-      m_base = nullptr;
-
-      clean_();
-    }
+  private:
+    ////////////////////////////////////////////////////////////////////////////
+    // FRIEND DECLARATIONS
+    ////////////////////////////////////////////////////////////////////////////
 
     friend class NArray<value, N+1>;
     friend class NArray<typename std::toggle_const<T>::type, N>;
@@ -477,104 +419,35 @@ namespace wilt
     friend class NArrayIterator<type, N>;
     friend class NArrayIterator<cvalue, N>;
 
-  protected:
-
-    // Raw constructor
-    NArray(NArrayDataRef<type> header, type* base, Point<N> dims, Point<N> steps)
-      : m_data(header),
-        m_base(base),
-        m_dims(dims),
-        m_step(steps)
-    {
-      
-    }
-
   private:
-    typename NArray<T, N-1>::exposed_type sliceN_(pos_t n, dim_t dim) const
-    {
-      return NArray<value, N-1>(m_data, m_base+m_step[dim]*n, slice_(m_dims, dim), slice_(m_step, dim));
-    }
-    NArray<value, N> rangeN_(pos_t n, pos_t length, dim_t dim) const
-    {
-      Point<N> temp = m_dims;
-      temp[dim] = length;
-      return NArray<value, N>(m_data, m_base+m_step[dim]*n, temp, m_step);
-    }
-    NArray<value, N> flipN_(dim_t dim) const
-    {
-      Point<N> temp = m_step;
-      temp[dim] = -temp[dim];
-      return NArray<value, N>(m_data, m_base+m_step[dim]*(m_dims[dim]-1), m_dims, temp);
-    }
+    ////////////////////////////////////////////////////////////////////////////
+    // PRIVATE FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
 
-    bool valid_() const
-    {
-      for (dim_t i = 0; i < N; ++i)
-        if (m_dims[i] == 0)
-          return false;
-        else if (m_dims[i] < 0)
-          throw std::invalid_argument("dimension cannot be negative");
-      return true;
-    }
+    NArray(NArrayDataRef<T> header, T* base, Point<N> dims, Point<N> steps);
 
-    void create_()
-    {
-      pos_t size = size_(m_dims);
-      if (size > 0)
-      {
-        m_data = NArrayDataRef<type>(size);
-        m_base = m_data->data;
-      }
-    }
-
-    void create_(const T& val)
-    {
-      pos_t size = size_(m_dims);
-      if (size > 0)
-      {
-        m_data = NArrayDataRef<type>(size, val);
-        m_base = m_data->data;
-      }
-    }
-    
-    void create_(T* ptr, PTR ltype)
-    {
-      pos_t size = size_(m_dims);
-      if (size > 0)
-      {
-        m_data = NArrayDataRef<type>(size, ptr, ltype);
-        m_base = m_data->data;
-      }
-    }
-
-    template <class Generator>
-    void create_(Generator gen)
-    {
-      pos_t size = size_(m_dims);
-      if (size > 0)
-      {
-        m_data = NArrayDataRef<type>(size, gen);
-        m_base = m_data->data;
-      }
-    }
-
-    void clean_()
-    {
-      m_dims.clear();
-      m_step.clear();
-    }
+    typename NArray<T, N - 1>::exposed_type sliceN_(pos_t n, dim_t dim) const;
+    NArray<value, N> rangeN_(pos_t n, pos_t length, dim_t dim) const;
+    NArray<value, N> flipN_(dim_t dim) const;
 
     template <class U, class Converter>
-    static void convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func)
-    {
-      Point<N> dims = lhs.dims();
-      Point<N> step1 = lhs.steps();
-      Point<N> step2 = rhs.steps();
-      dim_t n = condense_(dims, step1, step2);
-      unaryOp_(rhs.base(), lhs.base(), dims.data(), step2.data(), step1.data(), func, n);
-    }
+    static void convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func);
+
+    void create_();
+    void create_(const T& val);
+    void create_(T* ptr, PTR ltype);
+    template <class Generator>
+    void create_(Generator gen);
+
+    void clean_();
+    bool valid_() const;
 
   }; // class NArray
+
+  //////////////////////////////////////////////////////////////////////////////
+  // This is only here to make it easier to do NArray<T, 1> slices. Making a
+  // specialization that can be converted meant that the code only had to change
+  // the return type, not the construction
 
   template <class T>
   class NArray<T, 0>
@@ -606,21 +479,21 @@ namespace wilt
 
   }; // class NArray<T, 0>
 
-    //! @brief         applies an operation on two source arrays and stores the
-    //!                result in a destination array
-    //! @param[out]    dst - the destination array
-    //! @param[in]     src1 - pointer to 1st source array
-    //! @param[in]     src2 - pointer to 2nd source array
-    //! @param[in]     dims - pointer to dimension array
-    //! @param[in]     dstep - pointer to dst step array
-    //! @param[in]     s1step - pointer to 1st source step array
-    //! @param[in]     s2step - pointer to 2nd source step array
-    //! @param[in]     op - function or function object with the signature 
-    //!                T(U, V) or similar
-    //! @param[in]     N - the dimensionality of the arrays
-    //!
-    //! arrays must be the same size (hence the single dimension array), and
-    //! this function makes no checks whether the inputs are valid.
+  //! @brief         applies an operation on two source arrays and stores the
+  //!                result in a destination array
+  //! @param[out]    dst - the destination array
+  //! @param[in]     src1 - pointer to 1st source array
+  //! @param[in]     src2 - pointer to 2nd source array
+  //! @param[in]     dims - pointer to dimension array
+  //! @param[in]     dstep - pointer to dst step array
+  //! @param[in]     s1step - pointer to 1st source step array
+  //! @param[in]     s2step - pointer to 2nd source step array
+  //! @param[in]     op - function or function object with the signature 
+  //!                T(U, V) or similar
+  //! @param[in]     N - the dimensionality of the arrays
+  //!
+  //! arrays must be the same size (hence the single dimension array), and
+  //! this function makes no checks whether the inputs are valid.
   template <class T, class U, class V, class Operator>
   void binaryOp_(
     T* dst, const U* src1, const V* src2, const pos_t* dims,
@@ -1221,6 +1094,16 @@ namespace wilt
   }
 
   template <class T, dim_t N>
+  NArray<T, N>::NArray(NArrayDataRef<T> header, T* base, Point<N> dims, Point<N> steps)
+    : m_data(header)
+    , m_base(base)
+    , m_dims(dims)
+    , m_step(steps)
+  {
+
+  }
+
+  template <class T, dim_t N>
   NArray<T, N>& NArray<T, N>::operator+= (const NArray<cvalue, N>& arr)
   {
     static_assert(!std::is_const<T>::value, "operator+= invalid on const type");
@@ -1477,6 +1360,12 @@ namespace wilt
   }
 
   template <class T, dim_t N>
+  typename NArray<T, N-1>::exposed_type NArray<T, N>::sliceN_(pos_t n, dim_t dim) const
+  {
+    return NArray<value, N-1>(m_data, m_base + m_step[dim] * n, slice_(m_dims, dim), slice_(m_step, dim));
+  }
+
+  template <class T, dim_t N>
   NArray<T, N> NArray<T, N>::rangeX(pos_t x, pos_t length) const
   {
     if (x >= m_dims[0] || x + length > m_dims[0] || length <= 0 || x < 0)
@@ -1525,6 +1414,22 @@ namespace wilt
       throw std::out_of_range("nRange(n, length, dim) index out of bounds");
 
     return rangeN_(n, length, dim);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::rangeN_(pos_t n, pos_t length, dim_t dim) const
+  {
+    Point<N> temp = m_dims;
+    temp[dim] = length;
+    return NArray<value, N>(m_data, m_base + m_step[dim] * n, temp, m_step);
+  }
+
+  template <class T, dim_t N>
+  NArray<value, N> NArray<T, N>::flipN_(dim_t dim) const
+  {
+    Point<N> temp = m_step;
+    temp[dim] = -temp[dim];
+    return NArray<value, N>(m_data, m_base + m_step[dim] * (m_dims[dim] - 1), m_dims, temp);
   }
 
   template <class T, dim_t N>
@@ -1647,6 +1552,9 @@ namespace wilt
   template <class T, dim_t N>
   NArray<T, N> NArray<T, N>::asAligned() const
   {
+    if (empty())
+      return NArray<T, N>();
+
     Point<N> dims = m_dims;
     Point<N> steps = m_step;
     pos_t offset = align_(dims, steps);
@@ -1657,11 +1565,166 @@ namespace wilt
   template <class T, dim_t N>
   NArray<T, N> NArray<T, N>::asCondensed() const
   {
+    if (empty())
+      return NArray<T, N>();
+
     Point<N> dims = m_dims;
     Point<N> steps = m_step;
     dim_t n = condense_(dims, steps);
 
     return NArray<T, N>(m_data, m_base, dims, steps);
+  }
+
+  template <class T, dim_t N>
+  NArray<typename std::remove_const<T>::type, N> NArray<T, N>::clone() const
+  {
+    NArray<typename std::remove_const<T>::type, N> ret(m_dims);
+    ret.setTo(*this);
+    return ret;
+  }
+
+  template <class T, dim_t N>
+  template <class U>
+  NArray<U, N> NArray<T, N>::convertTo() const
+  {
+    NArray<U, N> ret(m_dims);
+    convertTo_(*this, ret, [](const T& t) {return static_cast<U>(t); });
+    return ret;
+  }
+
+  template <class T, dim_t N>
+  template <class U, class Converter>
+  NArray<U, N> NArray<T, N>::convertTo(Converter func) const
+  {
+    NArray<U, N> ret(m_dims);
+    convertTo_(*this, ret, func);
+    return ret;
+  }
+
+  template <class T, dim_t N>
+  template <class U, class Converter>
+  void NArray<T, N>::convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func)
+  {
+    Point<N> dims = lhs.dims();
+    Point<N> step1 = lhs.steps();
+    Point<N> step2 = rhs.steps();
+    dim_t n = condense_(dims, step1, step2);
+    unaryOp_(rhs.base(), lhs.base(), dims.data(), step2.data(), step1.data(), func, n);
+  }
+
+  template <class T, dim_t N>
+  void NArray<T, N>::setTo(const NArray<const T, N>& arr) const
+  {
+    if (m_dims != arr.dims())
+      throw std::invalid_argument("setTo(arr): dimensions must match");
+    if (std::is_const<T>::value)
+      throw std::domain_error("setTo(arr): cannot set to const type");
+
+    unaryOp2_(m_base, arr.base(), m_dims.data(), m_step.data(), arr.steps().data(),
+      [](type& r, const type& v) {r = v; }, N);
+  }
+
+  template <class T, dim_t N>
+  void NArray<T, N>::setTo(const T & val) const
+  {
+    if (std::is_const<T>::value)
+      throw std::domain_error("setTo(val): cannot set to const type");
+
+    singleOp2_(m_base, m_dims.data(), m_step.data(), [&val](type& r) {r = val; }, N);
+  }
+
+  template <class T, dim_t N>
+  void NArray<T, N>::setTo(const NArray<const T, N>& arr, const NArray<uint8_t, N>& mask) const
+  {
+    if (m_dims != arr.dims() || m_dims != mask.dims())
+      throw std::invalid_argument("setTo(arr, mask): dimensions must match");
+    if (std::is_const<T>::value)
+      throw std::domain_error("setTo(arr, mask): cannot set to const type");
+
+    binaryOp2_(m_base, arr.base(), mask.base(), m_dims.data(), m_step.data(), arr.steps().data(), mask.steps().data(),
+      [](type& r, const type& v, uint8_t m) {if (m != 0) r = v; }, N);
+  }
+
+  template <class T, dim_t N>
+  void NArray<T, N>::setTo(const T & val, const NArray<uint8_t, N>& mask) const
+  {
+    if (std::is_const<T>::value)
+      throw std::domain_error("setTo(val): cannot set to const type");
+
+    unaryOp2_(m_base, mask.base(), m_dims.data(), m_step.data(), mask.steps().data(),
+      [&val](type& r, uint8_t m) {if (m != 0) r = val; }, N);
+  }
+
+  template <class T, dim_t N>
+  void NArray<T, N>::clear()
+  {
+    m_data.clear();
+    m_base = nullptr;
+
+    clean_();
+  }
+
+  template <class T, dim_t N>
+  void NArray<T, N>::create_()
+  {
+    pos_t size = size_(m_dims);
+    if (size > 0)
+    {
+      m_data = NArrayDataRef<type>(size);
+      m_base = m_data->data;
+    }
+  }
+
+  template <class T, dim_t N>
+  void NArray<T, N>::create_(const T & val)
+  {
+    pos_t size = size_(m_dims);
+    if (size > 0)
+    {
+      m_data = NArrayDataRef<type>(size, val);
+      m_base = m_data->data;
+    }
+  }
+
+  template <class T, dim_t N>
+  void NArray<T, N>::create_(T * ptr, PTR ltype)
+  {
+    pos_t size = size_(m_dims);
+    if (size > 0)
+    {
+      m_data = NArrayDataRef<type>(size, ptr, ltype);
+      m_base = m_data->data;
+    }
+  }
+
+  template <class T, dim_t N>
+  template <class Generator>
+  void NArray<T, N>::create_(Generator gen)
+  {
+    pos_t size = size_(m_dims);
+    if (size > 0)
+    {
+      m_data = NArrayDataRef<type>(size, gen);
+      m_base = m_data->data;
+    }
+  }
+
+  template <class T, dim_t N>
+  void NArray<T, N>::clean_()
+  {
+    m_dims.clear();
+    m_step.clear();
+  }
+
+  template <class T, dim_t N>
+  bool NArray<T, N>::valid_() const
+  {
+    for (dim_t i = 0; i < N; ++i)
+      if (m_dims[i] == 0)
+        return false;
+      else if (m_dims[i] < 0)
+        throw std::invalid_argument("dimension cannot be negative");
+    return true;
   }
 
 } // namespace wilt
