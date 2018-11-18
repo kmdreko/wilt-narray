@@ -280,22 +280,22 @@ namespace wilt
   //!
   //! Is used exclusively in NArray::align() to create an aligned NArray
   template <dim_t N>
-  pos_t align_(Point<N>& dims, Point<N>& step)
+  pos_t align_(Point<N>& dims, Point<N>& steps)
   {
     pos_t offset = 0;
     for (dim_t i = 0; i < N; ++i)
     {
-      if (step[i] < 0)
+      if (steps[i] < 0)
       {
-        step[i] = -step[i];
-        offset -= step[i] * (dims[i] - 1);
+        steps[i] = -steps[i];
+        offset -= steps[i] * (dims[i] - 1);
       }
     }
     for (dim_t i = 1; i < N; ++i)
     {
-      for (dim_t j = i; j > 0 && step[j] > step[j-1]; --j)
+      for (dim_t j = i; j > 0 && steps[j] > steps[j-1]; --j)
       {
-        std::swap(step[j], step[j-1]);
+        std::swap(steps[j], steps[j-1]);
         std::swap(dims[j], dims[j-1]);
       }
     }

@@ -460,49 +460,49 @@ namespace wilt
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
       filterReplicate_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
       filterReflect_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
       filterReflect101_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
       filterWrap_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, ignoreOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
       filterNone_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -598,49 +598,49 @@ namespace wilt
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
       filterReplicate_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
       filterReflect_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
       filterReflect101_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
       filterWrap_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, ignoreOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
       filterNone_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -748,49 +748,49 @@ namespace wilt
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
       filterReplicate_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
       filterReflect_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
       filterReflect101_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
       filterWrap_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, ignoreOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
       filterNone_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -918,42 +918,42 @@ namespace wilt
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
       filterReplicate_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
       filterReflect_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
       filterReflect101_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
       filterWrap_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
       filterNone_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -1029,49 +1029,49 @@ namespace wilt
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
       filterReplicate_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
       filterReflect_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
       filterReflect101_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
       filterWrap_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, paddedOp, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, ignoreOp, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
       filterNone_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, normalOp, N);
       break;
 
@@ -1116,49 +1116,49 @@ namespace wilt
     case Border::REPLICATE:
       ret = NArray<T, N>(src.dims());
       filterReplicate_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::REFLECT:
       ret = NArray<T, N>(src.dims());
       filterReflect_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::REFLECT_101:
       ret = NArray<T, N>(src.dims());
       filterReflect101_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::WRAP:
       ret = NArray<T, N>(src.dims());
       filterWrap_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::PADDED:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::IGNORE:
       ret = NArray<T, N>(src.dims());
       filterPadded_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 
     case Border::NONE:
       ret = NArray<T, N>(src.dims()-size+1);
       filterNone_(ret.base(), src.base(), 
-        ret.dims().data()+N-1, ret.step().data()+N-1, src.step().data()+N-1, 
+        ret.dims().data()+N-1, ret.steps().data()+N-1, src.steps().data()+N-1, 
         &size[N-1], idx, pos, 1, op, N);
       break;
 

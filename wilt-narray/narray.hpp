@@ -223,7 +223,7 @@ namespace wilt
     // determine the size of data and how that data is accessed.
 
     const Point<N>& dims() const;
-    const Point<N>& step() const;
+    const Point<N>& steps() const;
 
     // The total count of elements that can be accessed. This is simply the
     // compound of the dimension sizes.
@@ -356,7 +356,7 @@ namespace wilt
 
     // Gets a pointer to the segment base. Can be used to access the whole
     // segment if isContinuous() and isAligned() or by respecting dims() and 
-    // step()
+    // steps()
     T* base() const;
 
   public:
@@ -407,7 +407,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(arr): cannot set to const type");
 
-      unaryOp2_(m_base, arr.base(), &m_dims[0], &m_step[0], arr.step().data(),
+      unaryOp2_(m_base, arr.base(), &m_dims[0], &m_step[0], arr.steps().data(),
         [](type& r, const type& v){r = v;}, N);
     }
     void setTo(const T& val)
@@ -431,7 +431,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(arr, mask): cannot set to const type");
 
-      binaryOp2_(m_base, arr.base(), mask.base(), &m_dims[0], &m_step[0], arr.step().data(), mask.step().data(),
+      binaryOp2_(m_base, arr.base(), mask.base(), &m_dims[0], &m_step[0], arr.steps().data(), mask.steps().data(),
         [](type& r, const type& v, uint8_t m){if (m != 0) r = v;}, N);
     }
     void setTo(const T& val, const NArray<uint8_t, N>& mask)
@@ -439,7 +439,7 @@ namespace wilt
       if (std::is_const<T>::value)
         throw std::domain_error("setTo(val): cannot set to const type");
 
-      unaryOp2_(m_base, mask.base(), &m_dims[0], &m_step[0], mask.step().data(),
+      unaryOp2_(m_base, mask.base(), &m_dims[0], &m_step[0], mask.steps().data(),
         [&val](type& r, uint8_t m){if (m != 0) r = val;}, N);
     }
 
@@ -460,10 +460,10 @@ namespace wilt
     NArray<value, N> aligned() const
     {
       Point<N> dims = m_dims;
-      Point<N> step = m_step;
-      pos_t offset = align_(dims, step);
+      Point<N> steps = m_step;
+      pos_t offset = align_(dims, steps);
 
-      return NArray<value, N>(m_data, m_base + offset, dims, step);
+      return NArray<value, N>(m_data, m_base + offset, dims, steps);
     }
 
     //! @brief      clears this object, deallocates the data if its the last
@@ -485,11 +485,11 @@ namespace wilt
   protected:
 
     // Raw constructor
-    NArray(NArrayDataRef<type> header, type* base, Point<N> dims, Point<N> step)
+    NArray(NArrayDataRef<type> header, type* base, Point<N> dims, Point<N> steps)
       : m_data(header),
         m_base(base),
         m_dims(dims),
-        m_step(step)
+        m_step(steps)
     {
       
     }
@@ -573,8 +573,8 @@ namespace wilt
     static void convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func)
     {
       Point<N> dims = lhs.dims();
-      Point<N> step1 = lhs.step();
-      Point<N> step2 = rhs.step();
+      Point<N> step1 = lhs.steps();
+      Point<N> step2 = rhs.steps();
       dim_t n = condense_(dims, step1, step2);
       unaryOp_(rhs.base(), lhs.base(), &dims[0], &step2[0], &step1[0], func, n);
     }
@@ -883,7 +883,7 @@ namespace wilt
   {
     NArray<T, N> ret(src1.dims());
     binaryOp_(ret.base(), src1.base(), src2.base(), ret.dims().data(), 
-              ret.step().data(), src1.step().data(), src2.step().data(), op, N);
+              ret.steps().data(), src1.steps().data(), src2.steps().data(), op, N);
     return ret;
   }
 
@@ -898,7 +898,7 @@ namespace wilt
   void binaryOp(NArray<T, N>& dst, const NArray<U, N>& src1, const NArray<V, N>& src2, Operator op)
   {
     binaryOp2_(dst.base(), src1.base(), src2.base(), dst.dims().data(),
-               dst.step().data(), src1.step().data(), src2.step().data(), op, N);
+               dst.steps().data(), src1.steps().data(), src2.steps().data(), op, N);
   }
 
   //! @brief         applies an operation on a source array and stores the
@@ -912,7 +912,7 @@ namespace wilt
   {
     NArray<T, N> ret(src.dims());
     unaryOp_(ret.base(), src.base(), ret.dims().data(),
-             ret.step().data(), src.step().data(), op, N);
+             ret.steps().data(), src.steps().data(), op, N);
     return ret;
   }
 
@@ -926,7 +926,7 @@ namespace wilt
   void unaryOp(NArray<T, N>& dst, const NArray<U, N>& src, Operator op)
   {
     unaryOp2_(dst.base(), src.base(), ret.dims().data(),
-              dst.step().data(), src.step().data(), op, N);
+              dst.steps().data(), src.steps().data(), op, N);
   }
 
   template <class T, dim_t N>
@@ -1314,7 +1314,7 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  const Point<N>& NArray<T, N>::step() const
+  const Point<N>& NArray<T, N>::steps() const
   {
     return m_step;
   }
