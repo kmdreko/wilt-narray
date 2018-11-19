@@ -349,6 +349,16 @@ namespace wilt
     template <dim_t M>
     NArray<T, N-M> subarrayAt(const Point<M>& pos) const;
 
+    // Transforms the array into a new size, typically to create sub-dimension
+    // splits but can form it into any set of dimensions if allowed by the
+    // segments representation. Any new dimensions will try to keep the element
+    // ordering or throw if it can't, it won't create a new dataset.
+    // 
+    // NOTE: total sizes much match
+    // NOTE: aligned and continuous arrays can be made into any shape
+    template <dim_t M>
+    NArray<T, M> reshape(const Point<M>& size) const;
+
     // Iterators for all the elements in-order
     iterator begin() const;
     iterator end() const;
@@ -418,9 +428,8 @@ namespace wilt
     // FRIEND DECLARATIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    friend class NArray<value, N+1>;
-    friend class NArray<typename std::toggle_const<T>::type, N>;
-    friend class NArray<typename std::toggle_const<T>::type, N+1>;
+    template <class U, dim_t M>
+    friend class NArray;
     friend class NArrayIterator<type, N>;
     friend class NArrayIterator<cvalue, N>;
 
@@ -1583,6 +1592,48 @@ namespace wilt
         base += m_step[i] * pos[i];
 
     return NArray<value, N-M>(m_data, base, chopHigh_<N - M>(m_dims), chopHigh_<N - M>(m_step));
+  }
+
+  template <class T, dim_t N>
+  template <dim_t M>
+  inline NArray<T, M> NArray<T, N>::reshape(const Point<M>& size) const
+  {
+    Point<N> olddims = m_dims;
+    Point<N> oldsteps = m_step;
+    Point<M> newdims = size;
+    Point<M> newsteps;
+    dim_t n = condense_(olddims, oldsteps);
+
+    int j = 0;
+    int i = N - n;
+    for (; i < N && j < M; )
+    {
+      if (olddims[i] == 1)
+      {
+        ++i;
+      }
+      else if (olddims[i] / newdims[j] * newdims[j] == olddims[i])
+      {
+        newsteps[j] = olddims[i] / newdims[j] * oldsteps[i];
+        olddims[i] /= newdims[j];
+        ++j;
+      }
+      else
+      {
+        throw std::domain_error("reshape() size not compatible");
+      }
+    }
+
+    for (int k = N; k < N; ++k)
+      if (olddims[k] != 1)
+        throw std::domain_error("reshape() size not compatible");
+    for (int k = j; k < M; ++k)
+      if (newdims[k] != 1)
+        throw std::domain_error("reshape() size not compatible");
+      else
+        newsteps[k] = 1;
+
+    return NArray<T, M>(m_data, m_base, newdims, newsteps);
   }
 
   template <class T, dim_t N>

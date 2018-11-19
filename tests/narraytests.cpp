@@ -252,6 +252,29 @@ void testSkipNCreatesCorrectNArray()
   }
 }
 
+void testReshapeCreatesCorrectNArray()
+{
+  { // T=int N=2
+    wilt::NArray<int, 2> a({ 14, 14 });
+
+    wilt::NArray<int, 4> b = a.subarray({ 1, 1 }, { 12, 12 }).reshape<4>({ 4, 3, 4, 3 });
+    assert(b.dims() == wilt::Point<4>({ 4, 3, 4, 3 }));
+    assert(b.steps() == wilt::Point<4>({ 42, 14, 3, 1 }));
+
+    wilt::NArray<int, 2> c = a.reshape<2>({ 98, 2 });
+    assert(c.dims() == wilt::Point<2>({ 98, 2 }));
+    assert(c.steps() == wilt::Point<2>({ 2, 1 }));
+
+    wilt::NArray<int, 5> d = a.reshape<5>({ 1, 98, 1, 2, 1 });
+    assert(d.dims() == wilt::Point<5>({ 1, 98, 1, 2, 1 }));
+    assert(d.steps() == wilt::Point<5>({ 196, 2, 2, 1, 1 }));
+
+    wilt::NArray<int, 2> e = a.flipX().flipY().reshape<2>({ 98, 2 });
+    assert(e.dims() == wilt::Point<2>({ 98, 2 }));
+    assert(e.steps() == wilt::Point<2>({ -2, -1 }));
+  }
+}
+
 void testNArray()
 {
   testDefaultConstructorHasSizeZero();
@@ -260,4 +283,5 @@ void testNArray()
   testCopyConstructorSharesData();
   testAsCondensedCreatesCorrectNArray();
   testSkipNCreatesCorrectNArray();
+  testReshapeCreatesCorrectNArray();
 }
