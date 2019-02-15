@@ -275,6 +275,34 @@ void testReshapeCreatesCorrectNArray()
   }
 }
 
+void testRepeatCreatesCorrectNArray()
+{
+  { // T=int N=1
+    wilt::NArray<int, 1> a({ 1 }, 5);
+
+    wilt::NArray<int, 2> b = a.repeat(100);
+    assert(b.size() == 100);
+    assert(b.sizes() == wilt::Point<2>({ 1, 100 }));
+    assert(b.steps() == wilt::Point<2>({ 1, 0 }));
+    assert(b.at({ 0, 0 }) == b.at({ 0, 99 }));
+    assert(&b.at({ 0, 0 }) == &b.at({ 0, 99 }));
+
+    wilt::NArray<int, 1> c = a.repeat(100).sliceX(0);
+    assert(c.size() == 100);
+    assert(c.sizes() == wilt::Point<1>({ 100 }));
+    assert(c.steps() == wilt::Point<1>({ 0 }));
+    assert(c.at({ 0 }) == c.at({ 99 }));
+    assert(&c.at({ 0 }) == &c.at({ 99 }));
+
+    wilt::NArray<int, 3> d = a.repeat(100).reshape<3>({ 1, 5, 20 }).transpose();
+    assert(d.size() == 100);
+    assert(d.sizes() == wilt::Point<3>({ 5, 1, 20 }));
+    assert(d.steps() == wilt::Point<3>({ 0, 1, 0 }));
+    assert(d.at({ 0, 0, 0 }) == d.at({ 4, 0, 19 }));
+    assert(&d.at({ 0, 0, 0 }) == &d.at({ 4, 0, 19 }));
+  }
+}
+
 void testNArray()
 {
   testDefaultConstructorHasSizeZero();
@@ -284,4 +312,5 @@ void testNArray()
   testAsCondensedCreatesCorrectNArray();
   testSkipNCreatesCorrectNArray();
   testReshapeCreatesCorrectNArray();
+  testRepeatCreatesCorrectNArray();
 }

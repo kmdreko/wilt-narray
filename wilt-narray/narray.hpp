@@ -359,6 +359,9 @@ namespace wilt
     template <dim_t M>
     NArray<T, M> reshape(const Point<M>& size) const;
 
+    // Creates an additional dimension of size {n} that repeats the same data
+    NArray<T, N+1> repeat(pos_t n) const;
+
     // Iterators for all the elements in-order
     iterator begin() const;
     iterator end() const;
@@ -1608,15 +1611,15 @@ namespace wilt
     int i = N - n;
     for (; i < N && j < M; )
     {
-      if (oldsizes[i] == 1)
-      {
-        ++i;
-      }
-      else if (oldsizes[i] / newsizes[j] * newsizes[j] == oldsizes[i])
+      if (oldsizes[i] / newsizes[j] * newsizes[j] == oldsizes[i])
       {
         newsteps[j] = oldsizes[i] / newsizes[j] * oldsteps[i];
         oldsizes[i] /= newsizes[j];
         ++j;
+      }
+      else if (oldsizes[i] == 1)
+      {
+        ++i;
       }
       else
       {
@@ -1634,6 +1637,12 @@ namespace wilt
         newsteps[k] = 1;
 
     return NArray<T, M>(m_data, m_base, newsizes, newsteps);
+  }
+
+  template<class T, dim_t N>
+  NArray<T, N+1> NArray<T, N>::repeat(pos_t n) const
+  {
+    return NArray<value, N+1>(m_data, m_base, push_(sizes_, N, n), push_(steps_, N, 0));
   }
 
   template <class T, dim_t N>

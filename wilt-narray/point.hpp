@@ -205,6 +205,23 @@ namespace wilt
     return ret;
   }
 
+  //! @brief      Adds an element to a point at an index
+  //! @param[in]  pt - point to add into
+  //! @param[in]  n - index to add at
+  //! @param[in]  v - value to add
+  //! @return     point with the value added
+  template <dim_t N>
+  Point<N+1> push_(const Point<N>& pt, dim_t n, pos_t v)
+  {
+    Point<N+1> ret;
+    for (dim_t i = 0; i < n; ++i)
+      ret[i] = pt[i];
+    ret[n] = v;
+    for (dim_t i = n+1; i < N+1; ++i)
+      ret[i] = pt[i-1];
+    return ret;
+  }
+
   //! @brief      Creates a point with two index values swapped
   //! @param[in]  pt - the point to swap indices
   //! @param[in]  a - first index to swap
