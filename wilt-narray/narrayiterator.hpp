@@ -57,7 +57,7 @@ namespace wilt
     NArrayIterator()
       : m_data(),
         m_base(nullptr),
-        m_dims(),
+        sizes_(),
         m_step(),
         m_pos(0)
     {
@@ -70,7 +70,7 @@ namespace wilt
     NArrayIterator(const wilt::NArray<T, N>& arr, pos_t pos = 0)
       : m_data(arr.m_data),
         m_base(arr.m_base),
-        m_dims(arr.m_dims),
+        sizes_(arr.sizes_),
         m_step(arr.m_step),
         m_pos(pos)
     {
@@ -82,7 +82,7 @@ namespace wilt
     NArrayIterator(const NArrayIterator<T, N>& iter)
       : m_data(iter.m_data),
         m_base(iter.m_base),
-        m_dims(iter.m_dims),
+        sizes_(iter.sizes_),
         m_step(iter.m_step),
         m_pos(iter.m_pos)
     {
@@ -95,7 +95,7 @@ namespace wilt
     NArrayIterator(const NArrayIterator<T, N>& iter, pos_t pos)
       : m_data(iter.m_data),
         m_base(iter.m_base),
-        m_dims(iter.m_dims),
+        sizes_(iter.sizes_),
         m_step(iter.m_step),
         m_pos(pos)
     {
@@ -109,7 +109,7 @@ namespace wilt
     {
       m_data = iter.m_data;
       m_base = iter.m_base;
-      m_dims = iter.m_dims;
+      sizes_ = iter.sizes_;
       m_step = iter.m_step;
       m_pos = iter.m_pos;
 
@@ -163,7 +163,7 @@ namespace wilt
     bool operator== (const NArrayIterator<T, N>& iter) const
     {
       return m_base == iter.m_base && 
-             m_dims == iter.m_dims && 
+             sizes_ == iter.sizes_ && 
              m_step == iter.m_step && 
              m_pos  == iter.m_pos;
     }
@@ -282,13 +282,13 @@ namespace wilt
     //!             pointing to
     Point<N> position() const
     {
-      return idx2pos_(m_dims, m_pos);
+      return idx2pos_(sizes_, m_pos);
     }
 
   private:
     NArrayDataRef<type> m_data;
     type* m_base;
-    Point<N> m_dims;
+    Point<N> sizes_;
     Point<N> m_step;
     pos_t m_pos;
 
@@ -297,7 +297,7 @@ namespace wilt
     //! @return     pointer to data at the offset
     pointer at_(pos_t pos) const
     {
-      Point<N> loc = idx2pos_(m_dims, m_pos);
+      Point<N> loc = idx2pos_(sizes_, m_pos);
       pointer ptr = m_base;
       for (dim_t i = 0; i < N; ++i)
         ptr += loc[i] * m_step[i];

@@ -407,7 +407,7 @@ namespace wilt
           else
           {
             NArray<T, N> minside = sub.rangeN(0, min[i], i);
-            minside.setTo(wrapArea_(s_min, minside.dims()));
+            minside.setTo(wrapArea_(s_min, minside.sizes()));
           }
         }
         
@@ -423,7 +423,7 @@ namespace wilt
             Point<N> loc = s_min;
             loc[i] = max[i];
             NArray<T, N> maxside = sub.rangeN(max[i], width, i);
-            maxside.setTo(wrapArea_(loc, maxside.dims()));
+            maxside.setTo(wrapArea_(loc, maxside.sizes()));
           }
         }
       }
@@ -434,7 +434,7 @@ namespace wilt
   template <class T, dim_t N>
   NArray<T, N> padArray(const NArray<T, N>& src, const Point<N>& width, BorderType<T> border)
   {
-    return NArrayWindow<T, N>(src, -width, src.dims() + 2 * width, border).clone();
+    return NArrayWindow<T, N>(src, -width, src.sizes() + 2 * width, border).clone();
   }
 
   template <class T, dim_t N>

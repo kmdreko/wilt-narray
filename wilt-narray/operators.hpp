@@ -40,9 +40,9 @@ namespace wilt
     template <class Operator>
     static NArray<Ret, N> none(const NArray<T, N>& lhs, const NArray<U, N>& rhs, Operator op)
     {
-      NArray<Ret, N> ret(lhs.dims());
+      NArray<Ret, N> ret(lhs.sizes());
       binaryOp2_(
-        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -60,18 +60,18 @@ namespace wilt
     template <class Operator>
     static NArray<Ret, N> none(const NArray<T, N>& lhs, Operator op)
     {
-      NArray<Ret, N> ret(lhs.dims());
+      NArray<Ret, N> ret(lhs.sizes());
       unaryOp2_(
-        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), op, N);
       return ret;
     }
     template <class Operator>
     static NArray<Ret, N> none(const NArray<U, N>& rhs, Operator op)
     {
-      NArray<Ret, N> ret(rhs.dims());
+      NArray<Ret, N> ret(rhs.sizes());
       unaryOp2_(
-        ret.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -93,9 +93,9 @@ namespace wilt
     template <class Operator>
     static NArray<T, N> none(const NArray<T, N>& lhs, const NArray<U, N>& rhs, Operator op)
     {
-      NArray<T, N> ret(lhs.dims());
+      NArray<T, N> ret(lhs.sizes());
       binaryOp2_(
-        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -104,7 +104,7 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<NArray<U, N>>(lhs));
       binaryOp2_(
-        ret.base(), ret.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), ret.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), ret.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -117,18 +117,18 @@ namespace wilt
     template <class Operator>
     static NArray<T, N> none(const NArray<T, N>& lhs, Operator op)
     {
-      NArray<T, N> ret(lhs.dims());
+      NArray<T, N> ret(lhs.sizes());
       unaryOp2_(
-        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), op, N);
       return ret;
     }
     template <class Operator>
     static NArray<T, N> none(const NArray<U, N>& rhs, Operator op)
     {
-      NArray<T, N> ret(rhs.dims());
+      NArray<T, N> ret(rhs.sizes());
       unaryOp2_(
-        ret.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -137,7 +137,7 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(lhs)); 
       unaryOp2_(
-        ret.base(), ret.base(), ret.dims().data(), 
+        ret.base(), ret.base(), ret.sizes().data(), 
         ret.steps().data(), ret.steps().data(), op, N);
       return ret;
     }
@@ -154,9 +154,9 @@ namespace wilt
     template <class Operator>
     static NArray<U, N> none(const NArray<T, N>& lhs, const NArray<U, N>& rhs, Operator op)
     {
-      NArray<U, N> ret(lhs.dims());
+      NArray<U, N> ret(lhs.sizes());
       binaryOp2_(
-        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -170,7 +170,7 @@ namespace wilt
     {
       NArray<U, N> ret(std::forward<NArray<U, N>>(rhs));
       binaryOp2_(
-        ret.base(), lhs.base(), ret.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), ret.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), ret.steps().data(), op, N);
       return ret;
     }
@@ -178,18 +178,18 @@ namespace wilt
     template <class Operator>
     static NArray<U, N> none(const NArray<T, N>& lhs, Operator op)
     {
-      NArray<U, N> ret(lhs.dims());
+      NArray<U, N> ret(lhs.sizes());
       unaryOp2_(
-        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), op, N);
       return ret;
     }
     template <class Operator>
     static NArray<U, N> none(const NArray<U, N>& rhs, Operator op)
     {
-      NArray<U, N> ret(rhs.dims());
+      NArray<U, N> ret(rhs.sizes());
       unaryOp2_(
-        ret.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -203,7 +203,7 @@ namespace wilt
     {
       NArray<U, N> ret(std::forward<wilt::NArray<U, N>>(rhs)); 
       unaryOp2_(
-        ret.base(), ret.base(), ret.dims().data(), 
+        ret.base(), ret.base(), ret.sizes().data(), 
         ret.steps().data(), ret.steps().data(), op, N);
       return ret;
     }
@@ -215,9 +215,9 @@ namespace wilt
     template <class Operator>
     static NArray<T, N> none(const NArray<T, N>& lhs, const NArray<T, N>& rhs, Operator op)
     {
-      NArray<T, N> ret(lhs.dims());
+      NArray<T, N> ret(lhs.sizes());
       binaryOp2_(
-        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -226,7 +226,7 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(lhs));
       binaryOp2_(
-        ret.base(), ret.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), ret.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), ret.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -235,7 +235,7 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(rhs));
       binaryOp2_(
-        ret.base(), lhs.base(), ret.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), ret.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), ret.steps().data(), op, N);
       return ret;
     }
@@ -243,9 +243,9 @@ namespace wilt
     template <class Operator>
     static NArray<T, N> none(const NArray<T, N>& lhs, Operator op)
     {
-      NArray<T, N> ret(lhs.dims());
+      NArray<T, N> ret(lhs.sizes());
       unaryOp2_(
-        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), op, N);
       return ret;
     }
@@ -254,7 +254,7 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<wilt::NArray<T, N>>(lhs));
       unaryOp2_(
-        ret.base(), ret.base(), ret.dims().data(), 
+        ret.base(), ret.base(), ret.sizes().data(), 
         ret.steps().data(), ret.steps().data(), op, N);
       return ret;
     }
@@ -263,7 +263,7 @@ namespace wilt
     {
       NArray<T, N> ret(std::forward<NArray<T, N>>(rhs)); 
       unaryOp2_(
-        ret.base(), ret.base(), ret.dims().data(), 
+        ret.base(), ret.base(), ret.sizes().data(), 
         ret.steps().data(), ret.steps().data(), op, N);
       return ret;
     }
@@ -275,9 +275,9 @@ namespace wilt
     template <class Operator>
     static NArray<Ret, N> none(const NArray<T, N>& lhs, const NArray<T, N>& rhs, Operator op)
     {
-      NArray<Ret, N> ret(lhs.dims());
+      NArray<Ret, N> ret(lhs.sizes());
       binaryOp2_(
-        ret.base(), lhs.base(), rhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), rhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), rhs.steps().data(), op, N);
       return ret;
     }
@@ -295,9 +295,9 @@ namespace wilt
     template <class Operator>
     static NArray<Ret, N> none(const NArray<T, N>& lhs, Operator op)
     {
-      NArray<Ret, N> ret(lhs.dims());
+      NArray<Ret, N> ret(lhs.sizes());
       unaryOp2_(
-        ret.base(), lhs.base(), ret.dims().data(), 
+        ret.base(), lhs.base(), ret.sizes().data(), 
         ret.steps().data(), lhs.steps().data(), op, N);
       return ret;
     }
@@ -318,7 +318,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t + u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("add(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -331,7 +331,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t + u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("add(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -346,7 +346,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t + u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("add(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -361,7 +361,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t + u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("add(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -426,7 +426,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t - u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("sub(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -439,7 +439,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t - u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("sub(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -454,7 +454,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t - u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("sub(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -469,7 +469,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t - u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("sub(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -534,7 +534,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("mul(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -547,7 +547,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("mul(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -562,7 +562,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("mul(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -577,7 +577,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("mul(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -642,7 +642,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("div(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -655,7 +655,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("div(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -670,7 +670,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("div(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -685,7 +685,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("div(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -750,7 +750,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("mod(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -763,7 +763,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("mod(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -778,7 +778,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("mod(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -793,7 +793,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("mod(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -858,7 +858,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t & u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_and(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -871,7 +871,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t & u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_and(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -886,7 +886,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t & u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_and(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -901,7 +901,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t & u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_and(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -966,7 +966,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t | u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_or(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -979,7 +979,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t | u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_or(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -994,7 +994,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t | u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_or(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -1009,7 +1009,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t | u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_or(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -1074,7 +1074,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t ^ u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_xor(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -1087,7 +1087,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t ^ u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_xor(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -1102,7 +1102,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t ^ u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_xor(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -1117,7 +1117,7 @@ namespace wilt
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t ^ u; };
 
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("bit_xor(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
@@ -1186,7 +1186,7 @@ namespace wilt
   template <class T, class U, dim_t N>
   NArray<uint8_t, N> compare(const NArray<T, N>& lhs, const NArray<U, N>& rhs, CMP mode)
   {
-    if (lhs.dims() != rhs.dims())
+    if (lhs.sizes() != rhs.sizes())
       throw std::invalid_argument("compare(): dimensions must match");
     if (lhs.empty())
       return NArray<uint8_t, N>();
