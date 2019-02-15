@@ -55,8 +55,8 @@ namespace wilt
 
     //! @brief  Default constructor. Useless
     NArrayIterator()
-      : m_data(),
-        m_base(nullptr),
+      : data_(),
+        base_(nullptr),
         sizes_(),
         steps_(),
         m_pos(0)
@@ -68,8 +68,8 @@ namespace wilt
     //! @param[in]  arr - array whose data to reference
     //! @param[in]  pos - data offset value, defaults to 0
     NArrayIterator(const wilt::NArray<T, N>& arr, pos_t pos = 0)
-      : m_data(arr.m_data),
-        m_base(arr.m_base),
+      : data_(arr.data_),
+        base_(arr.base_),
         sizes_(arr.sizes_),
         steps_(arr.steps_),
         m_pos(pos)
@@ -80,8 +80,8 @@ namespace wilt
     //! @brief      Copy constructor
     //! @param[in]  iter - iterator to copy from
     NArrayIterator(const NArrayIterator<T, N>& iter)
-      : m_data(iter.m_data),
-        m_base(iter.m_base),
+      : data_(iter.data_),
+        base_(iter.base_),
         sizes_(iter.sizes_),
         steps_(iter.steps_),
         m_pos(iter.m_pos)
@@ -93,8 +93,8 @@ namespace wilt
     //! @param[in]  iter - iterator to copy from
     //! @param[in]  pos - data offset value
     NArrayIterator(const NArrayIterator<T, N>& iter, pos_t pos)
-      : m_data(iter.m_data),
-        m_base(iter.m_base),
+      : data_(iter.data_),
+        base_(iter.base_),
         sizes_(iter.sizes_),
         steps_(iter.steps_),
         m_pos(pos)
@@ -107,8 +107,8 @@ namespace wilt
     //! @return     reference to this object
     NArrayIterator<T, N>& operator= (const NArrayIterator<T, N>& iter)
     {
-      m_data = iter.m_data;
-      m_base = iter.m_base;
+      data_ = iter.data_;
+      base_ = iter.base_;
       sizes_ = iter.sizes_;
       steps_ = iter.steps_;
       m_pos = iter.m_pos;
@@ -162,7 +162,7 @@ namespace wilt
     //! @return     true if iterators are the same, false otherwise
     bool operator== (const NArrayIterator<T, N>& iter) const
     {
-      return m_base == iter.m_base && 
+      return base_ == iter.base_ && 
              sizes_ == iter.sizes_ && 
              steps_ == iter.steps_ && 
              m_pos  == iter.m_pos;
@@ -286,8 +286,8 @@ namespace wilt
     }
 
   private:
-    NArrayDataRef<type> m_data;
-    type* m_base;
+    NArrayDataRef<type> data_;
+    type* base_;
     Point<N> sizes_;
     Point<N> steps_;
     pos_t m_pos;
@@ -298,7 +298,7 @@ namespace wilt
     pointer at_(pos_t pos) const
     {
       Point<N> loc = idx2pos_(sizes_, m_pos);
-      pointer ptr = m_base;
+      pointer ptr = base_;
       for (dim_t i = 0; i < N; ++i)
         ptr += loc[i] * steps_[i];
 

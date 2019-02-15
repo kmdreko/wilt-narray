@@ -122,10 +122,10 @@ namespace wilt
     // PRIVATE MEMBERS
     ////////////////////////////////////////////////////////////////////////////
 
-    NArrayDataRef<type> m_data; // reference to shared data
-    type* m_base;               // base of current data segment
-    Point<N> sizes_;            // dimension sizes
-    Point<N> steps_;            // step sizes
+    NArrayDataRef<type> data_; // reference to shared data
+    type* base_;               // base of current data segment
+    Point<N> sizes_;           // dimension sizes
+    Point<N> steps_;           // step sizes
 
   public:
     ////////////////////////////////////////////////////////////////////////////
@@ -475,25 +475,25 @@ namespace wilt
     using exposed_type = T&;
 
     NArray(const NArrayDataRef<T>& header, type* base, const Point<0>&, const Point<0>&)
-      : m_data(header),
-        m_base(base)
+      : data_(header),
+        base_(base)
     {
 
     }
 
     operator T&() const
     {
-      if (!m_data.ptr_())
+      if (!data_.ptr_())
         throw std::runtime_error("Mat<T, 0> references no data");
 
-      return *m_base;
+      return *base_;
     }
 
   private:
     NArray() { }
 
-    NArrayDataRef<T> m_data;
-    type* m_base;
+    NArrayDataRef<T> data_;
+    type* base_;
 
   }; // class NArray<T, 0>
 
@@ -909,8 +909,8 @@ namespace wilt
 
   template <class T, dim_t N>
   NArray<T, N>::NArray()
-    : m_data()
-    , m_base(nullptr)
+    : data_()
+    , base_(nullptr)
     , sizes_()
     , steps_()
   {
@@ -919,8 +919,8 @@ namespace wilt
 
   template <class T, dim_t N>
   NArray<T, N>::NArray(const Point<N>& size)
-    : m_data()
-    , m_base(nullptr)
+    : data_()
+    , base_(nullptr)
     , sizes_(size)
     , steps_(step_(size))
   {
@@ -932,8 +932,8 @@ namespace wilt
 
   template <class T, dim_t N>
   NArray<T, N>::NArray(const Point<N>& size, const T& val)
-    : m_data()
-    , m_base(nullptr)
+    : data_()
+    , base_(nullptr)
     , sizes_(size)
     , steps_(step_(size))
   {
@@ -945,8 +945,8 @@ namespace wilt
 
   template <class T, dim_t N>
   NArray<T, N>::NArray(const Point<N>& size, T* ptr, PTR type)
-    : m_data()
-    , m_base(nullptr)
+    : data_()
+    , base_(nullptr)
     , sizes_(size)
     , steps_(step_(size))
   {
@@ -958,8 +958,8 @@ namespace wilt
 
   template <class T, dim_t N>
   NArray<T, N>::NArray(const Point<N>& size, std::initializer_list<T> list)
-    : m_data()
-    , m_base(nullptr)
+    : data_()
+    , base_(nullptr)
     , sizes_(size)
     , steps_(step_(size))
   {
@@ -972,8 +972,8 @@ namespace wilt
   template <class T, dim_t N>
   template <class Generator>
   NArray<T, N>::NArray(const Point<N>& size, Generator gen)
-    : m_data()
-    , m_base(nullptr)
+    : data_()
+    , base_(nullptr)
     , sizes_(size)
     , steps_(step_(size))
   {
@@ -985,8 +985,8 @@ namespace wilt
 
   template <class T, dim_t N>
   NArray<T, N>::NArray(const NArray<T, N>& arr)
-    : m_data(arr.m_data)
-    , m_base(arr.m_base)
+    : data_(arr.data_)
+    , base_(arr.base_)
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
   {
@@ -995,8 +995,8 @@ namespace wilt
 
   template <class T, dim_t N>
   NArray<T, N>::NArray(NArray<T, N>&& arr)
-    : m_data(arr.m_data)
-    , m_base(arr.m_base)
+    : data_(arr.data_)
+    , base_(arr.base_)
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
   {
@@ -1006,15 +1006,15 @@ namespace wilt
   template <class T, dim_t N>
   template <class U, typename>
   NArray<T, N>::NArray(const NArray<U, N>& arr)
-    : m_data()
-    , m_base(nullptr)
+    : data_()
+    , base_(nullptr)
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
   {
     if (std::is_const<T>::value)
     {
-      m_data = arr.m_data;
-      m_base = arr.m_base;
+      data_ = arr.data_;
+      base_ = arr.base_;
     }
     else
     {
@@ -1026,15 +1026,15 @@ namespace wilt
   template <class T, dim_t N>
   template <class U, typename>
   NArray<T, N>::NArray(NArray<U, N>&& arr)
-    : m_data()
-    , m_base(nullptr)
+    : data_()
+    , base_(nullptr)
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
   {
     if (std::is_const<T>::value || arr.unique())
     {
-      m_data = arr.m_data;
-      m_base = arr.m_base;
+      data_ = arr.data_;
+      base_ = arr.base_;
     }
     else
     {
@@ -1048,10 +1048,10 @@ namespace wilt
   template <class T, dim_t N>
   NArray<T, N>& NArray<T, N>::operator= (const NArray<T, N>& arr)
   {
-    m_data = arr.m_data;
+    data_ = arr.data_;
     sizes_ = arr.sizes_;
     steps_ = arr.steps_;
-    m_base = arr.m_base;
+    base_ = arr.base_;
 
     return *this;
   }
@@ -1059,10 +1059,10 @@ namespace wilt
   template <class T, dim_t N>
   NArray<T, N>& NArray<T, N>::operator= (NArray<T, N>&& arr)
   {
-    m_data = arr.m_data;
+    data_ = arr.data_;
     sizes_ = arr.sizes_;
     steps_ = arr.steps_;
-    m_base = arr.m_base;
+    base_ = arr.base_;
 
     arr.clear();
 
@@ -1078,8 +1078,8 @@ namespace wilt
 
     if (std::is_const<T>::value)
     {
-      m_data = arr.m_data;
-      m_base = arr.m_base;
+      data_ = arr.data_;
+      base_ = arr.base_;
     }
     else
     {
@@ -1099,8 +1099,8 @@ namespace wilt
 
     if (std::is_const<T>::value || arr.unique())
     {
-      m_data = arr.m_data;
-      m_base = arr.m_base;
+      data_ = arr.data_;
+      base_ = arr.base_;
     }
     else
     {
@@ -1113,8 +1113,8 @@ namespace wilt
 
   template <class T, dim_t N>
   NArray<T, N>::NArray(NArrayDataRef<T> header, T* base, Point<N> sizes, Point<N> steps)
-    : m_data(header)
-    , m_base(base)
+    : data_(header)
+    , base_(base)
     , sizes_(sizes)
     , steps_(steps)
   {
@@ -1131,7 +1131,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    unaryOp2_(m_base, arr.m_base, sizes_.data(), steps_.data(), arr.steps_.data(), [](T& lhs, const T& rhs) {lhs += rhs; }, N);
+    unaryOp2_(base_, arr.base_, sizes_.data(), steps_.data(), arr.steps_.data(), [](T& lhs, const T& rhs) {lhs += rhs; }, N);
 
     return *this;
   }
@@ -1144,7 +1144,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    singleOp2_(m_base, sizes_.data(), steps_.data(), [&val](T& lhs) {lhs += val; }, N);
+    singleOp2_(base_, sizes_.data(), steps_.data(), [&val](T& lhs) {lhs += val; }, N);
 
     return *this;
   }
@@ -1159,7 +1159,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    unaryOp2_(m_base, arr.m_base, sizes_.data(), steps_.data(), arr.steps_.data(), [](T& lhs, const T& rhs) {lhs -= rhs; }, N);
+    unaryOp2_(base_, arr.base_, sizes_.data(), steps_.data(), arr.steps_.data(), [](T& lhs, const T& rhs) {lhs -= rhs; }, N);
 
     return *this;
   }
@@ -1172,7 +1172,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    singleOp2_(m_base, sizes_.data(), steps_.data(), [&val](T& lhs) {lhs -= val; }, N);
+    singleOp2_(base_, sizes_.data(), steps_.data(), [&val](T& lhs) {lhs -= val; }, N);
 
     return *this;
   }
@@ -1185,7 +1185,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    singleOp2_(m_base, sizes_.data(), steps_.data(), [&val](T& lhs) {lhs *= val; }, N);
+    singleOp2_(base_, sizes_.data(), steps_.data(), [&val](T& lhs) {lhs *= val; }, N);
 
     return *this;
   }
@@ -1198,7 +1198,7 @@ namespace wilt
     if (empty())
       return *this;
 
-    singleOp2_(m_base, sizes_.data(), steps_.data(), [&val](T& lhs) {lhs /= val; }, N);
+    singleOp2_(base_, sizes_.data(), steps_.data(), [&val](T& lhs) {lhs /= val; }, N);
 
     return *this;
   }
@@ -1224,19 +1224,19 @@ namespace wilt
   template <class T, dim_t N>
   bool NArray<T, N>::empty() const
   {
-    return m_data.ptr_() == nullptr;
+    return data_.ptr_() == nullptr;
   }
 
   template <class T, dim_t N>
   bool NArray<T, N>::unique() const
   {
-    return m_data.ptr_() && m_data.unique();
+    return data_.ptr_() && data_.unique();
   }
 
   template <class T, dim_t N>
   bool NArray<T, N>::shared() const
   {
-    return m_data.ptr_() && !m_data.unique();
+    return data_.ptr_() && !data_.unique();
   }
 
   template <class T, dim_t N>
@@ -1286,7 +1286,7 @@ namespace wilt
     if (empty())
       return false;
     else
-      return (std::size_t)size() < m_data->size;
+      return (std::size_t)size() < data_->size;
   }
 
   template <class T, dim_t N>
@@ -1307,7 +1307,7 @@ namespace wilt
     if (empty())
       throw std::runtime_error("at() invalid call on empty NArray");
 
-    T* ptr = m_base;
+    T* ptr = base_;
     for (dim_t i = 0; i < N; ++i)
       if (loc[i] >= sizes_[i] || loc[i] < 0)
         throw std::out_of_range("at() element larger then dimensions");
@@ -1380,7 +1380,7 @@ namespace wilt
   template <class T, dim_t N>
   typename NArray<T, N-1>::exposed_type NArray<T, N>::sliceN_(pos_t n, dim_t dim) const
   {
-    return NArray<value, N-1>(m_data, m_base + steps_[dim] * n, slice_(sizes_, dim), slice_(steps_, dim));
+    return NArray<value, N-1>(data_, base_ + steps_[dim] * n, slice_(sizes_, dim), slice_(steps_, dim));
   }
 
   template <class T, dim_t N>
@@ -1439,7 +1439,7 @@ namespace wilt
   {
     Point<N> temp = sizes_;
     temp[dim] = length;
-    return NArray<value, N>(m_data, m_base + steps_[dim] * n, temp, steps_);
+    return NArray<value, N>(data_, base_ + steps_[dim] * n, temp, steps_);
   }
 
   template <class T, dim_t N>
@@ -1486,7 +1486,7 @@ namespace wilt
   {
     Point<N> temp = steps_;
     temp[dim] = -temp[dim];
-    return NArray<value, N>(m_data, m_base + steps_[dim] * (sizes_[dim] - 1), sizes_, temp);
+    return NArray<value, N>(data_, base_ + steps_[dim] * (sizes_[dim] - 1), sizes_, temp);
   }
 
   template <class T, dim_t N>
@@ -1547,7 +1547,7 @@ namespace wilt
     Point<N> newsteps = steps_;
     newsizes[dim] = (sizes_[dim] - start + n - 1) / n;
     newsteps[dim] = steps_[dim] * n;
-    return NArray<value, N>(m_data, m_base + steps_[dim] * n, newsizes, newsteps);
+    return NArray<value, N>(data_, base_ + steps_[dim] * n, newsizes, newsteps);
   }
 
   template <class T, dim_t N>
@@ -1564,13 +1564,13 @@ namespace wilt
     if (dim1 >= N || dim2 >= N)
       throw std::out_of_range("transpose(dim1, dim2) index out of bounds");
 
-    return NArray<value, N>(m_data, m_base, swap_(sizes_, dim1, dim2), swap_(steps_, dim1, dim2));
+    return NArray<value, N>(data_, base_, swap_(sizes_, dim1, dim2), swap_(steps_, dim1, dim2));
   }
 
   template <class T, dim_t N>
   NArray<T, N> NArray<T, N>::subarray(const Point<N>& loc, const Point<N>& size) const
   {
-    type* base = m_base;
+    type* base = base_;
     for (dim_t i = 0; i < N; ++i)
     {
       if (size[i] + loc[i] > sizes_[i] || size[i] <= 0 || loc[i] < 0 || loc[i] >= sizes_[i])
@@ -1578,7 +1578,7 @@ namespace wilt
       base += steps_[i] * loc[i];
     }
 
-    return NArray<value, N>(m_data, base, size, steps_);
+    return NArray<value, N>(data_, base, size, steps_);
   }
 
   template <class T, dim_t N>
@@ -1587,14 +1587,14 @@ namespace wilt
   {
     static_assert(M<N && M>0, "subarrayAt(): pos is not less than N");
 
-    type* base = m_base;
+    type* base = base_;
     for (dim_t i = 0; i < M; ++i)
       if (pos[i] >= sizes_[i] || pos[i] < 0)
         throw std::out_of_range("subarrayAt(): pos out of range");
       else
         base += steps_[i] * pos[i];
 
-    return NArray<value, N-M>(m_data, base, chopHigh_<N - M>(sizes_), chopHigh_<N - M>(steps_));
+    return NArray<value, N-M>(data_, base, chopHigh_<N - M>(sizes_), chopHigh_<N - M>(steps_));
   }
 
   template <class T, dim_t N>
@@ -1636,7 +1636,7 @@ namespace wilt
       else
         newsteps[k] = 1;
 
-    return NArray<T, M>(m_data, m_base, newsizes, newsteps);
+    return NArray<T, M>(data_, base_, newsizes, newsteps);
   }
 
   template<class T, dim_t N>
@@ -1661,13 +1661,13 @@ namespace wilt
   template <class Operator>
   void NArray<T, N>::foreach(Operator op) const
   {
-    singleOp2_(m_base, sizes_.data(), steps_.data(), op, N);
+    singleOp2_(base_, sizes_.data(), steps_.data(), op, N);
   }
 
   template <class T, dim_t N>
   T* NArray<T, N>::base() const
   {
-    return m_base;
+    return base_;
   }
 
   template<class T, dim_t N>
@@ -1686,7 +1686,7 @@ namespace wilt
     Point<N> steps = steps_;
     pos_t offset = align_(steps, steps);
 
-    return NArray<T, N>(m_data, m_base + offset, steps, steps);
+    return NArray<T, N>(data_, base_ + offset, steps, steps);
   }
 
   template <class T, dim_t N>
@@ -1699,7 +1699,7 @@ namespace wilt
     Point<N> steps = steps_;
     dim_t n = condense_(sizes, steps);
 
-    return NArray<T, N>(m_data, m_base, sizes, steps);
+    return NArray<T, N>(data_, base_, sizes, steps);
   }
 
   template <class T, dim_t N>
@@ -1747,7 +1747,7 @@ namespace wilt
     if (std::is_const<T>::value)
       throw std::domain_error("setTo(arr): cannot set to const type");
 
-    unaryOp2_(m_base, arr.base(), sizes_.data(), steps_.data(), arr.steps().data(),
+    unaryOp2_(base_, arr.base(), sizes_.data(), steps_.data(), arr.steps().data(),
       [](type& r, const type& v) {r = v; }, N);
   }
 
@@ -1757,7 +1757,7 @@ namespace wilt
     if (std::is_const<T>::value)
       throw std::domain_error("setTo(val): cannot set to const type");
 
-    singleOp2_(m_base, sizes_.data(), steps_.data(), [&val](type& r) {r = val; }, N);
+    singleOp2_(base_, sizes_.data(), steps_.data(), [&val](type& r) {r = val; }, N);
   }
 
   template <class T, dim_t N>
@@ -1768,7 +1768,7 @@ namespace wilt
     if (std::is_const<T>::value)
       throw std::domain_error("setTo(arr, mask): cannot set to const type");
 
-    binaryOp2_(m_base, arr.base(), mask.base(), sizes_.data(), steps_.data(), arr.steps().data(), mask.steps().data(),
+    binaryOp2_(base_, arr.base(), mask.base(), sizes_.data(), steps_.data(), arr.steps().data(), mask.steps().data(),
       [](type& r, const type& v, uint8_t m) {if (m != 0) r = v; }, N);
   }
 
@@ -1778,15 +1778,15 @@ namespace wilt
     if (std::is_const<T>::value)
       throw std::domain_error("setTo(val): cannot set to const type");
 
-    unaryOp2_(m_base, mask.base(), sizes_.data(), steps_.data(), mask.steps().data(),
+    unaryOp2_(base_, mask.base(), sizes_.data(), steps_.data(), mask.steps().data(),
       [&val](type& r, uint8_t m) {if (m != 0) r = val; }, N);
   }
 
   template <class T, dim_t N>
   void NArray<T, N>::clear()
   {
-    m_data.clear();
-    m_base = nullptr;
+    data_.clear();
+    base_ = nullptr;
 
     clean_();
   }
@@ -1797,8 +1797,8 @@ namespace wilt
     pos_t size = size_(sizes_);
     if (size > 0)
     {
-      m_data = NArrayDataRef<type>(size);
-      m_base = m_data->data;
+      data_ = NArrayDataRef<type>(size);
+      base_ = data_->data;
     }
   }
 
@@ -1808,8 +1808,8 @@ namespace wilt
     pos_t size = size_(sizes_);
     if (size > 0)
     {
-      m_data = NArrayDataRef<type>(size, val);
-      m_base = m_data->data;
+      data_ = NArrayDataRef<type>(size, val);
+      base_ = data_->data;
     }
   }
 
@@ -1819,8 +1819,8 @@ namespace wilt
     pos_t size = size_(sizes_);
     if (size > 0)
     {
-      m_data = NArrayDataRef<type>(size, ptr, ltype);
-      m_base = m_data->data;
+      data_ = NArrayDataRef<type>(size, ptr, ltype);
+      base_ = data_->data;
     }
   }
 
@@ -1831,8 +1831,8 @@ namespace wilt
     pos_t size = size_(sizes_);
     if (size > 0)
     {
-      m_data = NArrayDataRef<type>(size, gen);
-      m_base = m_data->data;
+      data_ = NArrayDataRef<type>(size, gen);
+      base_ = data_->data;
     }
   }
 
