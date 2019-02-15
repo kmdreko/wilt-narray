@@ -229,7 +229,7 @@ namespace wilt
           min[i] = 0;
         }
 
-        // max[i] = min(m_size[i], m_dims[i] - m_offs[i]); with enclosed flag
+        // max[i] = min(m_size[i], sizes_[i] - m_offs[i]); with enclosed flag
         if (m_size[i] > m_arr.length(i) - m_offs[i])
         {
           enclosed = false;

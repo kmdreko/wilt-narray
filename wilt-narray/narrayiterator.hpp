@@ -58,7 +58,7 @@ namespace wilt
       : m_data(),
         m_base(nullptr),
         sizes_(),
-        m_step(),
+        steps_(),
         m_pos(0)
     {
   
@@ -71,7 +71,7 @@ namespace wilt
       : m_data(arr.m_data),
         m_base(arr.m_base),
         sizes_(arr.sizes_),
-        m_step(arr.m_step),
+        steps_(arr.steps_),
         m_pos(pos)
     {
 
@@ -83,7 +83,7 @@ namespace wilt
       : m_data(iter.m_data),
         m_base(iter.m_base),
         sizes_(iter.sizes_),
-        m_step(iter.m_step),
+        steps_(iter.steps_),
         m_pos(iter.m_pos)
     {
 
@@ -96,7 +96,7 @@ namespace wilt
       : m_data(iter.m_data),
         m_base(iter.m_base),
         sizes_(iter.sizes_),
-        m_step(iter.m_step),
+        steps_(iter.steps_),
         m_pos(pos)
     {
 
@@ -110,7 +110,7 @@ namespace wilt
       m_data = iter.m_data;
       m_base = iter.m_base;
       sizes_ = iter.sizes_;
-      m_step = iter.m_step;
+      steps_ = iter.steps_;
       m_pos = iter.m_pos;
 
       return *this;
@@ -164,7 +164,7 @@ namespace wilt
     {
       return m_base == iter.m_base && 
              sizes_ == iter.sizes_ && 
-             m_step == iter.m_step && 
+             steps_ == iter.steps_ && 
              m_pos  == iter.m_pos;
     }
 
@@ -289,7 +289,7 @@ namespace wilt
     NArrayDataRef<type> m_data;
     type* m_base;
     Point<N> sizes_;
-    Point<N> m_step;
+    Point<N> steps_;
     pos_t m_pos;
 
     //! @brief      gets the pointer at the data offset
@@ -300,7 +300,7 @@ namespace wilt
       Point<N> loc = idx2pos_(sizes_, m_pos);
       pointer ptr = m_base;
       for (dim_t i = 0; i < N; ++i)
-        ptr += loc[i] * m_step[i];
+        ptr += loc[i] * steps_[i];
 
       return ptr;
     }

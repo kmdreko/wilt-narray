@@ -240,25 +240,25 @@ namespace wilt
   }
 
   //! @brief      Creates a step array from a dim array
-  //! @param[in]  dims - the dimension array as a point
-  //! @return     step array created from dims as a point
+  //! @param[in]  sizes - the dimension array as a point
+  //! @return     step array created from sizes as a point
   //!
   //! Step array for {..., a, b, c, d} would be {..., b*c*d, c*d, d, 1}
   //! Dimension array should all be positive and non-zero to produce a
   //! meaningful result
   //! Will fail if N==0
   template <dim_t N>
-  Point<N> step_(const Point<N>& dims)
+  Point<N> step_(const Point<N>& sizes)
   {
     Point<N> ret;
     ret[N-1] = 1;
     for (dim_t i = N-1; i > 0; --i)
-      ret[i-1] = ret[i] * dims[i];
+      ret[i-1] = ret[i] * sizes[i];
     return ret;
   }
 
   //! @brief      Determines the size from a dim array
-  //! @param[in]  dims - the dimension array as a point
+  //! @param[in]  sizes - the dimension array as a point
   //! @return     total size denoted by the dimensions
   //!
   //! Size of {a, b, c, d} would be a*b*c*d
@@ -266,23 +266,23 @@ namespace wilt
   //! Will be zero if any dimension is zero
   //! Will fail if N==0
   template <dim_t N>
-  pos_t size_(const Point<N>& dims)
+  pos_t size_(const Point<N>& sizes)
   {
-    pos_t ret = dims[0];
+    pos_t ret = sizes[0];
     for (dim_t i = 1; i < N; ++i)
-      ret *= dims[i];
+      ret *= sizes[i];
     return ret;
   }
 
   //! @brief         Aligns the dim and step arrays such that the step values
   //!                are increasing and positive
-  //! @param[in,out] dims - the dimension array as a point
-  //! @param[in,out] step - the step array as a point
+  //! @param[in,out] sizes - the dimension array as a point
+  //! @param[in,out] steps - the step array as a point
   //! @return        offset to adjust the original base pointer
   //!
   //! Is used exclusively in NArray::align() to create an aligned NArray
   template <dim_t N>
-  pos_t align_(Point<N>& dims, Point<N>& steps)
+  pos_t align_(Point<N>& sizes, Point<N>& steps)
   {
     pos_t offset = 0;
     for (dim_t i = 0; i < N; ++i)
@@ -290,7 +290,7 @@ namespace wilt
       if (steps[i] < 0)
       {
         steps[i] = -steps[i];
-        offset -= steps[i] * (dims[i] - 1);
+        offset -= steps[i] * (sizes[i] - 1);
       }
     }
     for (dim_t i = 1; i < N; ++i)
@@ -298,7 +298,7 @@ namespace wilt
       for (dim_t j = i; j > 0 && steps[j] > steps[j-1]; --j)
       {
         std::swap(steps[j], steps[j-1]);
-        std::swap(dims[j], dims[j-1]);
+        std::swap(sizes[j], sizes[j-1]);
       }
     }
     return offset;
@@ -306,7 +306,7 @@ namespace wilt
 
   //! @brief         Condenses a dim array and steps array into smaller arrays
   //!                if able to
-  //! @param[in,out] dims - dimension array as a point
+  //! @param[in,out] sizes - dimension array as a point
   //! @param[in,out] steps - step array as a point
   //! @return        the dimension of the arrays after condensing, values at or
   //!                after n in the arrays are junk
@@ -314,30 +314,30 @@ namespace wilt
   //! Is used when applying operations on arrays to effectively reduce the
   //! dimensionality of the data which will reduce loops and function calls.
   //! Condensing the dim and step arrays from an aligned and continuous NArray
-  //! should result in return=1, dims=size_(dims), steps={1}
+  //! should result in return=1, sizes=size_(sizes), steps={1}
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <dim_t N>
-  dim_t condense_(Point<N>& dims, Point<N>& steps)
+  dim_t condense_(Point<N>& sizes, Point<N>& steps)
   {
     dim_t j = N-1;
     for (int i = N-2; i >= 0; --i)
     {
-      if (steps[j] * dims[j] == steps[i])
+      if (steps[j] * sizes[j] == steps[i])
       {
-        dims[j] *= dims[i];
+        sizes[j] *= sizes[i];
       }
       else
       {
         --j;
-        dims[j] = dims[i];
+        sizes[j] = sizes[i];
         steps[j] = steps[i];
       }
     }
     for (dim_t i = 0; i < j; ++i)
     {
-      dims[i] = 1;
-      steps[i] = std::abs(dims[j] * steps[j]);
+      sizes[i] = 1;
+      steps[i] = std::abs(sizes[j] * steps[j]);
     }
 
     return N - j;
@@ -345,7 +345,7 @@ namespace wilt
 
   //! @brief         Condenses a dim array and step arrays into smaller arrays
   //!                if able to
-  //! @param[in,out] dims - dimension array as a point
+  //! @param[in,out] sizes - dimension array as a point
   //! @param[in,out] step1 - step array as a point
   //! @param[in,out] step2 - step array as a point that relates to another
   //!                NArray, must be aligned and related to the same dimension
@@ -356,22 +356,22 @@ namespace wilt
   //! Is used when applying operations on arrays to effectively reduce the
   //! dimensionality of the data which will reduce loops and function calls.
   //! Condensing the dim and step arrays from an aligned and continuous NArray
-  //! should result in return=1, dims=size_(dims), step1={1}, step2={1}
+  //! should result in return=1, sizes=size_(sizes), step1={1}, step2={1}
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <dim_t N>
-  dim_t condense_(Point<N>& dims, Point<N>& step1, Point<N>& step2)
+  dim_t condense_(Point<N>& sizes, Point<N>& step1, Point<N>& step2)
   {
     dim_t j = 0;
     for (dim_t i = 1; i < N; ++i)
     {
-      if (dims[i] * step1[i] == step1[i-1])
-        dims[j] *= dims[i];
+      if (sizes[i] * step1[i] == step1[i-1])
+        sizes[j] *= sizes[i];
       else
       {
         step1[j] = step1[i-1];
         step2[j] = step2[i-1];
-        dims[++j] = dims[i];
+        sizes[++j] = sizes[i];
       }
     }
     step1[j] = step1[N-1];
@@ -380,31 +380,31 @@ namespace wilt
   }
 
   //! @brief      Convertor from an index to a point
-  //! @param[in]  dims - dimension array, catalyst for the conversion
+  //! @param[in]  sizes - dimension array, catalyst for the conversion
   //! @param[in]  idx - index to convert from
   //! @return     point that corresponds to the index
   template <dim_t N>
-  Point<N> idx2pos_(const Point<N>& dims, pos_t idx)
+  Point<N> idx2pos_(const Point<N>& sizes, pos_t idx)
   {
     Point<N> ret;
     for (int i = N-1; i >= 0; --i)
     {
-      ret[i] = idx % dims[i];
-      idx /= dims[i];
+      ret[i] = idx % sizes[i];
+      idx /= sizes[i];
     }
     return ret;
   }
 
   //! @brief      Convertor from a point to an index
-  //! @param[in]  dims - dimension array, catalyst for the conversion
+  //! @param[in]  sizes - dimension array, catalyst for the conversion
   //! @param[in]  pos - point to convert from
   //! @return     index that corresponds to the point
   template <dim_t N>
-  pos_t pos2idx_(const Point<N>& dims, const Point<N>& pos)
+  pos_t pos2idx_(const Point<N>& sizes, const Point<N>& pos)
   {
     pos_t idx = pos[N-1];
     for (int i = N-2; i >= 0; --i)
-      pos += pos[i] * dims[i+1];
+      pos += pos[i] * sizes[i+1];
     return idx;
   }
 

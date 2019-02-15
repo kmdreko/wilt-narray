@@ -1503,7 +1503,7 @@ bool operator== (const wilt::NArray<T, N>& lhs, const wilt::NArray<T, N>& rhs)
 {
   return allOf_(
     lhs.base(), rhs.base(), 
-    lhs.dimsPtr_(), lhs.steps().data(), rhs.steps().data(), 
+    lhs.sizes().data(), lhs.steps().data(), rhs.steps().data(), 
     [](const T& a, const T& b){return a == b;}, N);
 }
 template <class T, class U, dim_t N>
