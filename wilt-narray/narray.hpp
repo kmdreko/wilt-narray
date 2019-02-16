@@ -362,6 +362,23 @@ namespace wilt
     // Creates an additional dimension of size {n} that repeats the same data
     NArray<T, N+1> repeat(pos_t n) const;
 
+    // Creates an additional dimension that essentially creates a sliding window
+    // along that dimension. It reduces that dimension by n+1 and creates a new
+    // dimension with size n.
+    //   - X = 0th dimension
+    //   - Y = 1st dimension
+    //   - Z = 2nd dimension
+    //   - W = 3rd dimension
+    //   - N = specified dimension
+    //
+    // NOTE: some functions are only avaliable if they have that dimension
+    // NOTE: adds the dimension to the end
+    NArray<T, N+1> windowX(pos_t n) const;
+    NArray<T, N+1> windowY(pos_t n) const;
+    NArray<T, N+1> windowZ(pos_t n) const;
+    NArray<T, N+1> windowW(pos_t n) const;
+    NArray<T, N+1> windowN(pos_t n, dim_t dim) const;
+
     // Iterators for all the elements in-order
     iterator begin() const;
     iterator end() const;
@@ -447,6 +464,7 @@ namespace wilt
     NArray<T, N> rangeN_(pos_t n, pos_t length, dim_t dim) const;
     NArray<T, N> flipN_(dim_t dim) const;
     NArray<T, N> skipN_(pos_t n, pos_t start, dim_t dim) const;
+    NArray<T, N+1> overlapN_(pos_t n, dim_t dim) const;
 
     template <class U, class Converter>
     static void convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func);
@@ -1642,7 +1660,73 @@ namespace wilt
   template<class T, dim_t N>
   NArray<T, N+1> NArray<T, N>::repeat(pos_t n) const
   {
-    return NArray<value, N+1>(m_data, m_base, push_(sizes_, N, n), push_(steps_, N, 0));
+    if (n <= 0)
+      throw std::invalid_argument("repeat(n): n must be positive");
+
+    return NArray<value, N+1>(data_, base_, push_(sizes_, N, n), push_(steps_, N, 0));
+  }
+
+  template<class T, dim_t N>
+  NArray<T, N+1> NArray<T, N>::windowX(pos_t n) const
+  {
+    if (n < 1 || n > sizes_[0])
+      throw std::out_of_range("windowX(n): n out of bounds");
+
+    return overlapN_(n, 0);
+  }
+
+  template<class T, dim_t N>
+  NArray<T, N+1> NArray<T, N>::windowY(pos_t n) const
+  {
+    static_assert(N >= 2, "windowY() only valid when N >= 2");
+
+    if (n < 1 || n > sizes_[1])
+      throw std::out_of_range("windowY(n): n out of bounds");
+
+    return overlapN_(n, 1);
+  }
+
+  template<class T, dim_t N>
+  NArray<T, N+1> NArray<T, N>::windowZ(pos_t n) const
+  {
+    static_assert(N >= 3, "windowZ() only valid when N >= 3");
+
+    if (n < 1 || n > sizes_[2])
+      throw std::out_of_range("windowZ(n): n out of bounds");
+
+    return overlapN_(n, 2);
+  }
+
+  template<class T, dim_t N>
+  NArray<T, N+1> NArray<T, N>::windowW(pos_t n) const
+  {
+    static_assert(N >= 4, "windowW() only valid when N >= 4");
+
+    if (n < 1 || n > sizes_[3])
+      throw std::out_of_range("windowW(n): n out of bounds");
+
+    return overlapN_(n, 3);
+  }
+
+  template<class T, dim_t N>
+  NArray<T, N+1> NArray<T, N>::windowN(pos_t n, dim_t dim) const
+  {
+    if (dim >= N)
+      throw std::out_of_range("windowN(n, dim): dim out of bounds");
+    if (n < 1 || n > sizes_[dim])
+      throw std::out_of_range("windowN(n, dim): n out of bounds");
+
+    return overlapN_(n, dim);
+  }
+
+  template<class T, dim_t N>
+  NArray<T, N+1> NArray<T, N>::overlapN_(pos_t n, dim_t dim) const
+  {
+    auto sizes = push_(sizes_, N, n);
+    auto steps = push_(steps_, N, steps_[dim]);
+    sizes[dim] -= n - 1;
+
+    return NArray<T, N+1>(data_, base_, sizes, steps);
   }
 
   template <class T, dim_t N>
