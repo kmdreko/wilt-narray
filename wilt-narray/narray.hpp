@@ -278,34 +278,35 @@ namespace wilt
     typename NArray<T, N-1>::exposed_type operator[] (pos_t n) const;
 
     // Gets the N-1 dimension slice along the specified dimension
+    //   - dim = specified dimension
     //   - X = 0th dimension
     //   - Y = 1st dimension
     //   - Z = 2nd dimension
     //   - W = 3rd dimension
-    //   - N = specified dimension
     //
     // NOTE: some functions are only available if they have that dimension
+    typename NArray<T, N-1>::exposed_type slice(dim_t dim, pos_t n) const;
     typename NArray<T, N-1>::exposed_type sliceX(pos_t x) const;
     NArray<T, N-1> sliceY(pos_t y) const;
     NArray<T, N-1> sliceZ(pos_t z) const;
     NArray<T, N-1> sliceW(pos_t w) const;
-    typename NArray<T, N-1>::exposed_type sliceN(pos_t n, dim_t dim) const;
 
     // Gets the subarray with range along the specified dimension
+    //   - dim = specified dimension
     //   - X = 0th dimension
     //   - Y = 1st dimension
     //   - Z = 2nd dimension
     //   - W = 3rd dimension
-    //   - N = specified dimension
     //
     // NOTE: some functions are only available if they have that dimension
+    NArray<T, N> range(dim_t dim, pos_t n, pos_t length) const;
     NArray<T, N> rangeX(pos_t x, pos_t length) const;
     NArray<T, N> rangeY(pos_t y, pos_t length) const;
     NArray<T, N> rangeZ(pos_t z, pos_t length) const;
     NArray<T, N> rangeW(pos_t w, pos_t length) const;
-    NArray<T, N> rangeN(pos_t n, pos_t length, dim_t dim) const;
 
     // Gets an NArray with the specified dimension reversed
+    //   - dim = specified dimension
     //   - X = 0th dimension
     //   - Y = 1st dimension
     //   - Z = 2nd dimension
@@ -313,26 +314,26 @@ namespace wilt
     //   - N = specified dimension
     //
     // NOTE: some functions are only available if they have that dimension
+    NArray<T, N> flip(dim_t dim) const;
     NArray<T, N> flipX() const;
     NArray<T, N> flipY() const;
     NArray<T, N> flipZ() const;
     NArray<T, N> flipW() const;
-    NArray<T, N> flipN(dim_t dim) const;
 
     // Gets an NArray with skipping every 'n' indexes along that dimension,
     // optional 'start' that denotes where the skipping starts from
+    //   - dim = specified dimension
     //   - X = 0th dimension
     //   - Y = 1st dimension
     //   - Z = 2nd dimension
     //   - W = 3rd dimension
-    //   - N = specified dimension
     //
     // NOTE: some functions are only available if they have that dimension
+    NArray<T, N> skip(dim_t dim, pos_t n, pos_t start = 0) const;
     NArray<T, N> skipX(pos_t n, pos_t start = 0) const;
     NArray<T, N> skipY(pos_t n, pos_t start = 0) const;
     NArray<T, N> skipZ(pos_t n, pos_t start = 0) const;
     NArray<T, N> skipW(pos_t n, pos_t start = 0) const;
-    NArray<T, N> skipN(pos_t n, pos_t start, dim_t dim) const;
 
     // Gets an NArray with two dimensions swapped
     //
@@ -365,19 +366,19 @@ namespace wilt
     // Creates an additional dimension that essentially creates a sliding window
     // along that dimension. It reduces that dimension by n+1 and creates a new
     // dimension with size n.
+    //   - dim = specified dimension
     //   - X = 0th dimension
     //   - Y = 1st dimension
     //   - Z = 2nd dimension
     //   - W = 3rd dimension
-    //   - N = specified dimension
     //
     // NOTE: some functions are only avaliable if they have that dimension
     // NOTE: adds the dimension to the end
+    NArray<T, N+1> window(dim_t dim, pos_t n) const;
     NArray<T, N+1> windowX(pos_t n) const;
     NArray<T, N+1> windowY(pos_t n) const;
     NArray<T, N+1> windowZ(pos_t n) const;
     NArray<T, N+1> windowW(pos_t n) const;
-    NArray<T, N+1> windowN(pos_t n, dim_t dim) const;
 
     // Iterators for all the elements in-order
     iterator begin() const;
@@ -460,11 +461,11 @@ namespace wilt
 
     NArray(NArrayDataRef<T> header, T* base, Point<N> sizes, Point<N> steps);
 
-    typename NArray<T, N-1>::exposed_type sliceN_(pos_t n, dim_t dim) const;
-    NArray<T, N> rangeN_(pos_t n, pos_t length, dim_t dim) const;
-    NArray<T, N> flipN_(dim_t dim) const;
-    NArray<T, N> skipN_(pos_t n, pos_t start, dim_t dim) const;
-    NArray<T, N+1> overlapN_(pos_t n, dim_t dim) const;
+    typename NArray<T, N-1>::exposed_type slice_(dim_t dim, pos_t n) const;
+    NArray<T, N> range_(dim_t dim, pos_t n, pos_t length) const;
+    NArray<T, N> flip_(dim_t dim) const;
+    NArray<T, N> skip_(dim_t dim, pos_t n, pos_t start) const;
+    NArray<T, N+1> window_(dim_t dim, pos_t n) const;
 
     template <class U, class Converter>
     static void convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func);
@@ -1336,12 +1337,21 @@ namespace wilt
   }
 
   template <class T, dim_t N>
-  typename NArray<T, N - 1>::exposed_type NArray<T, N>::operator[] (pos_t n) const
+  typename NArray<T, N-1>::exposed_type NArray<T, N>::operator[] (pos_t n) const
   {
     if (n >= sizes_[0])
       throw std::out_of_range("operator[] index out of bounds");
 
-    return sliceN_(n, 0);
+    return slice_(0, n);
+  }
+
+  template <class T, dim_t N>
+  typename NArray<T, N-1>::exposed_type NArray<T, N>::slice(dim_t dim, pos_t n) const
+  {
+    if (dim >= N || n >= sizes_[dim] || n < 0)
+      throw std::out_of_range("slice(dim, n) index out of bounds");
+
+    return slice_(dim, n);
   }
 
   template <class T, dim_t N>
@@ -1350,7 +1360,7 @@ namespace wilt
     if (x >= sizes_[0] || x < 0)
       throw std::out_of_range("sliceX(x) index out of bounds");
 
-    return sliceN_(x, 0);
+    return slice_(0, x);
   }
 
   template <class T, dim_t N>
@@ -1361,7 +1371,7 @@ namespace wilt
     if (y >= sizes_[1] || y < 0)
       throw std::out_of_range("sliceY(y) index out of bounds");
 
-    return sliceN_(y, 1);
+    return slice_(1, y);
   }
 
   template <class T, dim_t N>
@@ -1372,7 +1382,7 @@ namespace wilt
     if (z >= sizes_[2] || z < 0)
       throw std::out_of_range("sliceZ(z) index out of bounds");
 
-    return sliceN_(z, 2);
+    return slice_(2, z);
   }
 
   template <class T, dim_t N>
@@ -1383,31 +1393,31 @@ namespace wilt
     if (w >= sizes_[3] || w < 0)
       throw std::out_of_range("sliceW(w) index out of bounds");
 
-    return sliceN_(w, 3);
+    return slice_(3, w);
   }
 
   template <class T, dim_t N>
-  typename NArray<T, N-1>::exposed_type NArray<T, N>::sliceN(pos_t n, dim_t dim) const
+  typename NArray<T, N-1>::exposed_type NArray<T, N>::slice_(dim_t dim, pos_t n) const
   {
-    if (dim >= N || n >= sizes_[dim] || n < 0)
-      throw std::out_of_range("nSlice(n, dim) index out of bounds");
-
-    return sliceN_(n, dim);
+    return NArray<value, N-1>(data_, base_ + steps_[dim] * n, wilt::slice_(sizes_, dim), wilt::slice_(steps_, dim));
   }
 
   template <class T, dim_t N>
-  typename NArray<T, N-1>::exposed_type NArray<T, N>::sliceN_(pos_t n, dim_t dim) const
+  NArray<T, N> NArray<T, N>::range(dim_t dim, pos_t n, pos_t length) const
   {
-    return NArray<value, N-1>(data_, base_ + steps_[dim] * n, slice_(sizes_, dim), slice_(steps_, dim));
+    if (n >= sizes_[dim] || n + length > sizes_[dim] || length <= 0 || n < 0 || dim >= N)
+      throw std::out_of_range("range(dim, n, length) index out of bounds");
+
+    return range_(dim, n, length);
   }
 
   template <class T, dim_t N>
   NArray<T, N> NArray<T, N>::rangeX(pos_t x, pos_t length) const
   {
     if (x >= sizes_[0] || x + length > sizes_[0] || length <= 0 || x < 0)
-      throw std::out_of_range("xRange(x, length) index out of bounds");
+      throw std::out_of_range("rangeX(x, length) index out of bounds");
 
-    return rangeN_(x, length, 0);
+    return range_(0, x, length);
   }
 
   template <class T, dim_t N>
@@ -1416,9 +1426,9 @@ namespace wilt
     static_assert(N >= 2, "rangeY() only valid when N >= 2");
 
     if (y >= sizes_[1] || y + length > sizes_[1] || length <= 0 || y < 0)
-      throw std::out_of_range("yRange(y, length) index out of bounds");
+      throw std::out_of_range("rangeY(y, length) index out of bounds");
 
-    return rangeN_(y, length, 1);
+    return range_(1, y, length);
   }
 
   template <class T, dim_t N>
@@ -1427,9 +1437,9 @@ namespace wilt
     static_assert(N >= 3, "rangeZ() only valid when N >= 3");
 
     if (z >= sizes_[2] || z + length > sizes_[2] || length <= 0 || z < 0)
-      throw std::out_of_range("zRange(z, length) index out of bounds");
+      throw std::out_of_range("rangeZ(z, length) index out of bounds");
 
-    return rangeN_(z, length, 2);
+    return range_(2, z, length);
   }
 
   template <class T, dim_t N>
@@ -1438,22 +1448,13 @@ namespace wilt
     static_assert(N >= 4, "rangeW() only valid when N >= 4");
 
     if (w >= sizes_[3] || w + length > sizes_[3] || length <= 0 || w < 0)
-      throw std::out_of_range("wRange(w, length) index out of bounds");
+      throw std::out_of_range("rangeW(w, length) index out of bounds");
 
-    return rangeN_(w, length, 3);
+    return range_(3, w, length);
   }
 
   template <class T, dim_t N>
-  NArray<T, N> NArray<T, N>::rangeN(pos_t n, pos_t length, dim_t dim) const
-  {
-    if (n >= sizes_[dim] || n + length > sizes_[dim] || length <= 0 || n < 0 || dim >= N)
-      throw std::out_of_range("nRange(n, length, dim) index out of bounds");
-
-    return rangeN_(n, length, dim);
-  }
-
-  template <class T, dim_t N>
-  NArray<T, N> NArray<T, N>::rangeN_(pos_t n, pos_t length, dim_t dim) const
+  NArray<T, N> NArray<T, N>::range_(dim_t dim, pos_t n, pos_t length) const
   {
     Point<N> temp = sizes_;
     temp[dim] = length;
@@ -1461,9 +1462,18 @@ namespace wilt
   }
 
   template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::flip(dim_t dim) const
+  {
+    if (dim >= N)
+      throw std::out_of_range("flip(dim) index out of bounds");
+
+    return flip_(dim);
+  }
+
+  template <class T, dim_t N>
   NArray<T, N> NArray<T, N>::flipX() const
   {
-    return flipN_(0);
+    return flip_(0);
   }
 
   template <class T, dim_t N>
@@ -1471,7 +1481,7 @@ namespace wilt
   {
     static_assert(N >= 2, "flipY() only valid when N >= 2");
 
-    return flipN_(1);
+    return flip_(1);
   }
 
   template <class T, dim_t N>
@@ -1479,7 +1489,7 @@ namespace wilt
   {
     static_assert(N >= 3, "flipZ() only valid when N >= 3");
 
-    return flipN_(2);
+    return flip_(2);
   }
 
   template <class T, dim_t N>
@@ -1487,20 +1497,11 @@ namespace wilt
   {
     static_assert(N >= 4, "flipW() only valid when N >= 4");
 
-    return flipN_(3);
+    return flip_(3);
   }
 
   template <class T, dim_t N>
-  NArray<T, N> NArray<T, N>::flipN(dim_t dim) const
-  {
-    if (dim >= N)
-      throw std::out_of_range("nFlip(dim) index out of bounds");
-
-    return flipN_(dim);
-  }
-
-  template <class T, dim_t N>
-  NArray<T, N> NArray<T, N>::flipN_(dim_t dim) const
+  NArray<T, N> NArray<T, N>::flip_(dim_t dim) const
   {
     Point<N> temp = steps_;
     temp[dim] = -temp[dim];
@@ -1508,12 +1509,21 @@ namespace wilt
   }
 
   template <class T, dim_t N>
+  NArray<T, N> NArray<T, N>::skip(dim_t dim, pos_t n, pos_t start) const
+  {
+    if (dim >= N || n < 1 || n >= sizes_[dim] || start < 0)
+      throw std::out_of_range("skip(n, start, dim) index out of bounds");
+
+    return skip_(dim, n, start);
+  }
+
+  template <class T, dim_t N>
   NArray<T, N> NArray<T, N>::skipX(pos_t n, pos_t start) const
   {
     if (n < 1 || n >= sizes_[0] || start < 0)
-      throw std::out_of_range("skipN(n, start, dim) index out of bounds");
+      throw std::out_of_range("skipX(n, start) index out of bounds");
 
-    return skipN_(n, start, 0);
+    return skip_(0, n, start);
   }
 
   template <class T, dim_t N>
@@ -1524,7 +1534,7 @@ namespace wilt
     if (n < 1 || n >= sizes_[1] || start < 0)
       throw std::out_of_range("skipY(n, start) index out of bounds");
 
-    return skipN_(n, start, 1);
+    return skip_(1, n, start);
   }
 
   template <class T, dim_t N>
@@ -1535,7 +1545,7 @@ namespace wilt
     if (n < 1 || n >= sizes_[2] || start < 0)
       throw std::out_of_range("skipZ(n, start) index out of bounds");
 
-    return skipN_(n, start, 2);
+    return skip_(2, n, start);
   }
 
   template <class T, dim_t N>
@@ -1546,20 +1556,11 @@ namespace wilt
     if (n < 1 || n >= sizes_[3] || start < 0)
       throw std::out_of_range("skipW(n, start) index out of bounds");
 
-    return skipN_(n, start, 3);
+    return skip_(3, n, start);
   }
 
   template <class T, dim_t N>
-  NArray<T, N> NArray<T, N>::skipN(pos_t n, pos_t start, dim_t dim) const
-  {
-    if (dim >= N || n < 1 || n >= sizes_[dim] || start < 0)
-      throw std::out_of_range("skipN(n, start, dim) index out of bounds");
-
-    return skipN_(n, start, dim);
-  }
-
-  template <class T, dim_t N>
-  NArray<T, N> NArray<T, N>::skipN_(pos_t n, pos_t start, dim_t dim) const
+  NArray<T, N> NArray<T, N>::skip_(dim_t dim, pos_t n, pos_t start) const
   {
     Point<N> newsizes = sizes_;
     Point<N> newsteps = steps_;
@@ -1667,12 +1668,23 @@ namespace wilt
   }
 
   template<class T, dim_t N>
+  NArray<T, N+1> NArray<T, N>::window(dim_t dim, pos_t n) const
+  {
+    if (dim >= N)
+      throw std::out_of_range("window(n, dim): dim out of bounds");
+    if (n < 1 || n > sizes_[dim])
+      throw std::out_of_range("window(n, dim): n out of bounds");
+
+    return window_(dim, n);
+  }
+
+  template<class T, dim_t N>
   NArray<T, N+1> NArray<T, N>::windowX(pos_t n) const
   {
     if (n < 1 || n > sizes_[0])
       throw std::out_of_range("windowX(n): n out of bounds");
 
-    return overlapN_(n, 0);
+    return window_(0, n);
   }
 
   template<class T, dim_t N>
@@ -1683,7 +1695,7 @@ namespace wilt
     if (n < 1 || n > sizes_[1])
       throw std::out_of_range("windowY(n): n out of bounds");
 
-    return overlapN_(n, 1);
+    return window_(1, n);
   }
 
   template<class T, dim_t N>
@@ -1694,7 +1706,7 @@ namespace wilt
     if (n < 1 || n > sizes_[2])
       throw std::out_of_range("windowZ(n): n out of bounds");
 
-    return overlapN_(n, 2);
+    return window_(2, n);
   }
 
   template<class T, dim_t N>
@@ -1705,28 +1717,17 @@ namespace wilt
     if (n < 1 || n > sizes_[3])
       throw std::out_of_range("windowW(n): n out of bounds");
 
-    return overlapN_(n, 3);
+    return window_(3, n);
   }
 
   template<class T, dim_t N>
-  NArray<T, N+1> NArray<T, N>::windowN(pos_t n, dim_t dim) const
+  NArray<T, N+1> NArray<T, N>::window_(dim_t dim, pos_t n) const
   {
-    if (dim >= N)
-      throw std::out_of_range("windowN(n, dim): dim out of bounds");
-    if (n < 1 || n > sizes_[dim])
-      throw std::out_of_range("windowN(n, dim): n out of bounds");
+    auto newsizes = push_(sizes_, N, n);
+    auto newsteps = push_(steps_, N, steps_[dim]);
+    newsizes[dim] -= n - 1;
 
-    return overlapN_(n, dim);
-  }
-
-  template<class T, dim_t N>
-  NArray<T, N+1> NArray<T, N>::overlapN_(pos_t n, dim_t dim) const
-  {
-    auto sizes = push_(sizes_, N, n);
-    auto steps = push_(steps_, N, steps_[dim]);
-    sizes[dim] -= n - 1;
-
-    return NArray<T, N+1>(data_, base_, sizes, steps);
+    return NArray<T, N+1>(data_, base_, newsizes, newsteps);
   }
 
   template <class T, dim_t N>
