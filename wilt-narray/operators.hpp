@@ -34,7 +34,7 @@
 namespace wilt
 {
   // helper structures for applying move semantics to operators
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   struct move_op
   {
     template <class Operator>
@@ -87,7 +87,7 @@ namespace wilt
     }
   };
 
-  template <class T, class U, dim_t N>
+  template <class T, class U, std::size_t N>
   struct move_op<T, T, U, N>
   {
     template <class Operator>
@@ -148,7 +148,7 @@ namespace wilt
     }
   };
 
-  template <class T, class U, dim_t N>
+  template <class T, class U, std::size_t N>
   struct move_op<U, T, U, N>
   {
     template <class Operator>
@@ -209,7 +209,7 @@ namespace wilt
     }
   };
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   struct move_op<T, T, T, N>
   {
     template <class Operator>
@@ -269,7 +269,7 @@ namespace wilt
     }
   };
 
-  template <class Ret, class T, dim_t N>
+  template <class Ret, class T, std::size_t N>
   struct move_op<Ret, T, T, N>
   {
     template <class Operator>
@@ -313,7 +313,7 @@ namespace wilt
     }
   };
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> add(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t + u; };
@@ -326,7 +326,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> add(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t + u; };
@@ -341,7 +341,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> add(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t + u; };
@@ -356,7 +356,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> add(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t + u; };
@@ -373,7 +373,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> add(const NArray<T, N>& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t + rhs; };
@@ -384,7 +384,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> add(NArray<T, N>&& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t + rhs; };
@@ -397,7 +397,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> add(const T& lhs, const NArray<U, N>& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs + u; };
@@ -408,7 +408,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> add(const T& lhs, NArray<U, N>&& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs + u; };
@@ -421,7 +421,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> sub(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t - u; };
@@ -434,7 +434,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> sub(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t - u; };
@@ -449,7 +449,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> sub(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t - u; };
@@ -464,7 +464,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> sub(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t - u; };
@@ -481,7 +481,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> sub(const NArray<T, N>& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t - rhs; };
@@ -492,7 +492,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> sub(NArray<T, N>&& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t - rhs; };
@@ -505,7 +505,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> sub(const T& lhs, const NArray<U, N>& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs - u; };
@@ -516,7 +516,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> sub(const T& lhs, NArray<U, N>&& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs - u; };
@@ -529,7 +529,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mul(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
@@ -542,7 +542,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mul(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
@@ -557,7 +557,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mul(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
@@ -572,7 +572,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mul(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t * u; };
@@ -589,7 +589,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mul(const NArray<T, N>& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t * rhs; };
@@ -600,7 +600,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mul(NArray<T, N>&& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t * rhs; };
@@ -613,7 +613,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mul(const T& lhs, const NArray<U, N>& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs * u; };
@@ -624,7 +624,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mul(const T& lhs, NArray<U, N>&& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs * u; };
@@ -637,7 +637,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> div(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
@@ -650,7 +650,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> div(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
@@ -665,7 +665,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> div(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
@@ -680,7 +680,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> div(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t / u; };
@@ -697,7 +697,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> div(const NArray<T, N>& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t / rhs; };
@@ -708,7 +708,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> div(NArray<T, N>&& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t / rhs; };
@@ -721,7 +721,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> div(const T& lhs, const NArray<U, N>& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs / u; };
@@ -732,7 +732,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> div(const T& lhs, NArray<U, N>&& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs / u; };
@@ -745,7 +745,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mod(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
@@ -758,7 +758,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mod(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
@@ -773,7 +773,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mod(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
@@ -788,7 +788,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mod(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t % u; };
@@ -805,7 +805,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mod(const NArray<T, N>& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t % rhs; };
@@ -816,7 +816,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mod(NArray<T, N>&& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t % rhs; };
@@ -829,7 +829,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mod(const T& lhs, const NArray<U, N>& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs % u; };
@@ -840,7 +840,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> mod(const T& lhs, NArray<U, N>&& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs % u; };
@@ -853,7 +853,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_and(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t & u; };
@@ -866,7 +866,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_and(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t & u; };
@@ -881,7 +881,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_and(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t & u; };
@@ -896,7 +896,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_and(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t & u; };
@@ -913,7 +913,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_and(const NArray<T, N>& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t & rhs; };
@@ -924,7 +924,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_and(NArray<T, N>&& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t & rhs; };
@@ -937,7 +937,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_and(const T& lhs, const NArray<U, N>& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs & u; };
@@ -948,7 +948,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_and(const T& lhs, NArray<U, N>&& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs & u; };
@@ -961,7 +961,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_or(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t | u; };
@@ -974,7 +974,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_or(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t | u; };
@@ -989,7 +989,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_or(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t | u; };
@@ -1004,7 +1004,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_or(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t | u; };
@@ -1021,7 +1021,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_or(const NArray<T, N>& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t | rhs; };
@@ -1032,7 +1032,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_or(NArray<T, N>&& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t | rhs; };
@@ -1045,7 +1045,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_or(const T& lhs, const NArray<U, N>& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs | u; };
@@ -1056,7 +1056,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_or(const T& lhs, NArray<U, N>&& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs | u; };
@@ -1069,7 +1069,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_xor(const NArray<T, N>& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t ^ u; };
@@ -1082,7 +1082,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_xor(NArray<T, N>&& lhs, const NArray<U, N>& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t ^ u; };
@@ -1097,7 +1097,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_xor(const NArray<T, N>& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t ^ u; };
@@ -1112,7 +1112,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_xor(NArray<T, N>&& lhs, NArray<U, N>&& rhs)
   {
     auto op = [](Ret& r, const T& t, const U& u){ r = t ^ u; };
@@ -1129,7 +1129,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_xor(const NArray<T, N>& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t ^ rhs; };
@@ -1140,7 +1140,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_xor(NArray<T, N>&& lhs, const U& rhs)
   {
     auto op = [&rhs](Ret& r, const T& t){ r = t ^ rhs; };
@@ -1153,7 +1153,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(lhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_xor(const T& lhs, const NArray<U, N>& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs ^ u; };
@@ -1164,7 +1164,7 @@ namespace wilt
     return move_op<Ret, T, U, N>::none(rhs, op);
   }
 
-  template <class Ret, class T, class U, dim_t N>
+  template <class Ret, class T, class U, std::size_t N>
   NArray<Ret, N> bit_xor(const T& lhs, NArray<U, N>&& rhs)
   {
     auto op = [&lhs](Ret& r, const U& u){ r = lhs ^ u; };
@@ -1183,7 +1183,7 @@ namespace wilt
     GE, LE, NE
   }; // enum CMP
 
-  template <class T, class U, dim_t N>
+  template <class T, class U, std::size_t N>
   NArray<uint8_t, N> compare(const NArray<T, N>& lhs, const NArray<U, N>& rhs, CMP mode)
   {
     if (lhs.sizes() != rhs.sizes())
@@ -1219,7 +1219,7 @@ namespace wilt
     }
   }
 
-  template <class T, class U, dim_t N>
+  template <class T, class U, std::size_t N>
   NArray<uint8_t, N> compare(const NArray<T, N>& lhs, const U& rhs, CMP mode)
   {
     if (lhs.empty())
@@ -1253,7 +1253,7 @@ namespace wilt
     }
   }
 
-  template <class T, class U, dim_t N>
+  template <class T, class U, std::size_t N>
   NArray<uint8_t, N> compare(const T& lhs, const NArray<U, N>& rhs, CMP mode)
   {
     if (rhs.empty())
@@ -1289,216 +1289,216 @@ namespace wilt
 
 } // namespace wilt
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::add<typename wilt::add_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::add<typename wilt::add_ret<T, U>::type>(std::forward<NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::add<typename wilt::add_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::add<typename wilt::add_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::add<typename wilt::add_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
   return wilt::add<typename wilt::add_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::add<typename wilt::add_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::add_ret<T, U>::type, N> operator+ (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::add<typename wilt::add_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::sub<typename wilt::sub_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::sub<typename wilt::sub_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::sub<typename wilt::sub_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::sub<typename wilt::sub_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::sub<typename wilt::sub_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
   return wilt::sub<typename wilt::sub_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::sub<typename wilt::sub_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::sub_ret<T, U>::type, N> operator- (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::sub<typename wilt::sub_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::mul_ret<T, U>::type, N> operator* (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::mul<typename wilt::mul_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::mul_ret<T, U>::type, N> operator* (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
   return wilt::mul<typename wilt::mul_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::mul_ret<T, U>::type, N> operator* (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::mul<typename wilt::mul_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::mul_ret<T, U>::type, N> operator* (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::mul<typename wilt::mul_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::div_ret<T, U>::type, N> operator/ (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::div<typename wilt::div_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::div_ret<T, U>::type, N> operator/ (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
   return wilt::div<typename wilt::div_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::div_ret<T, U>::type, N> operator/ (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::div<typename wilt::div_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::div_ret<T, U>::type, N> operator/ (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::div<typename wilt::div_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::mod_ret<T, U>::type, N> operator% (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::mod<typename wilt::mod_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::mod_ret<T, U>::type, N> operator% (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
   return wilt::mod<typename wilt::mod_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::mod_ret<T, U>::type, N> operator% (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::mod<typename wilt::mod_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::mod_ret<T, U>::type, N> operator% (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::mod<typename wilt::mod_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator< (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::LT);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator< (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::LT);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator< (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::LT);
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator> (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::GT);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator> (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::GT);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator> (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::GT);
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator<= (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::LE);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator<= (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::LE);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator<= (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::LE);
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator>= (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::GE);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator>= (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::GE);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator>= (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::GE);
 }
 
-template <class T, dim_t N>
+template <class T, std::size_t N>
 bool operator== (const wilt::NArray<T, N>& lhs, const wilt::NArray<T, N>& rhs)
 {
   return allOf_(
@@ -1506,151 +1506,151 @@ bool operator== (const wilt::NArray<T, N>& lhs, const wilt::NArray<T, N>& rhs)
     lhs.sizes().data(), lhs.steps().data(), rhs.steps().data(), 
     [](const T& a, const T& b){return a == b;}, N);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator== (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::EQ);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator== (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::EQ);
 }
 
-template <class T, dim_t N>
+template <class T, std::size_t N>
 bool operator!= (const wilt::NArray<T, N>& lhs, const wilt::NArray<T, N>& rhs)
 {
   return !(lhs == rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator!= (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::NE);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<uint8_t, N> operator!= (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::compare(lhs, rhs, wilt::CMP::NE);
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
   return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_and_ret<T, U>::type, N> operator& (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::bit_and<typename wilt::bit_and_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
   return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_or_ret<T, U>::type, N> operator| (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::bit_or<typename wilt::bit_or_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
 
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const wilt::NArray<T, N>& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (wilt::NArray<T, N>&& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (wilt::NArray<T, N>&& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(std::forward<wilt::NArray<T, N>>(lhs), std::forward<wilt::NArray<U, N>>(rhs));
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const wilt::NArray<T, N>& lhs, const U& rhs)
 {
   return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (wilt::NArray<T, N>&& lhs, const U& rhs)
 {
   return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(std::forward<wilt::NArray<U, N>>(lhs), rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const T& lhs, const wilt::NArray<U, N>& rhs)
 {
   return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, rhs);
 }
-template <class T, class U, dim_t N>
+template <class T, class U, std::size_t N>
 wilt::NArray<typename wilt::bit_xor_ret<T, U>::type, N> operator^ (const T& lhs, wilt::NArray<U, N>&& rhs)
 {
   return wilt::bit_xor<typename wilt::bit_xor_ret<T, U>::type>(lhs, std::forward<wilt::NArray<U, N>>(rhs));

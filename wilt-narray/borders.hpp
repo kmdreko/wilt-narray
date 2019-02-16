@@ -136,7 +136,7 @@ namespace wilt
 
   }; // class BorderType
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   class NArrayWindow
   {
   public:
@@ -431,13 +431,13 @@ namespace wilt
 
   }; // class NArrayBorder
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> padArray(const NArray<T, N>& src, const Point<N>& width, BorderType<T> border)
   {
     return NArrayWindow<T, N>(src, -width, src.sizes() + 2 * width, border).clone();
   }
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> padArray(const NArray<T, N>& src, const Point<N>& width, int border)
   {
     return padArray(src, width, BorderType<T>(border));

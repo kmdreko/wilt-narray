@@ -40,7 +40,7 @@
 
 namespace wilt
 {
-  template <class T, dim_t N, class U, dim_t M, class Operator>
+  template <class T, std::size_t N, class U, std::size_t M, class Operator>
   void compress_(NArray<T, N>& dst, const NArray<U, M>& src, Point<N> pos, pos_t n, Operator op)
   {
     if (n == N-1)
@@ -61,7 +61,7 @@ namespace wilt
     }
   }
 
-  template <class T, class U, dim_t N, class Operator>
+  template <class T, class U, std::size_t N, class Operator>
   void filter_(NArray<T, N>& dst, const NArray<U, N>& src, Point<N> pos, Point<N> size, pos_t n, Operator op, const BorderType<U>& border)
   {
     if (n == N-1)
@@ -376,7 +376,7 @@ namespace wilt
     MEDIAN
   }; // enum filter
 
-  template <class T, dim_t N, class U, dim_t M, class Operator>
+  template <class T, std::size_t N, class U, std::size_t M, class Operator>
   NArray<T, N> compress(const NArray<U, M>& src, Operator op)
   {
     static_assert(N < M, "compress(): return must be smaller than src");
@@ -386,7 +386,7 @@ namespace wilt
     return ret;
   }
 
-  template <class T, class U, dim_t N, class Operator>
+  template <class T, class U, std::size_t N, class Operator>
   NArray<T, N> filter(const NArray<U, N>& src, const Point<N>& size, Operator op, BorderType<U> border)
   {
     NArray<T, N> ret;
@@ -398,13 +398,13 @@ namespace wilt
     return ret;
   }
 
-  template <class T, class U, dim_t N, class Operator>
+  template <class T, class U, std::size_t N, class Operator>
   NArray<T, N> filter(const NArray<U, N>& src, const Point<N>& size, Operator op, int border)
   {
     return filter<T>(src, size, op, BorderType<U>(border));
   }
 
-  template <class T, class U, dim_t N>
+  template <class T, class U, std::size_t N>
   NArray<T, N> filterMean(const NArray<U, N>& src, const Point<N>& size, BorderType<U> border)
   {
     // validate input
@@ -516,13 +516,13 @@ namespace wilt
     return ret;
   }
 
-  template <class T, class U, dim_t N>
+  template <class T, class U, std::size_t N>
   NArray<T, N> filterMean(const NArray<U, N>& src, const Point<N>& size, int border)
   {
     return filterMean<T>(src, size, BorderType<U>(border));
   }
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> filterMax(const NArray<T, N>& src, const NArray<uint8_t, N>& kernel, BorderType<T> border)
   {
     // validate input
@@ -654,25 +654,25 @@ namespace wilt
     return ret;
   }
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> filterMax(const NArray<T, N>& src, const NArray<uint8_t, N>& kernel, int border)
   {
     return filterMax<T>(src, kernel, BorderType<T>(border));
   }
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> filterMax(const NArray<T, N>& src, const Point<N>& size, BorderType<T> border)
   {
     return filterMax(src, NArray<uint8_t, N>(size, uint8_t(255)), border);
   }
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> filterMax(const NArray<T, N>& src, const Point<N>& size, int border)
   {
     return filterMax<T>(src, size, BorderType<T>(border));
   }
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> filterMin(const NArray<T, N>& src, const NArray<uint8_t, N>& kernel, BorderType<T> border)
   {
     // validate input
@@ -804,25 +804,25 @@ namespace wilt
     return ret;
   }
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> filterMin(const NArray<T, N>& src, const NArray<uint8_t, N>& kernel, int border)
   {
     return filterMin<T>(src, kernel, BorderType<T>(border));
   }
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> filterMin(const NArray<T, N>& src, const Point<N>& size, BorderType<T> border)
   {
     return filterMin(src, NArray<uint8_t, N>(size, uint8_t(255)), border);
   }
 
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   NArray<T, N> filterMin(const NArray<T, N>& src, const Point<N>& size, int border)
   {
     return filterMin<T>(src, size, BorderType<T>(border));
   }
 
-  template <class T, class U, dim_t N>
+  template <class T, class U, std::size_t N>
   NArray<T, N> filterMedian(const NArray<U, N>& src, const Point<N>& size, BorderType<U> border)
   {
     // validate input
@@ -967,13 +967,13 @@ namespace wilt
     return ret;
   }
 
-  template <class T, class U, dim_t N>
+  template <class T, class U, std::size_t N>
   NArray<T, N> filterMedian(const NArray<U, N>& src, const Point<N>& size, int border)
   {
     return filterMedian<T>(src, size, BorderType<U>(border));
   }
 
-  template <class T, class U, class V, dim_t N>
+  template <class T, class U, class V, std::size_t N>
   NArray<T, N> filterKernel(const NArray<U, N>& src, const NArray<V, N>& kernel, BorderType<U> border)
   {
     // validate input
@@ -1085,13 +1085,13 @@ namespace wilt
     return ret;
   }
 
-  template <class T, class U, class V, dim_t N>
+  template <class T, class U, class V, std::size_t N>
   NArray<T, N> filterKernel(const NArray<U, N>& src, const NArray<V, N>& kernel, int border)
   {
     return filterKernel<T>(src, kernel, BorderType<U>(border));
   }
 
-  template <class T, class U, dim_t N, class Operator>
+  template <class T, class U, std::size_t N, class Operator>
   NArray<T, N> filterCustom(const NArray<U, N>& src, const Point<N>& size, Operator op, BorderType<U> border)
   {
     // validate input
@@ -1172,7 +1172,7 @@ namespace wilt
     return ret;
   }
 
-  template <class T, class U, dim_t N, class Operator>
+  template <class T, class U, std::size_t N, class Operator>
   NArray<T, N> filterCustom(const NArray<U, N>& src, const Point<N>& size, Operator op, int border)
   {
     return filterCustom<T>(src, size, op, BorderType<U>(border));

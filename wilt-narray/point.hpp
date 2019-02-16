@@ -39,7 +39,7 @@ namespace wilt
 {
   //! @class  Point
   //! @brief  An integer point class with arithmetic operations
-  template <dim_t N>
+  template <std::size_t N>
   class Point
   {
   public:
@@ -195,7 +195,7 @@ namespace wilt
   //!
   //! Is used to simplify NArray::slice_() calls
   //! Will fail if N==0
-  template <dim_t N>
+  template <std::size_t N>
   Point<N-1> slice_(const Point<N>& pt, dim_t n)
   {
     Point<N-1> ret;
@@ -210,7 +210,7 @@ namespace wilt
   //! @param[in]  n - index to add at
   //! @param[in]  v - value to add
   //! @return     point with the value added
-  template <dim_t N>
+  template <std::size_t N>
   Point<N+1> push_(const Point<N>& pt, dim_t n, pos_t v)
   {
     Point<N+1> ret;
@@ -230,7 +230,7 @@ namespace wilt
   //!
   //! Is used to simplify NArray::transpose() calls
   //! Will fail if N==0
-  template <dim_t N>
+  template <std::size_t N>
   Point<N> swap_(const Point<N>& pt, dim_t a, dim_t b)
   {
     Point<N> ret = pt;
@@ -238,7 +238,7 @@ namespace wilt
     return ret;
   }
 
-  template <dim_t N, dim_t M>
+  template <std::size_t N, dim_t M>
   Point<N> chopLow_(const Point<M>& pt)
   {
     Point<N> ret;
@@ -247,7 +247,7 @@ namespace wilt
     return ret;
   }
 
-  template <dim_t N, dim_t M>
+  template <std::size_t N, dim_t M>
   Point<N> chopHigh_(const Point<M>& pt)
   {
     Point<N> ret;
@@ -264,7 +264,7 @@ namespace wilt
   //! Dimension array should all be positive and non-zero to produce a
   //! meaningful result
   //! Will fail if N==0
-  template <dim_t N>
+  template <std::size_t N>
   Point<N> step_(const Point<N>& sizes)
   {
     Point<N> ret;
@@ -282,7 +282,7 @@ namespace wilt
   //! Dimension array should all be positive to produce a meaningful result
   //! Will be zero if any dimension is zero
   //! Will fail if N==0
-  template <dim_t N>
+  template <std::size_t N>
   pos_t size_(const Point<N>& sizes)
   {
     pos_t ret = sizes[0];
@@ -298,7 +298,7 @@ namespace wilt
   //! @return        offset to adjust the original base pointer
   //!
   //! Is used exclusively in NArray::align() to create an aligned NArray
-  template <dim_t N>
+  template <std::size_t N>
   pos_t align_(Point<N>& sizes, Point<N>& steps)
   {
     pos_t offset = 0;
@@ -334,7 +334,7 @@ namespace wilt
   //! should result in return=1, sizes=size_(sizes), steps={1}
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
-  template <dim_t N>
+  template <std::size_t N>
   dim_t condense_(Point<N>& sizes, Point<N>& steps)
   {
     dim_t j = N-1;
@@ -376,7 +376,7 @@ namespace wilt
   //! should result in return=1, sizes=size_(sizes), step1={1}, step2={1}
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
-  template <dim_t N>
+  template <std::size_t N>
   dim_t condense_(Point<N>& sizes, Point<N>& step1, Point<N>& step2)
   {
     dim_t j = 0;
@@ -400,7 +400,7 @@ namespace wilt
   //! @param[in]  sizes - dimension array, catalyst for the conversion
   //! @param[in]  idx - index to convert from
   //! @return     point that corresponds to the index
-  template <dim_t N>
+  template <std::size_t N>
   Point<N> idx2pos_(const Point<N>& sizes, pos_t idx)
   {
     Point<N> ret;
@@ -416,7 +416,7 @@ namespace wilt
   //! @param[in]  sizes - dimension array, catalyst for the conversion
   //! @param[in]  pos - point to convert from
   //! @return     index that corresponds to the point
-  template <dim_t N>
+  template <std::size_t N>
   pos_t pos2idx_(const Point<N>& sizes, const Point<N>& pos)
   {
     pos_t idx = pos[N-1];
@@ -432,7 +432,7 @@ namespace wilt
 //! @param[in]  rhs - point to compare
 //! @return     true if points are equal, false if different dimensions or
 //!             elements are not equal
-template <dim_t N, dim_t M>
+template <std::size_t N, dim_t M>
 bool operator== (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
 {
   if (N != M)
@@ -450,7 +450,7 @@ bool operator== (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
 //! @param[in]  rhs - point to compare
 //! @return     false if points are equal, true if different dimensions or
 //!             elements are not equal
-template <dim_t N, dim_t M>
+template <std::size_t N, dim_t M>
 bool operator!= (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
 {
   if (N != M)
@@ -468,7 +468,7 @@ bool operator!= (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
 //! @param[in]  lhs - point to add
 //! @param[in]  rhs - point to add
 //! @return     result from addition of the two points
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator+ (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
@@ -481,7 +481,7 @@ wilt::Point<N> operator+ (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
 //! @param[in]  lhs - point to subtract
 //! @param[in]  rhs - point to subtract
 //! @return     result from subtraction of the two points
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator- (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
@@ -495,7 +495,7 @@ wilt::Point<N> operator- (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
 //! @param[in]  lhs - point to add
 //! @param[in]  rhs - scalar to add
 //! @return     result from addition of the point and scalar
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator+ (const wilt::Point<N>& lhs, pos_t rhs)
 {
   wilt::Point<N> ret;
@@ -508,7 +508,7 @@ wilt::Point<N> operator+ (const wilt::Point<N>& lhs, pos_t rhs)
 //! @param[in]  lhs - point to subtract
 //! @param[in]  rhs - scalar to subtract
 //! @return     result from subtraction of the point and scalar
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator- (const wilt::Point<N>& lhs, pos_t rhs)
 {
   wilt::Point<N> ret;
@@ -521,7 +521,7 @@ wilt::Point<N> operator- (const wilt::Point<N>& lhs, pos_t rhs)
 //! @param[in]  lhs - point to multiply
 //! @param[in]  rhs - scalar to multiply
 //! @return     result from multipliction of the point and scalar
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator* (const wilt::Point<N>& lhs, pos_t rhs)
 {
   wilt::Point<N> ret;
@@ -534,7 +534,7 @@ wilt::Point<N> operator* (const wilt::Point<N>& lhs, pos_t rhs)
 //! @param[in]  lhs - point to divide
 //! @param[in]  rhs - scalar to divide
 //! @return     result from division of the point and scalar
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator/ (const wilt::Point<N>& lhs, pos_t rhs)
 {
   wilt::Point<N> ret;
@@ -548,7 +548,7 @@ wilt::Point<N> operator/ (const wilt::Point<N>& lhs, pos_t rhs)
 //! @param[in]  lhs - scalar to add
 //! @param[in]  rhs - point to add
 //! @return     result from addition of the point and scalar
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator+ (pos_t lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
@@ -561,7 +561,7 @@ wilt::Point<N> operator+ (pos_t lhs, const wilt::Point<N>& rhs)
 //! @param[in]  lhs - scalar to subtract
 //! @param[in]  rhs - point to subtract
 //! @return     result from subtraction of the point and scalar
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator- (pos_t lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
@@ -574,7 +574,7 @@ wilt::Point<N> operator- (pos_t lhs, const wilt::Point<N>& rhs)
 //! @param[in]  lhs - scalar to multiply
 //! @param[in]  rhs - point to multiply
 //! @return     result from multipliction of the point and scalar
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator* (pos_t lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
@@ -587,7 +587,7 @@ wilt::Point<N> operator* (pos_t lhs, const wilt::Point<N>& rhs)
 //! @param[in]  lhs - scalar to divide
 //! @param[in]  rhs - point to divide
 //! @return     result from division of the point and scalar
-template <dim_t N>
+template <std::size_t N>
 wilt::Point<N> operator/ (pos_t lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;

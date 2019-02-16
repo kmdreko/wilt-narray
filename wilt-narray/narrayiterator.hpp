@@ -42,7 +42,7 @@ namespace wilt
   //! The iterator class retains its own reference to the array data, meaning
   //! the NArray it is constructed from may be deleted and the iterator will
   //! still iterate over the data
-  template <class T, dim_t N>
+  template <class T, std::size_t N>
   class NArrayIterator
   {
   public:
