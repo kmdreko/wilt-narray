@@ -299,7 +299,7 @@ namespace wilt
     {
       Point<N> loc = idx2pos_(sizes_, m_pos);
       pointer ptr = base_;
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
         ptr += loc[i] * steps_[i];
 
       return ptr;

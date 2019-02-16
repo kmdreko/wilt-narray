@@ -97,7 +97,7 @@ namespace wilt
       pos_t pos,          // position of filled idx segment
       pos_t length,       // length of filled idx segment
       Operator op,        // final filter operator
-      dim_t n)            // current dimension / recursion counter
+      std::size_t n)      // current dimension / recursion counter
   {
     // invert size
     // invert sstep into istep
@@ -147,7 +147,7 @@ namespace wilt
       pos_t pos,          // position of filled idx segment
       pos_t length,       // length of filled idx segment
       Operator op,        // final filter operator
-      dim_t n)            // current dimension / recursion counter
+      std::size_t n)      // current dimension / recursion counter
   {
     int width = size[0] / 2;
 
@@ -196,7 +196,7 @@ namespace wilt
       pos_t pos,          // position of filled idx segment
       pos_t length,       // length of filled idx segment
       Operator op,        // final filter operator
-      dim_t n)            // current dimension / recursion counter
+      std::size_t n)      // current dimension / recursion counter
   {
     int width = size[0] / 2;
 
@@ -245,7 +245,7 @@ namespace wilt
       pos_t pos,          // position of filled idx segment
       pos_t length,       // length of filled idx segment
       Operator op,        // final filter operator
-      dim_t n)            // current dimension / recursion counter
+      std::size_t n)      // current dimension / recursion counter
   {
     int width = size[0] / 2;
 
@@ -294,7 +294,7 @@ namespace wilt
       pos_t pos,          // position of filled idx segment
       pos_t length,       // length of filled idx segment
       Operator op,        // final filter operator
-      dim_t n)            // current dimension / recursion counter
+      std::size_t n)      // current dimension / recursion counter
   {
     int width = size[0] / 2;
 
@@ -350,7 +350,7 @@ namespace wilt
       pos_t pos,          // position of filled idx segment
       pos_t length,       // length of filled idx segment
       Operator op,        // final filter operator
-      dim_t n)            // current dimension / recursion counter
+      std::size_t n)      // current dimension / recursion counter
   {
     int width = size[0] / 2;
 
@@ -408,7 +408,7 @@ namespace wilt
   NArray<T, N> filterMean(const NArray<U, N>& src, const Point<N>& size, BorderType<U> border)
   {
     // validate input
-    for (dim_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
       if (src.length(i) <= size[i] / 2)
         throw std::invalid_argument("filterMean(): filter size too large");
@@ -529,7 +529,7 @@ namespace wilt
     Point<N> size = kernel.sizes();
     if (kernel.empty() || !kernel.isContinuous() || !kernel.isAligned())
       throw std::invalid_argument("filterMax(): kernel must be non-empty, continuous, and aligned. use clone()");
-    for (dim_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
       if (src.length(i) <= size[i] / 2)
         throw std::invalid_argument("filterMax(): kernel too large");
@@ -679,7 +679,7 @@ namespace wilt
     Point<N> size = kernel.sizes();
     if (kernel.empty() || !kernel.isContinuous() || !kernel.isAligned())
       throw std::invalid_argument("filterMin(): kernel must be non-empty, continuous, and aligned. use clone()");
-    for (dim_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
       if (src.length(i) <= size[i] / 2)
         throw std::invalid_argument("filterMin(): kernel too large");
@@ -826,7 +826,7 @@ namespace wilt
   NArray<T, N> filterMedian(const NArray<U, N>& src, const Point<N>& size, BorderType<U> border)
   {
     // validate input
-    for (dim_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
       if (src.length(i) <= size[i] / 2)
         throw std::invalid_argument("filterMedian(): filter size too large");
@@ -980,7 +980,7 @@ namespace wilt
     Point<N> size = kernel.sizes();
     if (kernel.empty() || !kernel.isContinuous() || !kernel.isAligned())
       throw std::invalid_argument("filterKernel(): kernel must be non-empty, continuous, and aligned. use clone()");
-    for (dim_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
       if (src.length(i) <= size[i] / 2)
         throw std::invalid_argument("filterKernel(): kernel size too large");
@@ -1095,7 +1095,7 @@ namespace wilt
   NArray<T, N> filterCustom(const NArray<U, N>& src, const Point<N>& size, Operator op, BorderType<U> border)
   {
     // validate input
-    for (dim_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
       if (src.length(i) <= size[i] / 2)
         throw std::invalid_argument("filterCustom(): filter size too large");

@@ -90,7 +90,7 @@ namespace wilt
     //! @return     reference to this point
     Point<N>& operator+= (const Point<N>& pt)
     {
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
         m_size[i] += pt.m_size[i];
       return *this;
     }
@@ -100,7 +100,7 @@ namespace wilt
     //! @return     reference to this point
     Point<N>& operator-= (const Point<N>& pt)
     {
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
         m_size[i] -= pt.m_size[i];
       return *this;
     }
@@ -110,7 +110,7 @@ namespace wilt
     //! @return     reference to this point
     Point<N>& operator+= (pos_t val)
     {
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
         m_size[i] += val;
       return *this;
     }
@@ -120,7 +120,7 @@ namespace wilt
     //! @return     reference to this point
     Point<N>& operator-= (pos_t val)
     {
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
         m_size[i] -= val;
       return *this;
     }
@@ -130,7 +130,7 @@ namespace wilt
     //! @return     reference to this point
     Point<N>& operator*= (pos_t val)
     {
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
         m_size[i] *= val;
       return *this;
     }
@@ -140,7 +140,7 @@ namespace wilt
     //! @return     reference to this point
     Point<N>& operator/= (pos_t val)
     {
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
         m_size[i] /= val;
       return *this;
     }
@@ -149,7 +149,7 @@ namespace wilt
     //! @brief      Indexing operator
     //! @param[in]  n - index
     //! @return     reference to value at the index
-    pos_t& operator[] (dim_t n)
+    pos_t& operator[] (std::size_t n)
     {
       return m_size[n];
     }
@@ -157,7 +157,7 @@ namespace wilt
     //! @brief      Indexing operator
     //! @param[in]  n - index
     //! @return     reference to value at the index
-    const pos_t& operator[] (dim_t n) const
+    const pos_t& operator[] (std::size_t n) const
     {
       return m_size[n];
     }
@@ -196,10 +196,10 @@ namespace wilt
   //! Is used to simplify NArray::slice_() calls
   //! Will fail if N==0
   template <std::size_t N>
-  Point<N-1> slice_(const Point<N>& pt, dim_t n)
+  Point<N-1> slice_(const Point<N>& pt, std::size_t n)
   {
     Point<N-1> ret;
-    for (dim_t i = 0, j = 0; i < N; ++i)
+    for (std::size_t i = 0, j = 0; i < N; ++i)
       if (i != n)
         ret[j++] = pt[i];
     return ret;
@@ -211,13 +211,13 @@ namespace wilt
   //! @param[in]  v - value to add
   //! @return     point with the value added
   template <std::size_t N>
-  Point<N+1> push_(const Point<N>& pt, dim_t n, pos_t v)
+  Point<N+1> push_(const Point<N>& pt, std::size_t n, pos_t v)
   {
     Point<N+1> ret;
-    for (dim_t i = 0; i < n; ++i)
+    for (std::size_t i = 0; i < n; ++i)
       ret[i] = pt[i];
     ret[n] = v;
-    for (dim_t i = n+1; i < N+1; ++i)
+    for (std::size_t i = n+1; i < N+1; ++i)
       ret[i] = pt[i-1];
     return ret;
   }
@@ -231,27 +231,27 @@ namespace wilt
   //! Is used to simplify NArray::transpose() calls
   //! Will fail if N==0
   template <std::size_t N>
-  Point<N> swap_(const Point<N>& pt, dim_t a, dim_t b)
+  Point<N> swap_(const Point<N>& pt, std::size_t a, std::size_t b)
   {
     Point<N> ret = pt;
     std::swap(ret[a], ret[b]);
     return ret;
   }
 
-  template <std::size_t N, dim_t M>
+  template <std::size_t N, std::size_t M>
   Point<N> chopLow_(const Point<M>& pt)
   {
     Point<N> ret;
-    for (dim_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
       ret[i] = pt[i];
     return ret;
   }
 
-  template <std::size_t N, dim_t M>
+  template <std::size_t N, std::size_t M>
   Point<N> chopHigh_(const Point<M>& pt)
   {
     Point<N> ret;
-    for (dim_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
       ret[i] = pt[M-N+i];
     return ret;
   }
@@ -269,7 +269,7 @@ namespace wilt
   {
     Point<N> ret;
     ret[N-1] = 1;
-    for (dim_t i = N-1; i > 0; --i)
+    for (std::size_t i = N-1; i > 0; --i)
       ret[i-1] = ret[i] * sizes[i];
     return ret;
   }
@@ -286,7 +286,7 @@ namespace wilt
   pos_t size_(const Point<N>& sizes)
   {
     pos_t ret = sizes[0];
-    for (dim_t i = 1; i < N; ++i)
+    for (std::size_t i = 1; i < N; ++i)
       ret *= sizes[i];
     return ret;
   }
@@ -302,7 +302,7 @@ namespace wilt
   pos_t align_(Point<N>& sizes, Point<N>& steps)
   {
     pos_t offset = 0;
-    for (dim_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
       if (steps[i] < 0)
       {
@@ -310,9 +310,9 @@ namespace wilt
         offset -= steps[i] * (sizes[i] - 1);
       }
     }
-    for (dim_t i = 1; i < N; ++i)
+    for (std::size_t i = 1; i < N; ++i)
     {
-      for (dim_t j = i; j > 0 && steps[j] > steps[j-1]; --j)
+      for (std::size_t j = i; j > 0 && steps[j] > steps[j-1]; --j)
       {
         std::swap(steps[j], steps[j-1]);
         std::swap(sizes[j], sizes[j-1]);
@@ -335,9 +335,9 @@ namespace wilt
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <std::size_t N>
-  dim_t condense_(Point<N>& sizes, Point<N>& steps)
+  std::size_t condense_(Point<N>& sizes, Point<N>& steps)
   {
-    dim_t j = N-1;
+    std::size_t j = N-1;
     for (int i = N-2; i >= 0; --i)
     {
       if (steps[j] * sizes[j] == steps[i])
@@ -351,7 +351,7 @@ namespace wilt
         steps[j] = steps[i];
       }
     }
-    for (dim_t i = 0; i < j; ++i)
+    for (std::size_t i = 0; i < j; ++i)
     {
       sizes[i] = 1;
       steps[i] = std::abs(sizes[j] * steps[j]);
@@ -377,10 +377,10 @@ namespace wilt
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <std::size_t N>
-  dim_t condense_(Point<N>& sizes, Point<N>& step1, Point<N>& step2)
+  std::size_t condense_(Point<N>& sizes, Point<N>& step1, Point<N>& step2)
   {
-    dim_t j = 0;
-    for (dim_t i = 1; i < N; ++i)
+    std::size_t j = 0;
+    for (std::size_t i = 1; i < N; ++i)
     {
       if (sizes[i] * step1[i] == step1[i-1])
         sizes[j] *= sizes[i];
@@ -432,13 +432,13 @@ namespace wilt
 //! @param[in]  rhs - point to compare
 //! @return     true if points are equal, false if different dimensions or
 //!             elements are not equal
-template <std::size_t N, dim_t M>
+template <std::size_t N, std::size_t M>
 bool operator== (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
 {
   if (N != M)
     return false;
 
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     if (!(lhs[i] == rhs[i]))
       return false;
 
@@ -450,13 +450,13 @@ bool operator== (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
 //! @param[in]  rhs - point to compare
 //! @return     false if points are equal, true if different dimensions or
 //!             elements are not equal
-template <std::size_t N, dim_t M>
+template <std::size_t N, std::size_t M>
 bool operator!= (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
 {
   if (N != M)
     return true;
 
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     if (!(lhs[i] == rhs[i]))
       return true;
 
@@ -472,7 +472,7 @@ template <std::size_t N>
 wilt::Point<N> operator+ (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs[i] + rhs[i];
   return ret;
 }
@@ -485,7 +485,7 @@ template <std::size_t N>
 wilt::Point<N> operator- (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs[i] - rhs[i];
   return ret;
 }
@@ -499,7 +499,7 @@ template <std::size_t N>
 wilt::Point<N> operator+ (const wilt::Point<N>& lhs, pos_t rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs[i] + rhs;
   return ret;
 }
@@ -512,7 +512,7 @@ template <std::size_t N>
 wilt::Point<N> operator- (const wilt::Point<N>& lhs, pos_t rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs[i] - rhs;
   return ret;
 }
@@ -525,7 +525,7 @@ template <std::size_t N>
 wilt::Point<N> operator* (const wilt::Point<N>& lhs, pos_t rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs[i] * rhs;
   return ret;
 }
@@ -538,7 +538,7 @@ template <std::size_t N>
 wilt::Point<N> operator/ (const wilt::Point<N>& lhs, pos_t rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs[i] / rhs;
   return ret;
 }
@@ -552,7 +552,7 @@ template <std::size_t N>
 wilt::Point<N> operator+ (pos_t lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs + rhs[i];
   return ret;
 }
@@ -565,7 +565,7 @@ template <std::size_t N>
 wilt::Point<N> operator- (pos_t lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs - rhs[i];
   return ret;
 }
@@ -578,7 +578,7 @@ template <std::size_t N>
 wilt::Point<N> operator* (pos_t lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs * rhs[i];
   return ret;
 }
@@ -591,7 +591,7 @@ template <std::size_t N>
 wilt::Point<N> operator/ (pos_t lhs, const wilt::Point<N>& rhs)
 {
   wilt::Point<N> ret;
-  for (dim_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     ret[i] = lhs / rhs[i];
   return ret;
 }

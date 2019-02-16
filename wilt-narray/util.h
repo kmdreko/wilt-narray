@@ -46,7 +46,6 @@
 // - std::out_of_range
 
 // type aliases
-typedef std::size_t    dim_t;
 typedef std::ptrdiff_t pos_t;
 
 namespace wilt

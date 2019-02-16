@@ -160,12 +160,12 @@ namespace wilt
 
     T at(const Point<N>& loc) const
     {
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
         if (loc[i] < 0 || loc[i] >= m_size[i])
           throw std::out_of_range("at() element larger then dimensions");
 
       Point<N> arr_pos = loc + m_offs;
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
       {
         if (arr_pos[i] < 0 || arr_pos[i] >= m_arr.length(i))
         {
@@ -216,7 +216,7 @@ namespace wilt
       Point<N> mins;
       Point<N> maxs;
       bool enclosed = true;
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
       {
         // min[i] = max(-m_offs[i], 0); with enclosed flag
         if (m_offs[i] < 0)
@@ -303,7 +303,7 @@ namespace wilt
       return ret;
     }
 
-    void wrapArea_(NArray<T, N>& arr, Point<N> dloc, Point<N> sloc, dim_t n) const
+    void wrapArea_(NArray<T, N>& arr, Point<N> dloc, Point<N> sloc, std::size_t n) const
     {
       if (n == N-1)
       {
@@ -321,7 +321,7 @@ namespace wilt
     {
       Point<N> s_min = min;
       Point<N> s_max = max;
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
       {
         s_min[i] = 0;
         s_max[i] = m_size[i];
@@ -345,7 +345,7 @@ namespace wilt
     {
       Point<N> s_min = min;
       Point<N> s_max = max;
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
       {
         s_min[i] = 0;
         s_max[i] = m_size[i];
@@ -368,7 +368,7 @@ namespace wilt
     {
       Point<N> s_min = min;
       Point<N> s_max = max;
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
       {
         s_min[i] = 0;
         s_max[i] = m_size[i];
@@ -391,7 +391,7 @@ namespace wilt
     {
       Point<N> s_min = min;
       Point<N> s_max = max;
-      for (dim_t i = 0; i < N; ++i)
+      for (std::size_t i = 0; i < N; ++i)
       {
         s_min[i] = 0;
         s_max[i] = m_size[i];
