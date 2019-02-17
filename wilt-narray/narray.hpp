@@ -44,7 +44,7 @@
 
 namespace wilt
 {
-  template <class T, std::size_t N> class NArrayIterator;
+  template <class T, std::size_t N, std::size_t M = 0> class NArrayIterator;
   // - defined in "narrayiterator.hpp"
 
   //////////////////////////////////////////////////////////////////////////////
@@ -348,7 +348,7 @@ namespace wilt
 
     // Gets the array at that location. M must be less than N.
     template <std::size_t M>
-    NArray<T, N-M> subarrayAt(const Point<M>& pos) const;
+    typename NArray<T, N-M>::exposed_type subarrayAt(const Point<M>& pos) const;
 
     // Transforms the array into a new size, typically to create sub-dimension
     // splits but can form it into any set of dimensions if allowed by the
@@ -1602,7 +1602,7 @@ namespace wilt
 
   template <class T, std::size_t N>
   template <std::size_t M>
-  NArray<T, N-M> NArray<T, N>::subarrayAt(const Point<M>& pos) const
+  typename NArray<T, N-M>::exposed_type NArray<T, N>::subarrayAt(const Point<M>& pos) const
   {
     static_assert(M<N && M>0, "subarrayAt(): pos is not less than N");
 
@@ -1613,12 +1613,12 @@ namespace wilt
       else
         base += steps_[i] * pos[i];
 
-    return NArray<value, N-M>(data_, base, chopHigh_<N - M>(sizes_), chopHigh_<N - M>(steps_));
+    return NArray<value, N-M>(data_, base, chopHigh_<N-M>(sizes_), chopHigh_<N-M>(steps_));
   }
 
   template <class T, std::size_t N>
   template <std::size_t M>
-  inline NArray<T, M> NArray<T, N>::reshape(const Point<M>& size) const
+  NArray<T, M> NArray<T, N>::reshape(const Point<M>& size) const
   {
     Point<N> oldsizes = sizes_;
     Point<N> oldsteps = steps_;

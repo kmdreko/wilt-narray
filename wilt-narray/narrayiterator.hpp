@@ -42,20 +42,24 @@ namespace wilt
   //! The iterator class retains its own reference to the array data, meaning
   //! the NArray it is constructed from may be deleted and the iterator will
   //! still iterate over the data
-  template <class T, std::size_t N>
+  template <class T, std::size_t N, std::size_t M>
   class NArrayIterator
   {
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // ASSERTS
+    ////////////////////////////////////////////////////////////////////////////
+    static_assert(N > 0, "source size must be greater than 0");
+    static_assert(M < N, "result size must be less than source size");
+
   public:
     ////////////////////////////////////////////////////////////////////////////
     // TYPE DEFINITIONS
     ////////////////////////////////////////////////////////////////////////////
 
     typedef std::random_access_iterator_tag iterator_category;
-    typedef typename std::remove_const<T>::type type;
-    typedef T value_type;
+    typedef typename NArray<T, M>::exposed_type value_type;
     typedef ptrdiff_t difference_type;
-    typedef T& reference;
-    typedef T* pointer;
 
   private:
     ////////////////////////////////////////////////////////////////////////////
@@ -90,7 +94,7 @@ namespace wilt
 
     //! @brief      Copy constructor
     //! @param[in]  iter - iterator to copy from
-    NArrayIterator(const NArrayIterator<T, N>& iter)
+    NArrayIterator(const NArrayIterator<T, N, M>& iter)
       : array_(iter.array_),
         index_(iter.index_)
     {
@@ -100,7 +104,7 @@ namespace wilt
     //! @brief      Copy constructor with offset
     //! @param[in]  iter - iterator to copy from
     //! @param[in]  pos - data offset value
-    NArrayIterator(const NArrayIterator<T, N>& iter, pos_t pos)
+    NArrayIterator(const NArrayIterator<T, N, M>& iter, pos_t pos)
       : array_(iter.array_),
         index_(pos)
     {
@@ -115,7 +119,7 @@ namespace wilt
     //! @brief      assignment operator
     //! @param[in]  iter - iterator to copy from
     //! @return     reference to this object
-    NArrayIterator<T, N>& operator= (const NArrayIterator<T, N>& iter)
+    NArrayIterator<T, N, M>& operator= (const NArrayIterator<T, N, M>& iter)
     {
       array_ = iter.array_;
       index_ = iter.index_;
@@ -126,7 +130,7 @@ namespace wilt
     //! @brief      in-place addition operator, offsets data by +pos
     //! @param[in]  pos - value to offset
     //! @return     reference to this object
-    NArrayIterator<T, N>& operator+= (const ptrdiff_t pos)
+    NArrayIterator<T, N, M>& operator+= (const ptrdiff_t pos)
     {
       index_ += pos;
       return *this;
@@ -135,7 +139,7 @@ namespace wilt
     //! @brief      in-place addition operator, offsets data by -pos
     //! @param[in]  pos - value to offset
     //! @return     reference to this object
-    NArrayIterator<T, N>& operator-= (const ptrdiff_t pos)
+    NArrayIterator<T, N, M>& operator-= (const ptrdiff_t pos)
     {
       index_ -= pos;
       return *this;
@@ -148,14 +152,7 @@ namespace wilt
 
     //! @brief      de-reference operator, invalid if <begin or >=end
     //! @return     reference to data at the iterator position
-    reference operator* () const
-    {
-      return *at_(index_);
-    }
-
-    //! @brief      pointer operator, invalid if <begin or >=end
-    //! @return     pointer to data at the iterator position
-    pointer operator-> () const
+    value_type operator* () const
     {
       return at_(index_);
     }
@@ -163,17 +160,17 @@ namespace wilt
     //! @brief      index operator
     //! @param[in]  pos - data offset value
     //! @return     reference to data at the iterator position + offset
-    reference operator[] (pos_t pos) const
+    value_type operator[] (pos_t pos) const
     {
-      return *at_(index_ + pos);
+      return at_(index_ + pos);
     }
 
     //! @brief      gets the position of the iterator
     //! @return     point corresponding to the position in the NArray currently
     //!             pointing to
-    Point<N> position() const
+    Point<N-M> position() const
     {
-      return idx2pos_(array_->sizes(), index_);
+      return idx2pos_(chopLow_<N-M>(array_->sizes()), index_);
     }
 
   public:
@@ -185,16 +182,16 @@ namespace wilt
     //!             NArray data and if at same position
     //! @param[in]  iter - iterator to compare
     //! @return     true if iterators are the same, false otherwise
-    bool operator== (const NArrayIterator<T, N>& iter) const
+    bool operator== (const NArrayIterator<T, N, M>& iter) const
     {
-      return array_ == iter.array_ && index_  == iter.index_;
+      return array_ == iter.array_ && index_ == iter.index_;
     }
 
     //! @brief      not equal operator, determines both if it references the
     //!             same NArray data and if at same position
     //! @param[in]  iter - iterator to compare
     //! @return     false if iterators are the same, true otherwise
-    bool operator!= (const NArrayIterator<T, N>& iter) const
+    bool operator!= (const NArrayIterator<T, N, M>& iter) const
     {
       return !(*this == iter);
     }
@@ -203,7 +200,7 @@ namespace wilt
     //!             does not determine if they share a data-space
     //! @param[in]  iter - iterator to compare
     //! @return     true if data offset is less than that of iter
-    bool operator<  (const NArrayIterator<T, N>& iter) const
+    bool operator<  (const NArrayIterator<T, N, M>& iter) const
     {
       return index_ < iter.index_;
     }
@@ -212,7 +209,7 @@ namespace wilt
     //!             does not determine if they share a data-space
     //! @param[in]  iter - iterator to compare
     //! @return     true if data offset is greater than that of iter
-    bool operator>  (const NArrayIterator<T, N>& iter) const
+    bool operator>  (const NArrayIterator<T, N, M>& iter) const
     {
       return index_ > iter.index_;
     }
@@ -221,7 +218,7 @@ namespace wilt
     //!             offset, does not determine if they share a data-space
     //! @param[in]  iter - iterator to compare
     //! @return     true if data offset is less than or equal to that of iter
-    bool operator<= (const NArrayIterator<T, N>& iter) const
+    bool operator<= (const NArrayIterator<T, N, M>& iter) const
     {
       return index_ <= iter.index_;
     }
@@ -230,7 +227,7 @@ namespace wilt
     //!             offset, does not determine if they share a data-space
     //! @param[in]  iter - iterator to compare
     //! @return     true if data offset is greater than or equal to that of iter
-    bool operator>= (const NArrayIterator<T, N>& iter) const
+    bool operator>= (const NArrayIterator<T, N, M>& iter) const
     {
       return !(*this < iter);
     }
@@ -242,7 +239,7 @@ namespace wilt
 
     //! @brief      increments the data offset value
     //! @return     reference to this object
-    NArrayIterator<T, N>& operator++ ()
+    NArrayIterator<T, N, M>& operator++ ()
     {
       ++index_;
       return *this;
@@ -250,7 +247,7 @@ namespace wilt
 
     //! @brief      decrements the data offset value
     //! @return     reference to this object
-    NArrayIterator<T, N>& operator-- ()
+    NArrayIterator<T, N, M>& operator-- ()
     {
       --index_;
       return *this;
@@ -258,16 +255,16 @@ namespace wilt
 
     //! @brief      increments the data offset value
     //! @return     copy of this object before incrementing
-    NArrayIterator<T, N> operator++ (int)
+    NArrayIterator<T, N, M> operator++ (int)
     {
-      return NArrayIterator<T, N>(*this, index_++);
+      return NArrayIterator<T, N, M>(*this, index_++);
     }
 
     //! @brief      decrements the data offset value
     //! @return     copy of this object before decrementing
-    NArrayIterator<T, N> operator-- (int)
+    NArrayIterator<T, N, M> operator-- (int)
     {
-      return NArrayIterator<T, N>(*this, index_--);
+      return NArrayIterator<T, N, M>(*this, index_--);
     }
 
     //! @brief      the addition of two iterators
@@ -275,7 +272,7 @@ namespace wilt
     //! @return     the addition of the two data offset values
     //!
     //! This value doesn't mean much, is only here to pair with operator-
-    difference_type operator+ (const NArrayIterator<T, N>& iter) const
+    difference_type operator+ (const NArrayIterator<T, N, M>& iter) const
     {
       return index_ + iter.index_;
     }
@@ -283,7 +280,7 @@ namespace wilt
     //! @brief      the difference of two iterators
     //! @param[in]  iter - the iterator to diff
     //! @return     the difference of the two data offset values
-    difference_type operator- (const NArrayIterator<T, N>& iter) const
+    difference_type operator- (const NArrayIterator<T, N, M>& iter) const
     {
       return index_ - iter.index_;
     }
@@ -291,17 +288,17 @@ namespace wilt
     //! @brief      addition operator
     //! @param[in]  pos - the offset to add
     //! @return     this iterator plus the offset
-    NArrayIterator<T, N> operator+ (const ptrdiff_t pos)
+    NArrayIterator<T, N, M> operator+ (const ptrdiff_t pos)
     {
-      return NArrayIterator<T, N>(*this, index_ + pos);
+      return NArrayIterator<T, N, M>(*this, index_ + pos);
     }
 
     //! @brief      subtraction operator
     //! @param[in]  pos - the offset to subtract
     //! @return     this iterator minus the offset
-    NArrayIterator<T, N> operator- (const ptrdiff_t pos)
+    NArrayIterator<T, N, M> operator- (const ptrdiff_t pos)
     {
-      return NArrayIterator<T, N>(*this, index_ - pos);
+      return NArrayIterator<T, N, M>(*this, index_ - pos);
     }
 
   private:
@@ -312,14 +309,9 @@ namespace wilt
     //! @brief      gets the pointer at the data offset
     //! @param[in]  pos - data offset value
     //! @return     pointer to data at the offset
-    pointer at_(pos_t pos) const
+    value_type at_(pos_t pos) const
     {
-      Point<N> loc = idx2pos_(array_->sizes(), index_);
-      T* ptr = array_->base();
-      for (std::size_t i = 0; i < N; ++i)
-        ptr += loc[i] * array_->steps()[i];
-
-      return ptr;
+      return array_->subarrayAt(position());
     }
 
   }; // class NArrayIterator
