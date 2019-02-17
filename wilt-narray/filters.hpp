@@ -40,27 +40,6 @@
 
 namespace wilt
 {
-  template <class T, std::size_t N, class U, std::size_t M, class Operator>
-  void compress_(NArray<T, N>& dst, const NArray<U, M>& src, Point<N> pos, pos_t n, Operator op)
-  {
-    if (n == N-1)
-    {
-      for (int i = 0; i < dst.length(n); ++i)
-      {
-        pos[n] = i;
-        dst.at(pos) = op(src.subarrayAt(pos));
-      }
-    }
-    else
-    {
-      for (int i = 0; i < dst.length(n); ++i)
-      {
-        pos[n] = i;
-        compress_(dst, src, pos, n+1, op);
-      }
-    }
-  }
-
   template <class T, class U, std::size_t N, class Operator>
   void filter_(NArray<T, N>& dst, const NArray<U, N>& src, Point<N> pos, Point<N> size, pos_t n, Operator op, const BorderType<U>& border)
   {
@@ -375,16 +354,6 @@ namespace wilt
     MIN,
     MEDIAN
   }; // enum filter
-
-  template <class T, std::size_t N, class U, std::size_t M, class Operator>
-  NArray<T, N> compress(const NArray<U, M>& src, Operator op)
-  {
-    static_assert(N < M, "compress(): return must be smaller than src");
-
-    NArray<T, N> ret(chopLow_<N>(src.sizes()));
-    compress_<T, M-N>(ret, src, Point<N>(), 0, op);
-    return ret;
-  }
 
   template <class T, class U, std::size_t N, class Operator>
   NArray<T, N> filter(const NArray<U, N>& src, const Point<N>& size, Operator op, BorderType<U> border)
