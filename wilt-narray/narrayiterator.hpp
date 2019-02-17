@@ -62,10 +62,7 @@ namespace wilt
     // PRIVATE MEMBERS
     ////////////////////////////////////////////////////////////////////////////
 
-    NArrayDataRef<type> data_;
-    type* base_;
-    Point<N> sizes_;
-    Point<N> steps_;
+    const wilt::NArray<T, N>* array_;
     pos_t index_;
 
   public:
@@ -75,10 +72,7 @@ namespace wilt
 
     //! @brief  Default constructor. Useless
     NArrayIterator()
-      : data_(),
-        base_(nullptr),
-        sizes_(),
-        steps_(),
+      : array_(nullptr),
         index_(0)
     {
   
@@ -88,10 +82,7 @@ namespace wilt
     //! @param[in]  arr - array whose data to reference
     //! @param[in]  pos - data offset value, defaults to 0
     NArrayIterator(const wilt::NArray<T, N>& arr, pos_t pos = 0)
-      : data_(arr.data_),
-        base_(arr.base_),
-        sizes_(arr.sizes_),
-        steps_(arr.steps_),
+      : array_(&arr),
         index_(pos)
     {
 
@@ -100,10 +91,7 @@ namespace wilt
     //! @brief      Copy constructor
     //! @param[in]  iter - iterator to copy from
     NArrayIterator(const NArrayIterator<T, N>& iter)
-      : data_(iter.data_),
-        base_(iter.base_),
-        sizes_(iter.sizes_),
-        steps_(iter.steps_),
+      : array_(iter.array_),
         index_(iter.index_)
     {
 
@@ -113,10 +101,7 @@ namespace wilt
     //! @param[in]  iter - iterator to copy from
     //! @param[in]  pos - data offset value
     NArrayIterator(const NArrayIterator<T, N>& iter, pos_t pos)
-      : data_(iter.data_),
-        base_(iter.base_),
-        sizes_(iter.sizes_),
-        steps_(iter.steps_),
+      : array_(iter.array_),
         index_(pos)
     {
 
@@ -132,10 +117,7 @@ namespace wilt
     //! @return     reference to this object
     NArrayIterator<T, N>& operator= (const NArrayIterator<T, N>& iter)
     {
-      data_ = iter.data_;
-      base_ = iter.base_;
-      sizes_ = iter.sizes_;
-      steps_ = iter.steps_;
+      array_ = iter.array_;
       index_ = iter.index_;
 
       return *this;
@@ -191,7 +173,7 @@ namespace wilt
     //!             pointing to
     Point<N> position() const
     {
-      return idx2pos_(sizes_, index_);
+      return idx2pos_(array_->sizes(), index_);
     }
 
   public:
@@ -205,10 +187,7 @@ namespace wilt
     //! @return     true if iterators are the same, false otherwise
     bool operator== (const NArrayIterator<T, N>& iter) const
     {
-      return base_ == iter.base_ && 
-             sizes_ == iter.sizes_ && 
-             steps_ == iter.steps_ && 
-             index_  == iter.index_;
+      return array_ == iter.array_ && index_  == iter.index_;
     }
 
     //! @brief      not equal operator, determines both if it references the
@@ -335,10 +314,10 @@ namespace wilt
     //! @return     pointer to data at the offset
     pointer at_(pos_t pos) const
     {
-      Point<N> loc = idx2pos_(sizes_, index_);
-      pointer ptr = base_;
+      Point<N> loc = idx2pos_(array_->sizes(), index_);
+      T* ptr = array_->base();
       for (std::size_t i = 0; i < N; ++i)
-        ptr += loc[i] * steps_[i];
+        ptr += loc[i] * array_->steps()[i];
 
       return ptr;
     }
