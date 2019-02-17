@@ -315,6 +315,40 @@ void testWindowCreatesCorrectNArray()
   }
 }
 
+void testSubarraysIteratesCorrectly()
+{
+  {
+    int count;
+    wilt::NArray<int, 3> a({ 2, 3, 4 }, 5);
+
+    count = 0;
+    for (auto arr : a.subarrays<2>()) {
+      assert((std::is_same<decltype(arr), wilt::NArray<int, 2>>::value));
+      assert(arr.size() == 12);
+      assert(arr.sizes() == wilt::Point<2>({ 3, 4 }));
+      count++;
+    }
+    assert(count == 2);
+
+    count = 0;
+    for (auto arr : a.subarrays<1>()) {
+      assert((std::is_same<decltype(arr), wilt::NArray<int, 1>>::value));
+      assert(arr.size() == 4);
+      assert(arr.sizes() == wilt::Point<1>({ 4 }));
+      count++;
+    }
+    assert(count == 6);
+
+    count = 0;
+    for (auto arr : a.subarrays<0>()) {
+      assert((std::is_same<decltype(arr), int>::value));
+      assert(arr == 5);
+      count++;
+    }
+    assert(count == 24);
+  }
+}
+
 void testNArray()
 {
   testDefaultConstructorHasSizeZero();
@@ -325,5 +359,6 @@ void testNArray()
   testSkipNCreatesCorrectNArray();
   testReshapeCreatesCorrectNArray();
   testRepeatCreatesCorrectNArray();
+  testSubarraysIteratesCorrectly();
   testWindowCreatesCorrectNArray();
 }

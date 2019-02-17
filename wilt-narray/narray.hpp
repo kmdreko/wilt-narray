@@ -47,6 +47,9 @@ namespace wilt
   template <class T, std::size_t N, std::size_t M = 0> class NArrayIterator;
   // - defined in "narrayiterator.hpp"
 
+  template <class T, std::size_t N, std::size_t M> class SubNArrays;
+  // - defined below
+
   //////////////////////////////////////////////////////////////////////////////
   // This class is designed to access a sequence of data and to manipulate it in
   // an N-dimensional manner.
@@ -350,6 +353,10 @@ namespace wilt
     template <std::size_t M>
     typename NArray<T, N-M>::exposed_type subarrayAt(const Point<M>& pos) const;
 
+    // Gets an iterable for all subarrays
+    template <std::size_t M>
+    SubNArrays<T, N, M> subarrays() const;
+
     // Transforms the array into a new size, typically to create sub-dimension
     // splits but can form it into any set of dimensions if allowed by the
     // segments representation. Any new dimensions will try to keep the element
@@ -480,6 +487,19 @@ namespace wilt
     bool valid_() const;
 
   }; // class NArray
+
+  template <class T, std::size_t N, std::size_t M>
+  class SubNArrays
+  {
+  private:
+    NArray<T, N> array_;
+
+  public:
+    SubNArrays(const NArray<T, N>& arr) : array_(arr) {}
+
+    NArrayIterator<T, N, M> begin() { return{ array_ }; }
+    NArrayIterator<T, N, M> end() { return{ array_, size_(chopLow_<N - M>(array_.sizes())) }; }
+  }; // class SubNArrays
 
   //////////////////////////////////////////////////////////////////////////////
   // This is only here to make it easier to do NArray<T, 1> slices. Making a
@@ -1604,7 +1624,7 @@ namespace wilt
   template <std::size_t M>
   typename NArray<T, N-M>::exposed_type NArray<T, N>::subarrayAt(const Point<M>& pos) const
   {
-    static_assert(M<N && M>0, "subarrayAt(): pos is not less than N");
+    static_assert(M<=N && M>0, "subarrayAt(): pos is not less than N");
 
     type* base = base_;
     for (std::size_t i = 0; i < M; ++i)
@@ -1614,6 +1634,13 @@ namespace wilt
         base += steps_[i] * pos[i];
 
     return NArray<value, N-M>(data_, base, chopHigh_<N-M>(sizes_), chopHigh_<N-M>(steps_));
+  }
+
+  template<class T, std::size_t N>
+  template<std::size_t M>
+  SubNArrays<T, N, M> NArray<T, N>::subarrays() const
+  {
+    return SubNArrays<T, N, M>(*this);
   }
 
   template <class T, std::size_t N>
