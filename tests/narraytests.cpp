@@ -349,6 +349,23 @@ void testSubarraysIteratesCorrectly()
   }
 }
 
+void testCompressCreatesCorrectNArray()
+{
+  { // T=int N=3
+    wilt::NArray<int, 3> a({ 2, 3, 4 }, 5);
+
+    wilt::NArray<int, 1> b = a.compress<1>([](wilt::NArray<int, 2> m) { return m[0][0] + 1; });
+    assert(b.size() == 2);
+    for (auto v : b)
+      assert(v == 6);
+
+    wilt::NArray<int, 2> c = a.compress<2>([](wilt::NArray<int, 1> m) { return m[0] + 1; });
+    assert(c.size() == 6);
+    for (auto v : c)
+      assert(v == 6);
+  }
+}
+
 void testNArray()
 {
   testDefaultConstructorHasSizeZero();
@@ -361,4 +378,5 @@ void testNArray()
   testRepeatCreatesCorrectNArray();
   testSubarraysIteratesCorrectly();
   testWindowCreatesCorrectNArray();
+  testCompressCreatesCorrectNArray();
 }

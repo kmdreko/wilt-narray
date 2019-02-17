@@ -435,6 +435,9 @@ namespace wilt
     template <class U, class Converter>
     NArray<U, N> convertTo(Converter func) const;
 
+    template <std::size_t M, class Compressor>
+    NArray<T, M> compress(Compressor func) const;
+
   public:
     ////////////////////////////////////////////////////////////////////////////
     // MODIFIER FUNCTIONS
@@ -1837,6 +1840,22 @@ namespace wilt
   {
     NArray<U, N> ret(sizes_);
     convertTo_(*this, ret, func);
+    return ret;
+  }
+
+  template<class T, std::size_t N>
+  template<std::size_t M, class Compressor>
+  NArray<T, M> NArray<T, N>::compress(Compressor func) const
+  {
+    static_assert(M <= N, "destination size must be less than source size");
+    static_assert(M > 0, "destination size cannot be 0");
+
+    NArray<T, M> ret(chopLow_<M>(sizes_));
+
+    auto dstIt = ret.begin();
+    for (auto&& val : subarrays<N-M>())
+      (*dstIt++) = func(val);
+
     return ret;
   }
 
