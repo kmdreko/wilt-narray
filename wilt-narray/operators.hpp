@@ -1501,7 +1501,10 @@ wilt::NArray<uint8_t, N> operator>= (const wilt::NArray<T, N>& lhs, const U& rhs
 template <class T, std::size_t N>
 bool operator== (const wilt::NArray<T, N>& lhs, const wilt::NArray<T, N>& rhs)
 {
-  return allOf_(
+  if (lhs.sizes() != rhs.sizes())
+    return false;
+
+  return wilt::allOf_(
     lhs.base(), rhs.base(), 
     lhs.sizes().data(), lhs.steps().data(), rhs.steps().data(), 
     [](const T& a, const T& b){return a == b;}, N);

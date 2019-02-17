@@ -366,6 +366,18 @@ void testCompressCreatesCorrectNArray()
   }
 }
 
+void testMisc()
+{
+  { // test that window+skip can give the same result as a reshape+transpose
+    auto arr = wilt::NArray<int, 2>({ 9, 16 }, 1);
+    auto a = arr.reshape<4>({ 3, 3, 4, 4 }).transpose(1, 2);
+    auto b = arr.windowX(3).windowY(4).skipX(3).skipY(4);
+    assert(b.sizes() == a.sizes());
+    assert(b.steps() == a.steps());
+    assert(b == a);
+  }
+}
+
 void testNArray()
 {
   testDefaultConstructorHasSizeZero();
@@ -379,4 +391,6 @@ void testNArray()
   testSubarraysIteratesCorrectly();
   testWindowCreatesCorrectNArray();
   testCompressCreatesCorrectNArray();
+
+  testMisc();
 }

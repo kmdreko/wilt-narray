@@ -749,7 +749,7 @@ namespace wilt
     const pos_t* s1step, const pos_t* s2step,
     Operator op, std::size_t N)
   {
-    T* end = src1 + sizes[0] * s1step[0];
+    const T* end = src1 + sizes[0] * s1step[0];
     if (N == 1)
     {
       for (; src1 != end; src1 += s1step[0], src2 += s2step[0])
@@ -783,7 +783,7 @@ namespace wilt
     const pos_t* sstep,
     Operator op, std::size_t N)
   {
-    T* end = src + sizes[0] * sstep[0];
+    const T* end = src + sizes[0] * sstep[0];
     if (N == 1)
     {
       for (; src != end; src += sstep[0])
@@ -1589,7 +1589,7 @@ namespace wilt
     Point<N> newsteps = steps_;
     newsizes[dim] = (sizes_[dim] - start + n - 1) / n;
     newsteps[dim] = steps_[dim] * n;
-    return NArray<value, N>(data_, base_ + steps_[dim] * n, newsizes, newsteps);
+    return NArray<value, N>(data_, base_ + steps_[dim] * start, newsizes, newsteps);
   }
 
   template <class T, std::size_t N>
