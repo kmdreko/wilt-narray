@@ -107,16 +107,16 @@ namespace wilt
     // TYPE DEFINITIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    typedef typename std::remove_const<T>::type type;
-    typedef       T  value;
-    typedef const T  cvalue;
-    typedef       T* pointer;
-    typedef const T* cpointer;
-    typedef       T& reference;
-    typedef const T& creference;
+    using type = typename std::remove_const<T>::type;
+    using value = T;
+    using cvalue = const T;
+    using pointer = T*;
+    using cpointer = const T*;
+    using reference = T&;
+    using creference = const T&;
 
-    typedef NArrayIterator<value, N> iterator;
-    typedef NArrayIterator<cvalue, N> const_iterator;
+    using iterator = NArrayIterator<value, N>;
+    using const_iterator = NArrayIterator<cvalue, N>;
 
     using exposed_type = NArray<T, N>;
 
@@ -513,7 +513,7 @@ namespace wilt
   class NArray<T, 0>
   {
   public:
-    typedef typename std::remove_const<T>::type type;
+    using type = typename std::remove_const<T>::type;
     using exposed_type = T&;
 
     NArray(const NArrayDataRef<T>& header, type* base, const Point<0>&, const Point<0>&)

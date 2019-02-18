@@ -57,9 +57,9 @@ namespace wilt
     // TYPE DEFINITIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    typedef std::random_access_iterator_tag iterator_category;
-    typedef typename NArray<T, M>::exposed_type value_type;
-    typedef ptrdiff_t difference_type;
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = typename NArray<T, M>::exposed_type;
+    using difference_type = std::ptrdiff_t;
 
   private:
     ////////////////////////////////////////////////////////////////////////////
