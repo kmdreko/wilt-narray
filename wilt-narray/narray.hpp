@@ -1041,7 +1041,11 @@ namespace wilt
   template <class T, std::size_t N>
   typename NArray<T, N-1>::exposed_type NArray<T, N>::slice_(std::size_t dim, pos_t n) const
   {
-    return NArray<value, N-1>(std::shared_ptr<type>(data_, data_.get() + steps_[dim] * n), wilt::slice_(sizes_, dim), wilt::slice_(steps_, dim));
+    auto newdata = data_.get() + steps_[dim] * n;
+    auto newsizes = wilt::slice_(sizes_, dim);
+    auto newsteps = wilt::slice_(steps_, dim);
+
+    return NArray<T, N-1>(std::shared_ptr<type>(data_, newdata), newsizes, newsteps);
   }
 
   template <class T, std::size_t N>
@@ -1110,9 +1114,11 @@ namespace wilt
   template <class T, std::size_t N>
   NArray<T, N> NArray<T, N>::range_(std::size_t dim, pos_t n, pos_t length) const
   {
-    Point<N> temp = sizes_;
-    temp[dim] = length;
-    return NArray<value, N>(std::shared_ptr<type>(data_, data_.get() + steps_[dim] * n), temp, steps_);
+    auto newdata = data.get() + steps_[dim] * n;
+    auto newsizes = sizes_;
+    newsizes[dim] = length;
+
+    return NArray<T, N>(std::shared_ptr<type>(data_, newdata), newsizes, steps_);
   }
 
   template <class T, std::size_t N>
@@ -1157,9 +1163,11 @@ namespace wilt
   template <class T, std::size_t N>
   NArray<T, N> NArray<T, N>::flip_(std::size_t dim) const
   {
-    Point<N> temp = steps_;
-    temp[dim] = -temp[dim];
-    return NArray<value, N>(std::shared_ptr<type>(data_, data_.get() + steps_[dim] * (sizes_[dim] - 1)), sizes_, temp);
+    auto newdata = data_.get() + steps_[dim] * (sizes_[dim] - 1);
+    auto newsteps = steps_;
+    newsteps[dim] = -newsteps[dim];
+
+    return NArray<T, N>(std::shared_ptr<type>(data_, newdata), sizes_, newsteps);
   }
 
   template <class T, std::size_t N>
@@ -1228,11 +1236,13 @@ namespace wilt
   template <class T, std::size_t N>
   NArray<T, N> NArray<T, N>::skip_(std::size_t dim, pos_t n, pos_t start) const
   {
-    Point<N> newsizes = sizes_;
-    Point<N> newsteps = steps_;
+    auto newdata = data_.get() + steps_[dim] * start;
+    auto newsizes = sizes_;
+    auto newsteps = steps_;
     newsizes[dim] = (sizes_[dim] - start + n - 1) / n;
     newsteps[dim] = steps_[dim] * n;
-    return NArray<T, N>(std::shared_ptr<type>(data_, data_.get() + steps_[dim] * start), newsizes, newsteps);
+
+    return NArray<T, N>(std::shared_ptr<type>(data_, newdata), newsizes, newsteps);
   }
 
   template <class T, std::size_t N>
@@ -1251,7 +1261,10 @@ namespace wilt
     if (dim2 >= N)
       throw std::out_of_range("transpose(dim1, dim2): dim2 out of bounds");
 
-    return NArray<T, N>(data_, swap_(sizes_, dim1, dim2), swap_(steps_, dim1, dim2));
+    auto newsizes = swap_(sizes_, dim1, dim2);
+    auto newsteps = swap_(steps_, dim1, dim2);
+
+    return NArray<T, N>(data_, newsizes, newsteps);
   }
 
   template <class T, std::size_t N>
@@ -1275,14 +1288,16 @@ namespace wilt
     static_assert(M>0, "subarrayAt(pos): invalid when pos dimensionality is 0");
     static_assert(M<=N, "subarrayAt(pos): invalid when pos dimensionality is <= N");
 
-    type* base = data_.get();
+    auto newdata = data_.get();
+    auto newsizes = chopHigh_<N - M>(sizes_);
+    auto newsteps = chopHigh_<N - M>(steps_);
     for (std::size_t i = 0; i < M; ++i)
       if (pos[i] >= sizes_[i] || pos[i] < 0)
         throw std::out_of_range("subarrayAt(pos): pos out of range");
       else
-        base += steps_[i] * pos[i];
+        newdata += steps_[i] * pos[i];
 
-    return NArray<T, N-M>(std::shared_ptr<type>(data_, base), chopHigh_<N-M>(sizes_), chopHigh_<N-M>(steps_));
+    return NArray<T, N-M>(std::shared_ptr<type>(data_, newdata), newsizes, newsteps);
   }
 
   template<class T, std::size_t N>
@@ -1340,7 +1355,10 @@ namespace wilt
     if (n <= 0)
       throw std::invalid_argument("repeat(n): n must be positive");
 
-    return NArray<T, N+1>(data_, push_(sizes_, N, n), push_(steps_, N, 0));
+    auto newsizes = push_(sizes_, N, n);
+    auto newsteps = push_(steps_, N, 0);
+
+    return NArray<T, N+1>(data_, newsizes, newsteps);
   }
 
   template<class T, std::size_t N>
@@ -1402,6 +1420,7 @@ namespace wilt
     auto newsizes = push_(sizes_, N, n);
     auto newsteps = push_(steps_, N, steps_[dim]);
     newsizes[dim] -= n - 1;
+
     return NArray<T, N+1>(data_, newsizes, newsteps);
   }
 
@@ -1442,11 +1461,12 @@ namespace wilt
     if (empty())
       return NArray<T, N>();
 
-    Point<N> steps = sizes_;
-    Point<N> steps = steps_;
-    pos_t offset = align_(steps, steps);
+    auto newsizes = sizes_;
+    auto newsteps = steps_;
+    auto offset = align_(newsizes, newsteps);
+    auto newdata = data_.get() + offset;
 
-    return NArray<T, N>(std::shared_ptr<type>(data_, data_.get() + offset), steps, steps);
+    return NArray<T, N>(std::shared_ptr<type>(data_, newdata), newsizes, newsteps);
   }
 
   template <class T, std::size_t N>
@@ -1455,11 +1475,11 @@ namespace wilt
     if (empty())
       return NArray<T, N>();
 
-    Point<N> sizes = sizes_;
-    Point<N> steps = steps_;
-    std::size_t n = condense_(sizes, steps);
+    auto newsizes = sizes_;
+    auto newsteps = steps_;
+    std::size_t n = condense_(newsizes, newsteps);
 
-    return NArray<T, N>(data_, sizes, steps);
+    return NArray<T, N>(data_, newsizes, newsteps);
   }
 
   template <class T, std::size_t N>
