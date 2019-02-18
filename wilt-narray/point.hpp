@@ -425,175 +425,174 @@ namespace wilt
     return idx;
   }
 
-} // namespace wilt
-
-//! @brief      Compares the two points
-//! @param[in]  lhs - point to compare
-//! @param[in]  rhs - point to compare
-//! @return     true if points are equal, false if different dimensions or
-//!             elements are not equal
-template <std::size_t N, std::size_t M>
-bool operator== (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
-{
-  if (N != M)
-    return false;
-
-  for (std::size_t i = 0; i < N; ++i)
-    if (!(lhs[i] == rhs[i]))
+  //! @brief      Compares the two points
+  //! @param[in]  lhs - point to compare
+  //! @param[in]  rhs - point to compare
+  //! @return     true if points are equal, false if different dimensions or
+  //!             elements are not equal
+  template <std::size_t N, std::size_t M>
+  bool operator== (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
+  {
+    if (N != M)
       return false;
 
-  return true;
-}
+    for (std::size_t i = 0; i < N; ++i)
+      if (!(lhs[i] == rhs[i]))
+        return false;
 
-//! @brief      Compares the two points
-//! @param[in]  lhs - point to compare
-//! @param[in]  rhs - point to compare
-//! @return     false if points are equal, true if different dimensions or
-//!             elements are not equal
-template <std::size_t N, std::size_t M>
-bool operator!= (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
-{
-  if (N != M)
     return true;
+  }
 
-  for (std::size_t i = 0; i < N; ++i)
-    if (!(lhs[i] == rhs[i]))
+  //! @brief      Compares the two points
+  //! @param[in]  lhs - point to compare
+  //! @param[in]  rhs - point to compare
+  //! @return     false if points are equal, true if different dimensions or
+  //!             elements are not equal
+  template <std::size_t N, std::size_t M>
+  bool operator!= (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
+  {
+    if (N != M)
       return true;
 
-  return false;
-}
+    for (std::size_t i = 0; i < N; ++i)
+      if (!(lhs[i] == rhs[i]))
+        return true;
+
+    return false;
+  }
+
+  //! @brief      Adds two points
+  //! @param[in]  lhs - point to add
+  //! @param[in]  rhs - point to add
+  //! @return     result from addition of the two points
+  template <std::size_t N>
+  wilt::Point<N> operator+ (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs[i] + rhs[i];
+    return ret;
+  }
+
+  //! @brief      Subtracts two points
+  //! @param[in]  lhs - point to subtract
+  //! @param[in]  rhs - point to subtract
+  //! @return     result from subtraction of the two points
+  template <std::size_t N>
+  wilt::Point<N> operator- (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs[i] - rhs[i];
+    return ret;
+  }
 
 
-//! @brief      Adds two points
-//! @param[in]  lhs - point to add
-//! @param[in]  rhs - point to add
-//! @return     result from addition of the two points
-template <std::size_t N>
-wilt::Point<N> operator+ (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs[i] + rhs[i];
-  return ret;
-}
+  //! @brief      Adds a point and a scalar
+  //! @param[in]  lhs - point to add
+  //! @param[in]  rhs - scalar to add
+  //! @return     result from addition of the point and scalar
+  template <std::size_t N>
+  wilt::Point<N> operator+ (const wilt::Point<N>& lhs, pos_t rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs[i] + rhs;
+    return ret;
+  }
 
-//! @brief      Subtracts two points
-//! @param[in]  lhs - point to subtract
-//! @param[in]  rhs - point to subtract
-//! @return     result from subtraction of the two points
-template <std::size_t N>
-wilt::Point<N> operator- (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs[i] - rhs[i];
-  return ret;
-}
+  //! @brief      Subtracts a point and a scalar
+  //! @param[in]  lhs - point to subtract
+  //! @param[in]  rhs - scalar to subtract
+  //! @return     result from subtraction of the point and scalar
+  template <std::size_t N>
+  wilt::Point<N> operator- (const wilt::Point<N>& lhs, pos_t rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs[i] - rhs;
+    return ret;
+  }
 
+  //! @brief      Multiplies a point and a scalar
+  //! @param[in]  lhs - point to multiply
+  //! @param[in]  rhs - scalar to multiply
+  //! @return     result from multipliction of the point and scalar
+  template <std::size_t N>
+  wilt::Point<N> operator* (const wilt::Point<N>& lhs, pos_t rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs[i] * rhs;
+    return ret;
+  }
 
-//! @brief      Adds a point and a scalar
-//! @param[in]  lhs - point to add
-//! @param[in]  rhs - scalar to add
-//! @return     result from addition of the point and scalar
-template <std::size_t N>
-wilt::Point<N> operator+ (const wilt::Point<N>& lhs, pos_t rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs[i] + rhs;
-  return ret;
-}
-
-//! @brief      Subtracts a point and a scalar
-//! @param[in]  lhs - point to subtract
-//! @param[in]  rhs - scalar to subtract
-//! @return     result from subtraction of the point and scalar
-template <std::size_t N>
-wilt::Point<N> operator- (const wilt::Point<N>& lhs, pos_t rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs[i] - rhs;
-  return ret;
-}
-
-//! @brief      Multiplies a point and a scalar
-//! @param[in]  lhs - point to multiply
-//! @param[in]  rhs - scalar to multiply
-//! @return     result from multipliction of the point and scalar
-template <std::size_t N>
-wilt::Point<N> operator* (const wilt::Point<N>& lhs, pos_t rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs[i] * rhs;
-  return ret;
-}
-
-//! @brief      Divides a point and a scalar
-//! @param[in]  lhs - point to divide
-//! @param[in]  rhs - scalar to divide
-//! @return     result from division of the point and scalar
-template <std::size_t N>
-wilt::Point<N> operator/ (const wilt::Point<N>& lhs, pos_t rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs[i] / rhs;
-  return ret;
-}
+  //! @brief      Divides a point and a scalar
+  //! @param[in]  lhs - point to divide
+  //! @param[in]  rhs - scalar to divide
+  //! @return     result from division of the point and scalar
+  template <std::size_t N>
+  wilt::Point<N> operator/ (const wilt::Point<N>& lhs, pos_t rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs[i] / rhs;
+    return ret;
+  }
 
 
-//! @brief      Adds a point and a scalar
-//! @param[in]  lhs - scalar to add
-//! @param[in]  rhs - point to add
-//! @return     result from addition of the point and scalar
-template <std::size_t N>
-wilt::Point<N> operator+ (pos_t lhs, const wilt::Point<N>& rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs + rhs[i];
-  return ret;
-}
+  //! @brief      Adds a point and a scalar
+  //! @param[in]  lhs - scalar to add
+  //! @param[in]  rhs - point to add
+  //! @return     result from addition of the point and scalar
+  template <std::size_t N>
+  wilt::Point<N> operator+ (pos_t lhs, const wilt::Point<N>& rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs + rhs[i];
+    return ret;
+  }
 
-//! @brief      Subtracts a point and a scalar
-//! @param[in]  lhs - scalar to subtract
-//! @param[in]  rhs - point to subtract
-//! @return     result from subtraction of the point and scalar
-template <std::size_t N>
-wilt::Point<N> operator- (pos_t lhs, const wilt::Point<N>& rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs - rhs[i];
-  return ret;
-}
+  //! @brief      Subtracts a point and a scalar
+  //! @param[in]  lhs - scalar to subtract
+  //! @param[in]  rhs - point to subtract
+  //! @return     result from subtraction of the point and scalar
+  template <std::size_t N>
+  wilt::Point<N> operator- (pos_t lhs, const wilt::Point<N>& rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs - rhs[i];
+    return ret;
+  }
 
-//! @brief      Multiplies a point and a scalar
-//! @param[in]  lhs - scalar to multiply
-//! @param[in]  rhs - point to multiply
-//! @return     result from multipliction of the point and scalar
-template <std::size_t N>
-wilt::Point<N> operator* (pos_t lhs, const wilt::Point<N>& rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs * rhs[i];
-  return ret;
-}
+  //! @brief      Multiplies a point and a scalar
+  //! @param[in]  lhs - scalar to multiply
+  //! @param[in]  rhs - point to multiply
+  //! @return     result from multipliction of the point and scalar
+  template <std::size_t N>
+  wilt::Point<N> operator* (pos_t lhs, const wilt::Point<N>& rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs * rhs[i];
+    return ret;
+  }
 
-//! @brief      Divides a point and a scalar
-//! @param[in]  lhs - scalar to divide
-//! @param[in]  rhs - point to divide
-//! @return     result from division of the point and scalar
-template <std::size_t N>
-wilt::Point<N> operator/ (pos_t lhs, const wilt::Point<N>& rhs)
-{
-  wilt::Point<N> ret;
-  for (std::size_t i = 0; i < N; ++i)
-    ret[i] = lhs / rhs[i];
-  return ret;
-}
+  //! @brief      Divides a point and a scalar
+  //! @param[in]  lhs - scalar to divide
+  //! @param[in]  rhs - point to divide
+  //! @return     result from division of the point and scalar
+  template <std::size_t N>
+  wilt::Point<N> operator/ (pos_t lhs, const wilt::Point<N>& rhs)
+  {
+    wilt::Point<N> ret;
+    for (std::size_t i = 0; i < N; ++i)
+      ret[i] = lhs / rhs[i];
+    return ret;
+  }
+
+} // namespace wilt
 
 #endif // !WILT_POINT_HPP

@@ -45,11 +45,11 @@
 // - std::domain_error
 // - std::out_of_range
 
-// type aliases
-typedef std::ptrdiff_t pos_t;
-
 namespace wilt
 {
+  // type aliases
+  typedef std::ptrdiff_t pos_t;
+
   // operation type returns
   template <class T, class U> struct add_ret { typedef decltype(std::declval<T>() + std::declval<U>()) type; };
   template <class T, class U> struct sub_ret { typedef decltype(std::declval<T>() - std::declval<U>()) type; };
