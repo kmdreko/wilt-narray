@@ -32,192 +32,126 @@
 // - std::allocator
 // - std::shared_ptr
 // - std::make_shared
+// - std::enable_shared_from_this
 #include <cstddef>
 // - std::size_t
 
 namespace wilt
 {
-  enum PTR
+  enum NArrayDataAcquireType
   {
     ASSUME,
     COPY,
-    REF
+    REFERENCE
   };
 
   template <class T, class A = std::allocator<T>>
-  class NArrayDataRef
+  class NArrayDataBlock : public std::enable_shared_from_this<NArrayDataBlock<T, A>>
   {
+  private:
+    ////////////////////////////////////////////////////////////////////////////
+    // PRIVATE MEMBERS
+    ////////////////////////////////////////////////////////////////////////////
+
+    T* data_;
+    std::size_t size_;
+    A alloc_;
+    bool owned_;
+
   public:
-    class Node
-    {
-    public:
-      T* data;
-      std::size_t size;
-      A alloc;
-      bool owned;
+    ////////////////////////////////////////////////////////////////////////////
+    // CONSTRUCTORS
+    ////////////////////////////////////////////////////////////////////////////
 
-      Node()
-        : data(nullptr),
-        size(0),
-        alloc(),
-        owned(true)
-      {
-
-      }
-
-      Node(std::size_t size_)
-        : data(nullptr),
-        size(size_),
-        alloc(),
-        owned(true)
-      {
-        data = alloc.allocate(size_);
-        if (!raw_t<T>::value())
-          for (size_t i = 0; i < size_; ++i)
-            alloc.construct(data + i);
-      }
-
-      Node(std::size_t size_, const T& val)
-        : data(nullptr),
-        size(size_),
-        alloc(),
-        owned(true)
-      {
-        data = alloc.allocate(size_);
-        for (size_t i = 0; i < size_; ++i)
-          alloc.construct(data + i, val);
-      }
-
-      Node(std::size_t size_, T* _data, PTR ltype)
-        : data(nullptr),
-        size(size_),
-        alloc(),
-        owned(true)
-      {
-        switch (ltype)
-        {
-        case PTR::ASSUME:
-          data = _data;
-          break;
-        case PTR::COPY:
-          data = alloc.allocate(size_);
-          for (size_t i = 0; i < size_; ++i)
-            alloc.construct(data + i, _data[i]);
-          break;
-        case PTR::REF:
-          data = _data;
-          owned = false;
-          break;
-        }
-      }
-
-      template <class Generator>
-      Node(std::size_t size_, Generator gen)
-        : data(nullptr),
-        size(size_),
-        alloc(),
-        owned(true)
-      {
-        data = alloc.allocate(size_);
-        for (size_t i = 0; i < size_; ++i)
-          alloc.construct(data + i, gen());
-      }
-
-      ~Node()
-      {
-        if (data && owned)
-        {
-          if (!raw_t<T>::value())
-            for (std::size_t i = 0; i < size; ++i)
-              alloc.destroy(data + i);
-          alloc.deallocate(data, size);
-        }
-      }
-
-    }; // class Node
-
-    NArrayDataRef()
-      : m_node()
+    NArrayDataBlock()
+      : data_(nullptr),
+        size_(0),
+        alloc_(),
+        owned_(true)
     {
 
     }
 
-    NArrayDataRef(pos_t size)
-      : m_node()
+    NArrayDataBlock(std::size_t size)
+      : data_(nullptr),
+        size_(size),
+        alloc_(),
+        owned_(true)
     {
-      if (size > 0)
-        m_node = std::make_shared<Node>(size);
+      data_ = alloc_.allocate(size);
+      if (!raw_t<T>::value())
+        for (size_t i = 0; i < size; ++i)
+          alloc_.construct(data_ + i);
     }
 
-    NArrayDataRef(pos_t size, const T& val)
-      : m_node()
+    NArrayDataBlock(std::size_t size, const T& val)
+      : data_(nullptr),
+        size_(size),
+        alloc_(),
+        owned_(true)
     {
-      if (size > 0)
-        m_node = std::make_shared<Node>(size, val);
+      data_ = alloc_.allocate(size);
+      for (size_t i = 0; i < size; ++i)
+        alloc_.construct(data_ + i, val);
     }
 
-    NArrayDataRef(pos_t size, T* ptr, PTR ltype)
-      : m_node()
+    NArrayDataBlock(std::size_t size, T* data, NArrayDataAcquireType atype)
+      : data_(nullptr),
+        size_(size),
+        alloc_(),
+        owned_(true)
     {
-      if (size > 0)
-        m_node = std::make_shared<Node>(size, ptr, ltype);
+      switch (atype)
+      {
+      case wilt::ASSUME:
+        data_ = data;
+        break;
+      case wilt::COPY:
+        data_ = alloc_.allocate(size);
+        for (size_t i = 0; i < size; ++i)
+          alloc_.construct(data_ + i, data[i]);
+        break;
+      case wilt::REFERENCE:
+        data_ = data;
+        owned_ = false;
+        break;
+      }
     }
 
     template <class Generator>
-    NArrayDataRef(pos_t size, Generator gen)
-      : m_node()
+    NArrayDataBlock(std::size_t size, Generator gen)
+      : data_(nullptr),
+        size_(size),
+        alloc_(),
+        owned_(true)
     {
-      if (size > 0)
-        m_node = std::make_shared<Node>(size, gen);
+      data_ = alloc_.allocate(size);
+      for (size_t i = 0; i < size; ++i)
+        alloc_.construct(data_ + i, gen());
     }
 
-
-    NArrayDataRef(const NArrayDataRef<T, A>& header)
-      : m_node(header.m_node)
+    ~NArrayDataBlock()
     {
-
+      if (data_ && owned_)
+      {
+        if (!raw_t<T>::value())
+          for (std::size_t i = 0; i < size_; ++i)
+            alloc_.destroy(data_ + i);
+        alloc_.deallocate(data_, size_);
+      }
     }
 
-    ~NArrayDataRef()
-    {
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // ACCESS FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
 
+    std::shared_ptr<T> data() const
+    {
+      return std::shared_ptr<T>(shared_from_this(), data_);
     }
 
-    NArrayDataRef<T, A>& operator= (const NArrayDataRef<T, A>& header)
-    {
-      m_node = header.m_node;
-
-      return *this;
-    }
-
-    void clear()
-    {
-      m_node.reset();
-    }
-
-    bool unique() const
-    {
-      return m_node.unique();
-    }
-
-    Node& operator* () const
-    {
-      return *m_node.get();
-    }
-    Node* operator-> () const
-    {
-      return m_node.get();
-    }
-
-    Node* ptr_() const
-    {
-      return m_node.get();
-    }
-
-  private:
-    std::shared_ptr<Node> m_node;
-
-  }; // class NArrayDataRef
+  }; // class NArrayDataBlock
 
 } // namespace wilt
 
