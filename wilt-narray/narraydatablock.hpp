@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// FILE: narraydataref.hpp
+// FILE: narraydatablock.hpp
 // DATE: 2018-11-12
 // AUTH: Trevor Wilson <kmdreko@gmail.com>
 // DESC: Defines a shared-resource class for holding N-dimensional data

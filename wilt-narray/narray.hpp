@@ -40,7 +40,7 @@
 
 #include "util.h"
 #include "point.hpp"
-#include "narraydataref.hpp"
+#include "narraydatablock.hpp"
 
 namespace wilt
 {
