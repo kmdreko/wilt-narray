@@ -254,10 +254,8 @@ namespace wilt
 
     // Functions for determining the data organization for this array.
     //   - isContinuous = the array accesses data with no gaps
-    //   - isSubarray   = the array accesses all data in the reference data
     //   - isAligned    = the array accesses data linearly
     bool isContinuous() const;
-    bool isSubarray() const;
     bool isAligned() const;
 
   public:
@@ -969,15 +967,6 @@ namespace wilt
       stepSize += steps_[i] * (sizes_[i] - 1);
 
     return stepSize + 1 == this->size();
-  }
-
-  template <class T, std::size_t N>
-  bool NArray<T, N>::isSubarray() const
-  {
-    if (empty())
-      return false;
-    
-    return this->size() < data_->size;
   }
 
   template <class T, std::size_t N>
