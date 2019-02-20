@@ -60,6 +60,8 @@ namespace wilt
     using iterator_category = std::random_access_iterator_tag;
     using value_type = typename NArray<T, M>::exposed_type;
     using difference_type = std::ptrdiff_t;
+    using pointer = std::remove_reference<value_type>*;
+    using reference = value_type;
 
   private:
     ////////////////////////////////////////////////////////////////////////////
