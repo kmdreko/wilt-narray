@@ -166,6 +166,9 @@ namespace wilt
     template <class Generator>
     NArray(const Point<N>& size, Generator gen);
 
+    template <class Iterator>
+    NArray(const Point<N>& size, Iterator first, Iterator last);
+
     // Copy and move constructor, shares data and uses the same data segment as
     // 'arr'
     //
@@ -482,6 +485,8 @@ namespace wilt
     void create_(T* ptr, NArrayDataAcquireType atype);
     template <class Generator>
     void create_(Generator gen);
+    template <class Iterator>
+    void create_(Iterator first, Iterator last);
 
     void clean_();
     bool valid_() const;
@@ -644,7 +649,7 @@ namespace wilt
     , steps_(step_(size))
   {
     if (valid_() && list.size() == size_(sizes_))
-      create_((T*)list.begin(), wilt::COPY);
+      create_(list.begin(), list.end());
     else
       clean_();
   }
@@ -658,6 +663,19 @@ namespace wilt
   {
     if (valid_())
       create_(gen);
+    else
+      clean_();
+  }
+
+  template <class T, std::size_t N>
+  template <class Iterator>
+  NArray<T, N>::NArray(const Point<N>& size, Iterator first, Iterator last)
+    : data_()
+    , sizes_(size)
+    , steps_(step_(size))
+  {
+    if (valid_())
+      create_(first, last);
     else
       clean_();
   }
@@ -1615,6 +1633,15 @@ namespace wilt
     pos_t size = size_(sizes_);
     if (size > 0)
       data_ = std::make_shared<NArrayDataBlock<type>>(size, gen)->data();
+  }
+
+  template <class T, std::size_t N>
+  template <class Iterator>
+  void NArray<T, N>::create_(Iterator first, Iterator last)
+  {
+    pos_t size = size_(sizes_);
+    if (size > 0)
+      data_ = std::make_shared<NArrayDataBlock<type>>(size, first, last)->data();
   }
 
   template <class T, std::size_t N>

@@ -366,6 +366,45 @@ void testCompressCreatesCorrectNArray()
   }
 }
 
+void testNArrayIteratorConstructor()
+{
+  { // T=int N=2 with smaller array
+    int data[] = { 1, 2, 3 };
+
+    wilt::NArray<int, 2> a({ 2, 2 }, std::begin(data), std::end(data));
+    assert(a[0][0] == 1);
+    assert(a[0][1] == 2);
+    assert(a[1][0] == 3);
+    assert(a[1][1] == 0);
+  }
+
+  { // T=int N=2 with larger array
+    int data[] = { 1, 2, 3, 4, 5 };
+
+    wilt::NArray<int, 2> a({ 2, 2 }, std::begin(data), std::end(data));
+    assert(a[0][0] == 1);
+    assert(a[0][1] == 2);
+    assert(a[1][0] == 3);
+    assert(a[1][1] == 4);
+  }
+
+  { // T=TrackDefault N=2 with smaller array
+    TrackDefault data[3];
+
+    TrackDefault::reset();
+    wilt::NArray<TrackDefault, 2> a({ 2, 2 }, std::begin(data), std::end(data));
+    assert(TrackDefault::count == 1);
+  }
+
+  { // T=TrackCopy N=2 with larger array
+    TrackCopy data[5];
+
+    TrackCopy::reset();
+    wilt::NArray<TrackCopy, 2> a({ 2, 2 }, std::begin(data), std::end(data));
+    assert(TrackCopy::count == 4);
+  }
+}
+
 void testMisc()
 {
   { // test that window+skip can give the same result as a reshape+transpose
@@ -391,6 +430,7 @@ void testNArray()
   testSubarraysIteratesCorrectly();
   testWindowCreatesCorrectNArray();
   testCompressCreatesCorrectNArray();
+  testNArrayIteratorConstructor();
 
   testMisc();
 }

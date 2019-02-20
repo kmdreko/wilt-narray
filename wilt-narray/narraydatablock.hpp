@@ -130,6 +130,24 @@ namespace wilt
         alloc_.construct(data_ + i, gen());
     }
 
+    template <class Iterator>
+    NArrayDataBlock(std::size_t size, Iterator first, Iterator last)
+      : data_(nullptr),
+        size_(size),
+        alloc_(),
+        owned_(true)
+    {
+      data_ = alloc_.allocate(size);
+
+      size_t i = 0;
+      for (; i < size && first != last; ++i, ++first)
+        alloc_.construct(data_ + i, *first);
+
+      if (i != size)
+        for (; i < size; ++i)
+          alloc_.construct(data_ + i);
+    }
+
     ~NArrayDataBlock()
     {
       if (data_ && owned_)
