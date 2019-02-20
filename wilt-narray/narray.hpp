@@ -480,17 +480,6 @@ namespace wilt
     template <class U, class Converter>
     static void convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func);
 
-    void create_();
-    void create_(const T& val);
-    void create_(T* ptr, NArrayDataAcquireType atype);
-    template <class Generator>
-    void create_(Generator gen);
-    template <class Iterator>
-    void create_(Iterator first, Iterator last);
-
-    void clean_();
-    bool valid_() const;
-
   }; // class NArray
 
   template <class T, std::size_t N, std::size_t M>
@@ -609,75 +598,87 @@ namespace wilt
   template <class T, std::size_t N>
   NArray<T, N>::NArray(const Point<N>& size)
     : data_()
-    , sizes_(size)
-    , steps_(step_(size))
+    , sizes_()
+    , steps_()
   {
-    if (valid_())
-      create_();
-    else
-      clean_();
+    if (!validSize_(size))
+      return;
+
+    sizes_ = size;
+    steps_ = step_(size);
+    data_ = std::make_shared<NArrayDataBlock<type>>(size_(size))->data();
   }
 
   template <class T, std::size_t N>
   NArray<T, N>::NArray(const Point<N>& size, const T& val)
     : data_()
-    , sizes_(size)
-    , steps_(step_(size))
+    , sizes_()
+    , steps_()
   {
-    if (valid_())
-      create_(val);
-    else
-      clean_();
+    if (!validSize_(size))
+      return;
+
+    sizes_ = size;
+    steps_ = step_(size);
+    data_ = std::make_shared<NArrayDataBlock<type>>(size_(size), val)->data();
   }
 
   template <class T, std::size_t N>
   NArray<T, N>::NArray(const Point<N>& size, T* ptr, NArrayDataAcquireType atype)
     : data_()
-    , sizes_(size)
-    , steps_(step_(size))
+    , sizes_()
+    , steps_()
   {
-    if (valid_())
-      create_(ptr, atype);
-    else
-      clean_();
+    if (!validSize_(size))
+      return;
+
+    sizes_ = size;
+    steps_ = step_(size);
+    data_ = std::make_shared<NArrayDataBlock<type>>(size_(size), ptr, atype)->data();
   }
 
   template <class T, std::size_t N>
   NArray<T, N>::NArray(const Point<N>& size, std::initializer_list<T> list)
     : data_()
-    , sizes_(size)
-    , steps_(step_(size))
+    , sizes_()
+    , steps_()
   {
-    if (valid_() && list.size() == size_(sizes_))
-      create_(list.begin(), list.end());
-    else
-      clean_();
+    if (!validSize_(size))
+      return;
+
+    sizes_ = size;
+    steps_ = step_(size);
+    data_ = std::make_shared<NArrayDataBlock<type>>(size_(size), list.begin(), list.end())->data();
   }
 
   template <class T, std::size_t N>
   template <class Generator>
   NArray<T, N>::NArray(const Point<N>& size, Generator gen)
     : data_()
-    , sizes_(size)
-    , steps_(step_(size))
+    , sizes_()
+    , steps_()
   {
-    if (valid_())
-      create_(gen);
-    else
-      clean_();
+    if (!validSize_(size))
+      return;
+
+    sizes_ = size;
+    steps_ = step_(size);
+    data_ = std::make_shared<NArrayDataBlock<type>>(size_(size), gen)->data();
   }
 
   template <class T, std::size_t N>
   template <class Iterator>
   NArray<T, N>::NArray(const Point<N>& size, Iterator first, Iterator last)
     : data_()
-    , sizes_(size)
-    , steps_(step_(size))
+    , sizes_()
+    , steps_()
   {
-    if (valid_())
-      create_(first, last);
-    else
-      clean_();
+    if (!validSize_(size))
+      return;
+
+    sizes_ = size;
+    steps_ = step_(size);
+    data_ = std::make_shared<NArrayDataBlock<type>>(size_(size), first, last)->data();
   }
 
   template <class T, std::size_t N>
@@ -711,7 +712,7 @@ namespace wilt
     }
     else
     {
-      create_();
+      data_ = std::make_shared<NArrayDataBlock<type>>(size_(sizes_))->data();
       setTo(arr);
     }
   }
@@ -729,7 +730,7 @@ namespace wilt
     }
     else
     {
-      create_();
+      data_ = std::make_shared<NArrayDataBlock<type>>(size_(sizes_))->data();
       setTo(arr);
     }
 
@@ -771,7 +772,7 @@ namespace wilt
     }
     else
     {
-      create_();
+      data_ = std::make_shared<NArrayDataBlock<type>>(size_(sizes_))->data();
       setTo(arr);
     }
 
@@ -791,7 +792,7 @@ namespace wilt
     }
     else
     {
-      create_();
+      data_ = std::make_shared<NArrayDataBlock<type>>(size_(sizes_))->data();
       setTo(arr);
     }
 
@@ -1598,68 +1599,8 @@ namespace wilt
   void NArray<T, N>::clear()
   {
     data_.reset();
-
-    clean_();
-  }
-
-  template <class T, std::size_t N>
-  void NArray<T, N>::create_()
-  {
-    pos_t size = size_(sizes_);
-    if (size > 0)
-      data_ = std::make_shared<NArrayDataBlock<type>>(size)->data();
-  }
-
-  template <class T, std::size_t N>
-  void NArray<T, N>::create_(const T& val)
-  {
-    pos_t size = size_(sizes_);
-    if (size > 0)
-      data_ = std::make_shared<NArrayDataBlock<type>>(size, val)->data();
-  }
-
-  template <class T, std::size_t N>
-  void NArray<T, N>::create_(T* ptr, NArrayDataAcquireType atype)
-  {
-    pos_t size = size_(sizes_);
-    if (size > 0)
-      data_ = std::make_shared<NArrayDataBlock<type>>(size, ptr, atype)->data();
-  }
-
-  template <class T, std::size_t N>
-  template <class Generator>
-  void NArray<T, N>::create_(Generator gen)
-  {
-    pos_t size = size_(sizes_);
-    if (size > 0)
-      data_ = std::make_shared<NArrayDataBlock<type>>(size, gen)->data();
-  }
-
-  template <class T, std::size_t N>
-  template <class Iterator>
-  void NArray<T, N>::create_(Iterator first, Iterator last)
-  {
-    pos_t size = size_(sizes_);
-    if (size > 0)
-      data_ = std::make_shared<NArrayDataBlock<type>>(size, first, last)->data();
-  }
-
-  template <class T, std::size_t N>
-  void NArray<T, N>::clean_()
-  {
     sizes_.clear();
     steps_.clear();
-  }
-
-  template <class T, std::size_t N>
-  bool NArray<T, N>::valid_() const
-  {
-    for (std::size_t i = 0; i < N; ++i)
-      if (sizes_[i] == 0)
-        return false;
-      else if (sizes_[i] < 0)
-        throw std::invalid_argument("NArray(size, ...): dimension cannot be negative");
-    return true;
   }
 
 } // namespace wilt

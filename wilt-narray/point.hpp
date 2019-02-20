@@ -287,6 +287,15 @@ namespace wilt
     return ret;
   }
 
+  template <std::size_t N>
+  bool validSize_(const Point<N>& size)
+  {
+    for (std::size_t i = 0; i < N; ++i)
+      if (size[i] <= 0)
+        return false;
+    return true;
+  }
+
   //! @brief         Aligns the dim and step arrays such that the step values
   //!                are increasing and positive
   //! @param[in,out] sizes - the dimension array as a point
