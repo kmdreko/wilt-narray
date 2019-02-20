@@ -73,14 +73,14 @@ namespace wilt
   //   .flipY()                         dimensions = {  3,  2,  3 }
   //   .transpose(1, 2);                steps      = {  6,  1, -2 }
   // x--x--x--x--x--x--2--5--1--4--0--3--8--11-7--10-6--9--14-17-13-16-12-15
-  // |data                         |base
+  //                               |data
   // 
   // NArray<int, 2>({ 4, 6 })           creates an NArray like so:
   //   .sliceY(1);
   //                                    dimensions = {  4 }
   //                                    steps      = {  6 }
   // x--0--x--x--x--x--x--1--x--x--x--x--x--2--x--x--x--x--x--3--x--x--x--x
-  // |data
+  //    |data
   // 
   // These cases show how a single data-set can have multiple representations
   // but also how the data can be fragmented and unordered, but there are ways

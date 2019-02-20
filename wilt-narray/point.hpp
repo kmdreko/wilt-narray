@@ -55,16 +55,12 @@ namespace wilt
     //! @exception  std::exception if list size doesn't match dimensions
     Point(std::initializer_list<pos_t> list)
     {
-      if (list.size() == 1)
-        m_size.fill(*list.begin());
-      else if (list.size() != N)
+      if (list.size() != N)
         throw std::invalid_argument("Initializer list must match dimensions");
-      else
-      {
-        auto iter = list.begin();
-        for (pos_t i = 0; i < N; ++i, ++iter)
-          m_size[i] = *iter;
-      }
+
+      auto iter = list.begin();
+      for (pos_t i = 0; i < N; ++i, ++iter)
+        m_size[i] = *iter;
     }
 
     //! @brief      Copy constructor
