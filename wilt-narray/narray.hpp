@@ -249,10 +249,10 @@ namespace wilt
     //   - depth  = dimension 2
     //
     // NOTE: some functions are only available if they have that dimension
-    pos_t width() const;
-    pos_t height() const;
-    pos_t depth() const;
-    pos_t length(std::size_t dim) const;
+    std::size_t width() const;
+    std::size_t height() const;
+    std::size_t depth() const;
+    std::size_t length(std::size_t dim) const;
 
     // Functions for determining the data organization for this array.
     //   - isContinuous = the array accesses data with no gaps
@@ -927,13 +927,13 @@ namespace wilt
   }
 
   template <class T, std::size_t N>
-  pos_t NArray<T, N>::width() const
+  std::size_t NArray<T, N>::width() const
   {
     return sizes_[0];
   }
 
   template <class T, std::size_t N>
-  pos_t NArray<T, N>::height() const
+  std::size_t NArray<T, N>::height() const
   {
     static_assert(N >= 2, "height(): invalid when N < 2");
 
@@ -941,7 +941,7 @@ namespace wilt
   }
 
   template <class T, std::size_t N>
-  pos_t NArray<T, N>::depth() const
+  std::size_t NArray<T, N>::depth() const
   {
     static_assert(N >= 3, "depth(): invalid when N < 3");
 
@@ -949,12 +949,12 @@ namespace wilt
   }
 
   template <class T, std::size_t N>
-  pos_t NArray<T, N>::length(std::size_t dim) const
+  std::size_t NArray<T, N>::length(std::size_t dim) const
   {
     if (dim >= N)
       throw std::out_of_range("length(dim): dim out of bounds");
 
-    return sizes_[dim];
+    return (std::size_t)sizes_[dim];
   }
 
   template <class T, std::size_t N>
