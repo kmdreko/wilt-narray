@@ -10,7 +10,7 @@ This library is designed to access and modify N-dimensional data in an efficient
 
 There exist many methods for creating an array:
 
-```
+```C++
 // Creates an empty array
 NArray<int, 2> arr;
 
@@ -43,7 +43,7 @@ The initial argument is a `wilt::Point<N>` that defines the array size.
 
 Accessing elements in the array is pretty straightforward:
 
-```
+```C++
 NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 100; });
 
 // Access with traditional array syntax
@@ -70,7 +70,7 @@ for (auto subarr : arr.subarrays<1>())
 
 Get the array size:
 
-```
+```C++
 NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 100; });
 
 // Get total element count
@@ -88,7 +88,7 @@ Point<2> sizes = arr.sizes(); // { 100, 100 }
 
 Get meta info about the data:
 
-```
+```C++
 NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 100; });
 
 // Check if there's no data referenced
@@ -103,7 +103,7 @@ bool shared = arr.shared();
 
 Get meta info about the access:
 
-```
+```C++
 NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 100; });
 
 // Check if there are no gaps in the accessed data (not necessarily all the data)
@@ -117,7 +117,7 @@ bool aligned = arr.isAligned();
 
 None of the transformations copy data, they only access the existing data in a new way. This works by resource-sharing the source data which means that even if the initial array for a dataset is destroyed, other arrays may keep the data alive. Many of the following functions have X, Y, Z, and W variants that correspond to the dimensions 0, 1, 2, 3. 
 
-```
+```C++
 NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 10; });
 
 // Creates an array for the data with a fixed value along a dimension
@@ -149,7 +149,7 @@ NArray<int, 2> subarr = arr.skipY(5, 3); // skip every 5 values starting at the
 
 These ones are a bit more complicated.
 
-```
+```C++
 NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 10; });
 
 // Creates an array with the new size
@@ -200,7 +200,7 @@ There are also `singleOp`, `unaryOp`, and `binaryOp` that can apply an element-w
 
 You would normally initialize the library like so:
 
-```
+```C++
 #include "wilt-narray/narray.hpp"
 
 using wilt::NArray;
