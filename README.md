@@ -1,97 +1,214 @@
 # NArray Library
 
 ## Overview
-This library is designed to reference and modify N-dimensional data in an efficient manor. The primary class of the library is `NArray<T, N>` where `T` is the type and `N` is the number of dimensions which provides many methods for accessing the data. This library is similar to Boost::MultiArray and OpenCV cv::Mat but focuses on ease-of-use with simple interfaces and consistent operations without sacrificing performance. 
+
+This library is designed to access and modify N-dimensional data in an efficient and uniform manner. The primary class of the library is `wilt::NArray<T, N>` which represents an `N`-dimensional array of `T`. This library is similar to Boost::MultiArray and OpenCV cv::Mat but focuses on ease-of-use with simple interfaces and consistent operations without sacrificing performance. 
 
 ## Arrays
-### Creating an Array
-There exist many methods for creating an array: 
 
-    NArray<int, 2> data({3, 3});
-    NArray<int, 2> data({3, 3}, 1);
-    NArray<int, 2> data({3, 3}, ptr, PTR::REF);
-    NArray<int, 2> data({3, 3}, [](){ return rand(); });
-    NArray<int, 2> data({3, 3}, {1, 2, 3, 4, 5, 6, 7, 8, 9});
+### Creating the Array
 
-1. Creates a 3x3 array with default values
-2. Creates a 3x3 array with all elements set to 1
-3. Creates a 3x3 array that uses data through a pointer
-4. Creates a 3x3 array from a generator function
-5. Creates a 3x3 array from an initializer list
+There exist many methods for creating an array:
 
-The `{3, 3}` represents a `Point<N>` object that is created from an initializer list
+```
+// Creates an empty array
+NArray<int, 2> arr;
+
+// Creates a 3x3 array with default values
+NArray<int, 2> arr({ 3, 3 });
+
+// Creates a 3x3 array with all elements set to 1
+NArray<int, 2> arr({ 3, 3 }, 1);
+
+// Creates a 3x3 array from an initializer list
+NArray<int, 2> arr({ 3, 3 }, { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+
+// Creates a 3x3 array with data from iterators
+NArray<int, 2> arr({ 3, 3 }, container.begin(), container.end());
+
+// Creates a 3x3 array with data from a pointer. 
+// Choose either:
+//   - referencing existing data
+//   - assume ownership of the data (deletes it when unused)
+//   - copy data
+NArray<int, 2> arr({ 3, 3 }, raw_ptr, wilt::REFERENCE);
+
+// Creates a 3x3 array from a generator function
+NArray<int, 2> arr({ 3, 3 }, [](){ return rand(); });
+```
+
+The initial argument is a `wilt::Point<N>` that defines the array size.
 
 ### Accessing the Array
-The following functions slice\_, range\_, and flip\_ have X, Y, Z, W, and N variants where X, Y, Z, W correspond to the dimensions 1, 2, 3, 4 while N allows a parameter specifying the dimension.
 
-    NArray<int, 2> data({6, 6}, [](){ return rand() % 10; });
+Accessing elements in the array is pretty straightforward:
 
-    data.at({3, 1});
-    data[3][1];
-    data.sliceX(1);
-    data.rangeY(3, 2);
-    data.subarray({0, 0}, {2, 3});
+```
+NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 100; });
 
-    data.flipX();
-    data.t(0, 1);
+// Access with traditional array syntax
+arr[0][12] = 42;
 
-1. Returns the element at the location
-2. Identical to #1 (at() is preferable over [])
-3. Returns an `NArray<int, 1>` corresponding to that slice
-4. Returns an `NArray<int, 2>` corresponding to that range
-5. Returns an `NArray<int, 2>` corresponding to that position and size
-6. Returns the array with the X dimension reversed
-7. Returns the array with the two dimensions swapped
+// Access with a single function (better since it avoids temporaries needed for multiple []s)
+arr.at({ 0, 12 }) = 42;
+
+// Iterate over all elements
+for (auto& elem : arr)
+{
+    // Will loop 10,000 times
+    // Accesses elements in last-dimension-first order [0][0] ... [0][99] then [1][0] ... [1][99] and so on
+}
+
+// Iterate over all subarrays
+for (auto subarr : arr.subarrays<1>())
+{
+    // Will loop 100 times, one for each X-index
+}
+```
+
+### Querying the Array
+
+Get the array size:
+
+```
+NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 100; });
+
+// Get total element count
+std::size_t size = arr.size(); // 10000
+
+// Get single dimension
+std::size_t w = arr.size(0);  // size of dimension 0
+std::size_t w = arr.width();  // size of dimension 0
+std::size_t h = arr.height(); // size of dimension 1
+std::size_t d = arr.depth();  // size of dimension 2
+
+// Get set of dimension sizes
+Point<2> sizes = arr.sizes(); // { 100, 100 }
+```
+
+Get meta info about the data:
+
+```
+NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 100; });
+
+// Check if there's no data referenced
+bool empty = arr.empty();
+
+// Check if this array holds only reference
+bool unique = arr.unique();
+
+// Check if there are other references
+bool shared = arr.shared();
+```
+
+Get meta info about the access:
+
+```
+NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 100; });
+
+// Check if there are no gaps in the accessed data (not necessarily all the data)
+bool contiguous = arr.isContiguous();
+
+// Check if elements are accessed in increasing-memory order
+bool aligned = arr.isAligned();
+```
+
+### Transforming the Array
+
+None of the transformations copy data, they only access the existing data in a new way. This works by resource-sharing the source data which means that even if the initial array for a dataset is destroyed, other arrays may keep the data alive. Many of the following functions have X, Y, Z, and W variants that correspond to the dimensions 0, 1, 2, 3. 
+
+```
+NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 10; });
+
+// Creates an array for the data with a fixed value along a dimension
+NArray<int, 1> subarr = arr.sliceX(0); // identical to arr[0]
+NArray<int, 1> subarr = arr.sliceY(0);
+NArray<int, 1> subarr = arr.slice(1, 0); // slice on dimension 1 (Y), identical to arr.sliceY(0)
+
+// Creates an array for the data with a dimension limited
+NArray<int, 2> subarr = arr.rangeX(5, 95); // access the X-data from 5 to 95
+NArray<int, 2> subarr = arr.rangeX(5, 95)  // calls can be chained
+                           .rangeY(5, 95); // results in 90x90 array
+
+// Creates an array for the data with each dimension limited
+NArray<int, 2> subarr = arr.subarray({ 5, 5 }, { 95, 95 });
+
+// Creates an array for the data with dimenions swapped
+NArray<int, 2> subarr = arr.transpose(0, 1);
+NArray<int, 2> subarr = arr.transpose(); // X and Y by default
+
+// Creates an array with access through a dimension reversed
+NArray<int, 2> subarr = arr.flipX(); // arr[0] == subarr[99]
+NArray<int, 2> subarr = arr.flip(1); // flip dimension 1 (Y)
+
+// Create an array with access skipping over elements
+NArray<int, 2> subarr = arr.skipX(5); // skip every 5 values in the X-dimension
+NArray<int, 2> subarr = arr.skipY(5, 3); // skip every 5 values starting at the
+                                         // 3rd value in the Y-dimension
+```
+
+These ones are a bit more complicated.
+
+```
+NArray<int, 2> arr({ 100, 100 }, [](){ return rand() % 10; });
+
+// Creates an array with the new size
+NArray<int, 3> subarr = arr.reshape<3>({ 100, 20, 5 }); // splits the Y-dimension into Y and Z dimensions, splitting a 
+                                                        // dimension can always be done as long as the product equals
+                                                        // the original size
+NArray<int, 3> subarr = arr.reshape<3>({ 100, 5, 5 }); // fails
+NArray<int, 5> subarr = arr.reshape<3>({ 100, 1, 10, 5, 2 }); // works
+NArray<int, 1> subarr = arr.reshape<1>({ 10000 }); // transforms it into a 1-dimensional array, this can be done only
+                                                   // if access to the underlying data is uniform across the dimensions
+NArray<int, 1> subarr = arr.rangeX(5, 95).reshape<1>({ 9000 }); // fails
+NArray<int, 1> subarr = arr.rangeY(5, 95).reshape<1>({ 9000 }); // this is ok since the underlying access is uniform
+
+// Creates an array with an additional dimension that serves as a sliding-window over another dimension
+NArray<int, 2> subarr = arr.slicex(0)   // reduce dimension for this example
+                           .windowY(5); // resulting size is 95x5 and accesses elements at: 0...4, 1...5, ..., 95...99
+
+// Creates an array with an additional dimension that repeats its elements
+NArray<int, 3> subarr = arr.repeat(100); // resulting size is 100x100x100 where [0][0][0] is refers to the same element 
+                                         // as at [0][0][1] and [0][0][99]
+
+// Creates an array that accesses elements in memory-increasing order (can improve performance by forsaking order)
+NArray<int, 2> subarr = arr.flipX().transpose() // change access order for this example
+                           .asAligned(); // in this instance, gives the original array since it was in proper order
+```
 
 ### Modifying the Array
-All of the above operations do not copy the data but actually access the same data and therfore can modify the data. Meaning that `data.subarray({1, 1}, {2, 2}).at({0, 1}) = 5` makes `data.at({1, 2}) == 5`. If you wish to create a copy to modify separately, just use `.clone()`
 
-You can protect the data by specifying `const NArray<const int, 2>` or similar when passing your data into functions. 
+All of the above operations do not copy the data but actually access the same data and therfore can modify the data. Meaning that `data.subarray({1, 1}, {2, 2}).at({0, 1}) = 5` makes `data.at({1, 2}) == 5`. 
 
-There are many other functions that provide attributes, iterators, and other miscellaneous information related to the array that are well documented within the source. 
+Since assignment (`=`) only changes what data is referenced and doesn't modify the data, it can't be used for assigning to the data. You can assign to all values at once using `setTo()` which accepts a single value or an equivaliently-sized array.
+
+If you wish to create a copy to modify separately, you can use `.clone()`. You can protect the data by specifying `const NArray<const int, 2>` or using `.asConst()` when passing your data into functions.
+
+The operators `+=` and `-=` are available for element-wise modification for arrays. The operators `+=`, `-=`, `*=`, and `/=` also allow a single-element argument.
 
 ## Operations
 
 ### Arithmetic
-Operators (+,-,*,/,%,&,|,^) and specific-return functions (add,sub,div,mul,mod,bit\_and,bit\_or,bit\_xor) are provided that apply array-to-array and array-to-single calculations. Comparisons operators (>,<,>=,<=,==,!=) work the same way except == and != for array-to-array returns a single bool. To calculate element-wise equality use `compare(arr1, arr2, CMP::EQ);`.
 
-### Filters
-Filters are functions that apply an operation using the surrounding elements. The filters available and the various border cases are below:
-
-    Border::NONE            abc|de|fgh     border values are in the array, used for pre-padded data
-    Border::REPLICATE    aaa|abcdefgh|hhh  border values are nearest edge value
-    Border::REFLECT      cba|abcdefgh|hgf  border values are reflected around the border
-    Border::REFLECT_101  dcb|abcdefgh|gfe  border values are reflected around the edge
-    Border::WRAP         fgh|abcdefgh|abc  border values are copied from the opposite edge
-    Border::IGNORE       ---|abcdefgh|---  border values are ignored, may not be valid for all functions
-    Border::PADDED       iii|abcdefgh|iii  border values are a set value (created with Border::PAD())
-
-    filterMax();     gets the maximum element in the area, can provide a mask
-    filterMin();     gets the minimum element in the area, can provide a mask
-    filterMean();    gets the mean of the surrounding elements
-    filterMedian();  gets the median of the surrounding elements
-    filterKernel();  gets the sum of kernel * area
-    filter();        custom filter, pass in a function that accepts an NArray and returns a value
+Operators (`+`, `-`, `*`, `/`, `%`, `&`, `|`, `^`) and specific-return functions (`add`, `sub`, `div`, `mul`, `mod`, `bit_and`, `bit_or`, `bit_xor`) are provided that apply array-to-array and array-to-single calculations. Comparisons operators (`>`, `<`, `>=`, `<=`, `==`, `!=`) work the same way except `==` and `!=` for array-to-array returns a single bool. To calculate element-wise equality use `compare(arr1, arr2, CMP::EQ);`.
 
 ### Miscellaneous 
-Various other functions are available such as max, min, mean, and median that act on the whole array. There are also singleOp, unaryOp, and binaryOp that apply an element-wise operation between arrays.
+
+There are also `singleOp`, `unaryOp`, and `binaryOp` that can apply an element-wise operation between arrays.
 
 ## Using the Library
 
-You would normally initialize the library as such
+You would normally initialize the library like so:
 
-    #include "wilt-narray/narray.hpp"
-    using wilt::NArray;
+```
+#include "wilt-narray/narray.hpp"
 
-This library was designed with C++11 features but you can disable some features (brace-list-initialization, inline namespaces) for environments without full support (namely VS 2012) by using special defines in core.hpp
+using wilt::NArray;
+using wilt::Point;
+```
 
-### Cons
-This library is highly templated and uses various lambda expressions for its internal operations. As a result, the library may compile slowly depending on its use and debugging may become confusing when something is used incorrectly. Also, all the functions (particularly filters) are generic solutions that are not as efficient as optimized versions.
+This library was built and tested with C++14.
 
-## Final
+## Contact
 
-### Future
-Various optimizations can be made for literal typed arrays (particularly uchar). A few functions have already been made that utilize SIMD operations but aren't in the library quite yet. Currently the library is header-only and optimized functions will change that, but the core features will always be header only. There may be an image-processing specific portion of the library eventually but there are other libraries that do that far more effectively.
-
-### Contact
 If you have any questions, concerns, recommendations please feel free to e-mail me at kmdreko@gmail.com. If you notice a bug or something that seems unintentional, create an issue to report it.
