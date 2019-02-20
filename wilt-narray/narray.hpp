@@ -255,9 +255,9 @@ namespace wilt
     std::size_t depth() const;
 
     // Functions for determining the data organization for this array.
-    //   - isContinuous = the array accesses data with no gaps
+    //   - isContiguous = the array accesses data with no gaps
     //   - isAligned    = the array accesses data linearly
-    bool isContinuous() const;
+    bool isContiguous() const;
     bool isAligned() const;
 
   public:
@@ -396,7 +396,7 @@ namespace wilt
     void foreach(Operator op) const;
 
     // Gets a pointer to the segment base. Can be used to access the whole
-    // segment if isContinuous() and isAligned() or by respecting sizes() and 
+    // segment if isContiguous() and isAligned() or by respecting sizes() and 
     // steps()
     T* base() const;
 
@@ -958,7 +958,7 @@ namespace wilt
   }
 
   template <class T, std::size_t N>
-  bool NArray<T, N>::isContinuous() const
+  bool NArray<T, N>::isContiguous() const
   {
     pos_t stepSize = 0;
     for (std::size_t i = 0; i < N; ++i)
