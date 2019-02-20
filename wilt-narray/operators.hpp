@@ -335,7 +335,7 @@ namespace wilt
       throw std::invalid_argument("add(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -350,7 +350,7 @@ namespace wilt
       throw std::invalid_argument("add(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -365,9 +365,9 @@ namespace wilt
       throw std::invalid_argument("add(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -391,7 +391,7 @@ namespace wilt
 
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<wilt::NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
@@ -415,7 +415,7 @@ namespace wilt
 
     if (rhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
@@ -443,7 +443,7 @@ namespace wilt
       throw std::invalid_argument("sub(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -458,7 +458,7 @@ namespace wilt
       throw std::invalid_argument("sub(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -473,9 +473,9 @@ namespace wilt
       throw std::invalid_argument("sub(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -499,7 +499,7 @@ namespace wilt
 
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
@@ -523,7 +523,7 @@ namespace wilt
 
     if (rhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(std::forward<wilt::NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
@@ -551,7 +551,7 @@ namespace wilt
       throw std::invalid_argument("mul(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -566,7 +566,7 @@ namespace wilt
       throw std::invalid_argument("mul(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -581,9 +581,9 @@ namespace wilt
       throw std::invalid_argument("mul(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -607,7 +607,7 @@ namespace wilt
 
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
@@ -631,7 +631,7 @@ namespace wilt
 
     if (rhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
@@ -659,7 +659,7 @@ namespace wilt
       throw std::invalid_argument("div(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -674,7 +674,7 @@ namespace wilt
       throw std::invalid_argument("div(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -689,9 +689,9 @@ namespace wilt
       throw std::invalid_argument("div(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -715,7 +715,7 @@ namespace wilt
 
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<wilt::NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
@@ -739,7 +739,7 @@ namespace wilt
 
     if (rhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
@@ -767,7 +767,7 @@ namespace wilt
       throw std::invalid_argument("mod(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -782,7 +782,7 @@ namespace wilt
       throw std::invalid_argument("mod(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -797,9 +797,9 @@ namespace wilt
       throw std::invalid_argument("mod(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -823,7 +823,7 @@ namespace wilt
 
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
@@ -847,7 +847,7 @@ namespace wilt
 
     if (rhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
@@ -875,7 +875,7 @@ namespace wilt
       throw std::invalid_argument("bit_and(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -890,7 +890,7 @@ namespace wilt
       throw std::invalid_argument("bit_and(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -905,9 +905,9 @@ namespace wilt
       throw std::invalid_argument("bit_and(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -931,7 +931,7 @@ namespace wilt
 
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
@@ -955,7 +955,7 @@ namespace wilt
 
     if (rhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
@@ -983,7 +983,7 @@ namespace wilt
       throw std::invalid_argument("bit_or(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -998,7 +998,7 @@ namespace wilt
       throw std::invalid_argument("bit_or(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -1013,9 +1013,9 @@ namespace wilt
       throw std::invalid_argument("bit_or(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -1039,7 +1039,7 @@ namespace wilt
 
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
@@ -1063,7 +1063,7 @@ namespace wilt
 
     if (rhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
@@ -1091,7 +1091,7 @@ namespace wilt
       throw std::invalid_argument("bit_xor(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -1106,7 +1106,7 @@ namespace wilt
       throw std::invalid_argument("bit_xor(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -1121,9 +1121,9 @@ namespace wilt
       throw std::invalid_argument("bit_xor(): dimensions must match");
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), rhs, op);
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(lhs, std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(lhs, rhs, op);
@@ -1147,7 +1147,7 @@ namespace wilt
 
     if (lhs.empty())
       return NArray<Ret, N>();
-    if (lhs.unique() && lhs.isContinuous() && lhs.isAligned())
+    if (lhs.unique() && lhs.isContiguous() && lhs.isAligned())
       return move_op<Ret, T, U, N>::left(std::forward<NArray<T, N>>(lhs), op);
     
     return move_op<Ret, T, U, N>::none(lhs, op);
@@ -1171,7 +1171,7 @@ namespace wilt
 
     if (rhs.empty())
       return NArray<Ret, N>();
-    if (rhs.unique() && rhs.isContinuous() && rhs.isAligned())
+    if (rhs.unique() && rhs.isContiguous() && rhs.isAligned())
       return move_op<Ret, T, U, N>::right(std::forward<NArray<U, N>>(rhs), op);
 
     return move_op<Ret, T, U, N>::none(rhs, op);
