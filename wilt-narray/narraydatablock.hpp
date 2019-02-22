@@ -31,10 +31,12 @@
 #include <memory>
 // - std::allocator
 // - std::shared_ptr
-// - std::make_shared
 // - std::enable_shared_from_this
 #include <cstddef>
 // - std::size_t
+#include <type_traits>
+// - std::is_trivially_default_constructible
+// - std::is_trivially_destructible
 
 namespace wilt
 {
@@ -79,8 +81,8 @@ namespace wilt
         owned_(true)
     {
       data_ = alloc_.allocate(size);
-      if (!raw_t<T>::value())
-        for (size_t i = 0; i < size; ++i)
+      if (!std::is_trivially_default_constructible<T>::value)
+        for (std::size_t i = 0; i < size; ++i)
           alloc_.construct(data_ + i);
     }
 
@@ -91,7 +93,7 @@ namespace wilt
         owned_(true)
     {
       data_ = alloc_.allocate(size);
-      for (size_t i = 0; i < size; ++i)
+      for (std::size_t i = 0; i < size; ++i)
         alloc_.construct(data_ + i, val);
     }
 
@@ -126,7 +128,7 @@ namespace wilt
         owned_(true)
     {
       data_ = alloc_.allocate(size);
-      for (size_t i = 0; i < size; ++i)
+      for (std::size_t i = 0; i < size; ++i)
         alloc_.construct(data_ + i, gen());
     }
 
@@ -139,7 +141,7 @@ namespace wilt
     {
       data_ = alloc_.allocate(size);
 
-      size_t i = 0;
+      std::size_t i = 0;
       for (; i < size && first != last; ++i, ++first)
         alloc_.construct(data_ + i, *first);
 
@@ -152,7 +154,7 @@ namespace wilt
     {
       if (data_ && owned_)
       {
-        if (!raw_t<T>::value())
+        if (!std::is_trivially_destructible<T>::value)
           for (std::size_t i = 0; i < size_; ++i)
             alloc_.destroy(data_ + i);
         alloc_.deallocate(data_, size_);
