@@ -50,22 +50,6 @@ namespace wilt
   // type aliases
   using pos_t = std::ptrdiff_t;
 
-  // operation type returns
-  template <class T, class U> struct add_ret { using type = decltype(std::declval<T>() + std::declval<U>()); };
-  template <class T, class U> struct sub_ret { using type = decltype(std::declval<T>() - std::declval<U>()); };
-  template <class T, class U> struct mul_ret { using type = decltype(std::declval<T>() * std::declval<U>()); };
-  template <class T, class U> struct div_ret { using type = decltype(std::declval<T>() / std::declval<U>()); };
-  template <class T, class U> struct mod_ret { using type = decltype(std::declval<T>() % std::declval<U>()); };
-
-  template <class T, class U> struct bit_and_ret { using type = decltype(std::declval<T>() & std::declval<U>()); };
-  template <class T, class U> struct bit_or_ret  { using type = decltype(std::declval<T>() | std::declval<U>()); };
-  template <class T, class U> struct bit_xor_ret { using type = decltype(std::declval<T>() ^ std::declval<U>()); };
-
-  template <class T> struct sum_t { using type = T; };
-  template <class T> struct raw_t { static bool value() { return false; } };
-  
-  template <> struct sum_t<uint8_t> { using type = int; };
-
   //! @brief         applies an operation on two source arrays and stores the
   //!                result in a destination array
   //! @param[out]    dst - the destination array
