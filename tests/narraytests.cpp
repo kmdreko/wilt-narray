@@ -405,6 +405,71 @@ void testNArrayIteratorConstructor()
   }
 }
 
+void testNArrayAddition()
+{
+  { // NArray<int, 2> + NArray<int, 2>
+    wilt::NArray<int, 2> a({ 5, 5 }, 1);
+    wilt::NArray<int, 2> b({ 5, 5 }, 2);
+
+    auto c = a + b;
+    assert((std::is_same<decltype(c), wilt::NArray<int, 2>>::value));
+    assert(c.sizes() == wilt::Point<2>({ 5, 5 }));
+    for (auto v : c)
+      assert(v == 3);
+  }
+
+  { // NArray<int, 2> + int
+    wilt::NArray<int, 2> a({ 5, 5 }, 1);
+
+    auto c = a + 2;
+    assert((std::is_same<decltype(c), wilt::NArray<int, 2>>::value));
+    assert(c.sizes() == wilt::Point<2>({ 5, 5 }));
+    for (auto v : c)
+      assert(v == 3);
+  }
+
+  { // int + NArray<int, 2>
+    wilt::NArray<int, 2> b({ 5, 5 }, 2);
+
+    auto c = 1 + b;
+    assert((std::is_same<decltype(c), wilt::NArray<int, 2>>::value));
+    assert(c.sizes() == wilt::Point<2>({ 5, 5 }));
+    for (auto v : c)
+      assert(v == 3);
+  }
+
+  { // NArray<int, 2> + NArray<double, 2>
+    wilt::NArray<int, 2> a({ 5, 5 }, 1);
+    wilt::NArray<double, 2> b({ 5, 5 }, 2.25);
+
+    auto c = a + b;
+    assert((std::is_same<decltype(c), wilt::NArray<double, 2>>::value));
+    assert(c.sizes() == wilt::Point<2>({ 5, 5 }));
+    for (auto v : c)
+      assert(v == 3.25);
+  }
+
+  { // NArray<int, 2> + double
+    wilt::NArray<int, 2> a({ 5, 5 }, 1);
+
+    auto c = a + 2.25;
+    assert((std::is_same<decltype(c), wilt::NArray<double, 2>>::value));
+    assert(c.sizes() == wilt::Point<2>({ 5, 5 }));
+    for (auto v : c)
+      assert(v == 3.25);
+  }
+
+  { // int + NArray<double, 2>
+    wilt::NArray<double, 2> b({ 5, 5 }, 2.25);
+
+    auto c = 1 + b;
+    assert((std::is_same<decltype(c), wilt::NArray<double, 2>>::value));
+    assert(c.sizes() == wilt::Point<2>({ 5, 5 }));
+    for (auto v : c)
+      assert(v == 3.25);
+  }
+}
+
 void testMisc()
 {
   { // test that window+skip can give the same result as a reshape+transpose
@@ -431,6 +496,8 @@ void testNArray()
   testWindowCreatesCorrectNArray();
   testCompressCreatesCorrectNArray();
   testNArrayIteratorConstructor();
+
+  testNArrayAddition();
 
   testMisc();
 }
