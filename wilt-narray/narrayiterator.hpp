@@ -31,7 +31,7 @@
 #include <iterator>
 // - std::random_access_iterator_tag
 
-#include "util.h"
+#include "util.hpp"
 #include "point.hpp"
 #include "narray.hpp"
 

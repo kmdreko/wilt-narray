@@ -28,7 +28,7 @@
 #ifndef WILT_OPERATORS_HPP
 #define WILT_OPERATORS_HPP
 
-#include "util.h"
+#include "util.hpp"
 #include "narray.hpp"
 
 namespace wilt

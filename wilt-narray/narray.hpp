@@ -38,7 +38,7 @@
 #include <initializer_list>
 // - std::initializer list
 
-#include "util.h"
+#include "util.hpp"
 #include "point.hpp"
 #include "narraydatablock.hpp"
 
