@@ -342,19 +342,4 @@ namespace wilt
 
 } // namespace wilt
 
-namespace std
-{
-  template <class T>
-  struct toggle_const
-  {
-    using type = const T;
-  };
-
-  template <class T>
-  struct toggle_const<const T>
-  {
-    using type = T;
-  };
-}
-
 #endif // !WILT_UTIL_H
