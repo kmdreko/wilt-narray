@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// FILE: util.h
+// FILE: util.hpp
 // DATE: 2014-08-20
 // AUTH: Trevor Wilson <kmdreko@gmail.com>
 // DESC: defines utilities like macros, typedefs, and required libraries
@@ -25,8 +25,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef WILT_UTIL_H
-#define WILT_UTIL_H
+#ifndef WILT_UTIL_HPP
+#define WILT_UTIL_HPP
 
 // libraries
 #include <utility>
@@ -342,4 +342,4 @@ namespace wilt
 
 } // namespace wilt
 
-#endif // !WILT_UTIL_H
+#endif // !WILT_UTIL_HPP

@@ -25,8 +25,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef WILT_NARRAYDATAREF_HPP
-#define WILT_NARRAYDATAREF_HPP
+#ifndef WILT_NARRAYDATABLOCK_HPP
+#define WILT_NARRAYDATABLOCK_HPP
 
 #include <memory>
 // - std::allocator
@@ -175,4 +175,4 @@ namespace wilt
 
 } // namespace wilt
 
-#endif // !WILT_NARRAYDATAREF_HPP
+#endif // !WILT_NARRAYDATABLOCK_HPP
