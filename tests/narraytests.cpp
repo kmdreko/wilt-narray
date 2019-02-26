@@ -207,6 +207,38 @@ void testConstNArrayConstructor()
   }
 }
 
+void testCloneConstructsNewArrayCorrectly()
+{
+  { // T=int N=3
+    wilt::NArray<int, 3> a({ 3, 4, 5 }, 1);
+    wilt::NArray<int, 3> b = a.flipY().transpose();
+    wilt::NArray<int, 3> c = b.clone();
+    b[0][0][0] = 5;
+
+    assert(c.size() == a.size());
+    assert(c.sizes() == wilt::Point<3>({ 4, 3, 5 }));
+    assert(c.steps() == wilt::Point<3>({ 15, 5, 1 }));
+    for (auto v : c)
+      assert(v == 1);
+  }
+
+  { // makes exactly N copies
+    wilt::NArray<TrackCopy, 1> a({ 3 });
+    TrackCopy::reset();
+    wilt::NArray<TrackCopy, 1> b = a.clone();
+
+    assert(TrackCopy::count == 3);
+  }
+
+  { // does not default construct any elements
+    wilt::NArray<TrackDefault, 1> a({ 3 });
+    TrackDefault::reset();
+    wilt::NArray<TrackDefault, 1> b = a.clone();
+
+    assert(TrackDefault::count == 0);
+  }
+}
+
 void testAsCondensedCreatesCorrectNArray()
 {
   { // T=int N=1
@@ -518,6 +550,7 @@ void testNArray()
   testSizedWithDefaultConstructorHasConstructedSize();
   testCopyConstructorSharesData();
   testConstNArrayConstructor();
+  testCloneConstructsNewArrayCorrectly();
   testAsCondensedCreatesCorrectNArray();
   testSkipNCreatesCorrectNArray();
   testReshapeCreatesCorrectNArray();

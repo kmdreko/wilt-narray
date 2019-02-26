@@ -423,7 +423,8 @@ namespace wilt
     ////////////////////////////////////////////////////////////////////////////
     // Functions designed to create a new dataset
 
-    // Copies the data referenced into a new NArray
+    // Copies the data referenced into a new NArray. Calls the copy constructor
+    // size() times.
     NArray<typename std::remove_const<T>::type, N> clone() const;
 
     // Converts the NArray to a new data type either directly or with a
@@ -1476,9 +1477,7 @@ namespace wilt
   template <class T, std::size_t N>
   NArray<typename std::remove_const<T>::type, N> NArray<T, N>::clone() const
   {
-    NArray<typename std::remove_const<T>::type, N> ret(sizes_);
-    ret.setTo(*this);
-    return ret;
+    return NArray<typename std::remove_const<T>::type, N>(sizes_, [iter = this->begin()]() mutable -> T& { return *iter++; });
   }
 
   template <class T, std::size_t N>
