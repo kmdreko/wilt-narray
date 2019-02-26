@@ -47,6 +47,8 @@ namespace wilt
     REFERENCE
   };
 
+inline namespace detail
+{
   template <class T, class A = std::allocator<T>>
   class NArrayDataBlock : public std::enable_shared_from_this<NArrayDataBlock<T, A>>
   {
@@ -172,6 +174,8 @@ namespace wilt
     }
 
   }; // class NArrayDataBlock
+
+} // namespace detail
 
 } // namespace wilt
 

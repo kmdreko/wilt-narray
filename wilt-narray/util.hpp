@@ -50,6 +50,8 @@ namespace wilt
   // type aliases
   using pos_t = std::ptrdiff_t;
 
+inline namespace detail
+{
   //! @brief         applies an operation on two source arrays and stores the
   //!                result in a destination array
   //! @param[out]    dst - the destination array
@@ -339,6 +341,8 @@ namespace wilt
     }
     return true;
   }
+
+} // namespace detail
 
 } // namespace wilt
 
