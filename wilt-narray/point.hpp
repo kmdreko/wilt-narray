@@ -362,7 +362,7 @@ namespace detail
   //! Is used to simplify NArray::slice() calls
   //! Will fail if N==0
   template <std::size_t N>
-  Point<N-1> slice_(const Point<N>& pt, std::size_t n)
+  Point<N-1> slice(const Point<N>& pt, std::size_t n)
   {
     Point<N-1> ret;
     for (std::size_t i = 0, j = 0; i < N; ++i)
@@ -377,7 +377,7 @@ namespace detail
   //! @param[in]  v - value to add
   //! @return     point with the value added
   template <std::size_t N>
-  Point<N+1> push_(const Point<N>& pt, std::size_t n, pos_t v)
+  Point<N+1> push(const Point<N>& pt, std::size_t n, pos_t v)
   {
     Point<N+1> ret;
     for (std::size_t i = 0; i < n; ++i)
@@ -397,7 +397,7 @@ namespace detail
   //! Is used to simplify NArray::transpose() calls
   //! Will fail if N==0
   template <std::size_t N>
-  Point<N> swap_(const Point<N>& pt, std::size_t a, std::size_t b)
+  Point<N> swap(const Point<N>& pt, std::size_t a, std::size_t b)
   {
     Point<N> ret = pt;
     std::swap(ret[a], ret[b]);
@@ -405,7 +405,7 @@ namespace detail
   }
 
   template <std::size_t N, std::size_t M>
-  Point<N> chopLow_(const Point<M>& pt)
+  Point<N> chopLow(const Point<M>& pt)
   {
     Point<N> ret;
     for (std::size_t i = 0; i < N; ++i)
@@ -414,7 +414,7 @@ namespace detail
   }
 
   template <std::size_t N, std::size_t M>
-  Point<N> chopHigh_(const Point<M>& pt)
+  Point<N> chopHigh(const Point<M>& pt)
   {
     Point<N> ret;
     for (std::size_t i = 0; i < N; ++i)
@@ -431,7 +431,7 @@ namespace detail
   //! meaningful result
   //! Will fail if N==0
   template <std::size_t N>
-  Point<N> step_(const Point<N>& sizes)
+  Point<N> step(const Point<N>& sizes)
   {
     Point<N> ret;
     ret[N-1] = 1;
@@ -449,7 +449,7 @@ namespace detail
   //! Will be zero if any dimension is zero
   //! Will fail if N==0
   template <std::size_t N>
-  pos_t size_(const Point<N>& sizes)
+  pos_t size(const Point<N>& sizes)
   {
     pos_t ret = sizes[0];
     for (std::size_t i = 1; i < N; ++i)
@@ -458,7 +458,7 @@ namespace detail
   }
 
   template <std::size_t N>
-  bool validSize_(const Point<N>& size)
+  bool validSize(const Point<N>& size)
   {
     for (std::size_t i = 0; i < N; ++i)
       if (size[i] <= 0)
@@ -474,7 +474,7 @@ namespace detail
   //!
   //! Is used exclusively in NArray::align() to create an aligned NArray
   template <std::size_t N>
-  pos_t align_(Point<N>& sizes, Point<N>& steps)
+  pos_t align(Point<N>& sizes, Point<N>& steps)
   {
     pos_t offset = 0;
     for (std::size_t i = 0; i < N; ++i)
@@ -506,11 +506,11 @@ namespace detail
   //! Is used when applying operations on arrays to effectively reduce the
   //! dimensionality of the data which will reduce loops and function calls.
   //! Condensing the dim and step arrays from an aligned and continuous NArray
-  //! should result in return=1, sizes=size_(sizes), steps={1}
+  //! should result in return=1, sizes=size(sizes), steps={1}
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <std::size_t N>
-  std::size_t condense_(Point<N>& sizes, Point<N>& steps)
+  std::size_t condense(Point<N>& sizes, Point<N>& steps)
   {
     std::size_t j = N-1;
     for (int i = N-2; i >= 0; --i)
@@ -548,11 +548,11 @@ namespace detail
   //! Is used when applying operations on arrays to effectively reduce the
   //! dimensionality of the data which will reduce loops and function calls.
   //! Condensing the dim and step arrays from an aligned and continuous NArray
-  //! should result in return=1, sizes=size_(sizes), step1={1}, step2={1}
+  //! should result in return=1, sizes=size(sizes), step1={1}, step2={1}
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <std::size_t N>
-  std::size_t condense_(Point<N>& sizes, Point<N>& step1, Point<N>& step2)
+  std::size_t condense(Point<N>& sizes, Point<N>& step1, Point<N>& step2)
   {
     std::size_t j = 0;
     for (std::size_t i = 1; i < N; ++i)
@@ -576,7 +576,7 @@ namespace detail
   //! @param[in]  idx - index to convert from
   //! @return     point that corresponds to the index
   template <std::size_t N>
-  Point<N> idx2pos_(const Point<N>& sizes, pos_t idx)
+  Point<N> idx2pos(const Point<N>& sizes, pos_t idx)
   {
     Point<N> ret;
     for (int i = N-1; i >= 0; --i)
@@ -592,7 +592,7 @@ namespace detail
   //! @param[in]  pos - point to convert from
   //! @return     index that corresponds to the point
   template <std::size_t N>
-  pos_t pos2idx_(const Point<N>& sizes, const Point<N>& pos)
+  pos_t pos2idx(const Point<N>& sizes, const Point<N>& pos)
   {
     pos_t idx = pos[N-1];
     for (int i = N-2; i >= 0; --i)

@@ -68,7 +68,7 @@ namespace detail
   //! arrays must be the same size (hence the single dimension array), and
   //! this function makes no checks whether the inputs are valid.
   template <class T, class U, class V, class Operator>
-  void binaryOp_(
+  void binaryOp(
     T* dst, 
     const U* src1, 
     const V* src2, 
@@ -88,7 +88,7 @@ namespace detail
     else
     {
       for (; dst != end; dst += dsteps[0], src1 += s1steps[0], src2 += s2steps[0])
-        binaryOp_(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op, n - 1);
+        binaryOp(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op, n - 1);
     }
   }
 
@@ -108,7 +108,7 @@ namespace detail
   //! arrays must be the same size (hence the single dimension array), and
   //! this function makes no checks whether the inputs are valid.
   template <class T, class U, class V, class Operator>
-  void binaryOp2_(
+  void binaryOp2(
     T* dst, 
     const U* src1, 
     const V* src2, 
@@ -128,7 +128,7 @@ namespace detail
     else
     {
       for (; dst != end; dst += dsteps[0], src1 += s1steps[0], src2 += s2steps[0])
-        binaryOp2_(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op, n - 1);
+        binaryOp2(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op, n - 1);
     }
   }
 
@@ -146,7 +146,7 @@ namespace detail
   //! arrays must be the same size (hence the single dimension array), and
   //! this function makes no checks whether the inputs are valid.
   template <class T, class U, class Operator>
-  void unaryOp_(
+  void unaryOp(
     T* dst, 
     const U* src, 
     const pos_t* sizes,
@@ -164,7 +164,7 @@ namespace detail
     else
     {
       for (; dst != end; dst += dsteps[0], src += ssteps[0])
-        unaryOp_(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op, n - 1);
+        unaryOp(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op, n - 1);
     }
   }
 
@@ -182,7 +182,7 @@ namespace detail
   //! arrays must be the same size (hence the single dimension array), and
   //! this function makes no checks whether the inputs are valid.
   template <class T, class U, class Operator>
-  void unaryOp2_(
+  void unaryOp2(
     T* dst, 
     const U* src, 
     const pos_t* sizes,
@@ -200,7 +200,7 @@ namespace detail
     else
     {
       for (; dst < end; dst += dsteps[0], src += ssteps[0])
-        unaryOp2_(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op, n - 1);
+        unaryOp2(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op, n - 1);
     }
   }
 
@@ -215,7 +215,7 @@ namespace detail
   //!
   //! this function makes no checks whether the inputs are valid.
   template <class T, class Operator>
-  void singleOp_(
+  void singleOp(
     T* dst, 
     const pos_t* sizes,
     const pos_t* dsteps,
@@ -231,7 +231,7 @@ namespace detail
     else
     {
       for (; dst != end; dst += dsteps[0])
-        singleOp_(dst, sizes + 1, dsteps + 1, op, n - 1);
+        singleOp(dst, sizes + 1, dsteps + 1, op, n - 1);
     }
   }
 
@@ -246,7 +246,7 @@ namespace detail
   //!
   //! this function makes no checks whether the inputs are valid.
   template <class T, class Operator>
-  void singleOp2_(
+  void singleOp2(
     T* dst, 
     const pos_t* sizes,
     const pos_t* dsteps,
@@ -262,7 +262,7 @@ namespace detail
     else
     {
       for (; dst != end; dst += dsteps[0])
-        singleOp2_(dst, sizes + 1, dsteps + 1, op, n - 1);
+        singleOp2(dst, sizes + 1, dsteps + 1, op, n - 1);
     }
   }
 
@@ -281,7 +281,7 @@ namespace detail
   //!
   //! this function makes no checks whether the inputs are valid.
   template <class T, class U, class Operator>
-  bool allOf_(
+  bool allOf(
     const T* src1, 
     const U* src2, 
     const pos_t* sizes,
@@ -300,7 +300,7 @@ namespace detail
     else
     {
       for (; src1 != end; src1 += s1steps[0], src2 += s2steps[0])
-        if (!allOf_(src1, src2, sizes + 1, s1steps + 1, s2steps + 1, op, n - 1))
+        if (!allOf(src1, src2, sizes + 1, s1steps + 1, s2steps + 1, op, n - 1))
           return false;
     }
     return true;
@@ -319,7 +319,7 @@ namespace detail
   //!
   //! this function makes no checks whether the inputs are valid.
   template <class T, class Operator>
-  bool allOf_(
+  bool allOf(
     const T* src, 
     const pos_t* sizes,
     const pos_t* ssteps,
@@ -336,7 +336,7 @@ namespace detail
     else
     {
       for (; src != end; src += ssteps[0])
-        if (!allOf_(src, sizes + 1, ssteps + 1, op, n - 1))
+        if (!allOf(src, sizes + 1, ssteps + 1, op, n - 1))
           return false;
     }
     return true;
