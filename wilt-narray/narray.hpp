@@ -125,9 +125,9 @@ namespace wilt
     // PRIVATE MEMBERS
     ////////////////////////////////////////////////////////////////////////////
 
-    std::shared_ptr<type> data_; // pointer to referenced data
-    Point<N> sizes_;             // dimension sizes
-    Point<N> steps_;             // step sizes
+    std::shared_ptr<T> data_; // pointer to referenced data
+    Point<N> sizes_;          // dimension sizes
+    Point<N> steps_;          // step sizes
 
   public:
     ////////////////////////////////////////////////////////////////////////////
@@ -470,7 +470,7 @@ namespace wilt
     // PRIVATE FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    NArray(std::shared_ptr<type> data, Point<N> sizes, Point<N> steps);
+    NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps);
 
     typename NArray<T, N-1>::exposed_type slice_(std::size_t dim, pos_t n) const;
     NArray<T, N> range_(std::size_t dim, pos_t n, pos_t length) const;
@@ -508,7 +508,7 @@ namespace wilt
     using type = typename std::remove_const<T>::type;
     using exposed_type = T&;
 
-    NArray(std::shared_ptr<type> data, const Point<0>&, const Point<0>&)
+    NArray(std::shared_ptr<T> data, const Point<0>&, const Point<0>&)
       : data_(std::move(data))
     {
 
@@ -525,7 +525,7 @@ namespace wilt
   private:
     NArray() { }
 
-    std::shared_ptr<type> data_;
+    std::shared_ptr<T> data_;
 
   }; // class NArray<T, 0>
 
@@ -773,7 +773,7 @@ namespace wilt
   }
 
   template <class T, std::size_t N>
-  NArray<T, N>::NArray(std::shared_ptr<type> data, Point<N> sizes, Point<N> steps)
+  NArray<T, N>::NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps)
     : data_(std::move(data))
     , sizes_(sizes)
     , steps_(steps)
@@ -1262,7 +1262,7 @@ namespace wilt
   template <class T, std::size_t N>
   NArray<T, N> NArray<T, N>::subarray(const Point<N>& loc, const Point<N>& size) const
   {
-    type* base = data_.get();
+    T* base = data_.get();
     for (std::size_t i = 0; i < N; ++i)
     {
       if (size[i] + loc[i] > sizes_[i] || size[i] <= 0 || loc[i] < 0 || loc[i] >= sizes_[i])
@@ -1270,7 +1270,7 @@ namespace wilt
       base += steps_[i] * loc[i];
     }
 
-    return NArray<T, N>(std::shared_ptr<type>(data_, base), size, steps_);
+    return NArray<T, N>(std::shared_ptr<T>(data_, base), size, steps_);
   }
 
   template <class T, std::size_t N>
@@ -1289,7 +1289,7 @@ namespace wilt
       else
         newdata += steps_[i] * pos[i];
 
-    return NArray<T, N-M>(std::shared_ptr<type>(data_, newdata), newsizes, newsteps);
+    return NArray<T, N-M>(std::shared_ptr<T>(data_, newdata), newsizes, newsteps);
   }
 
   template<class T, std::size_t N>
@@ -1458,7 +1458,7 @@ namespace wilt
     auto offset = align_(newsizes, newsteps);
     auto newdata = data_.get() + offset;
 
-    return NArray<T, N>(std::shared_ptr<type>(data_, newdata), newsizes, newsteps);
+    return NArray<T, N>(std::shared_ptr<T>(data_, newdata), newsizes, newsteps);
   }
 
   template <class T, std::size_t N>
@@ -1534,7 +1534,7 @@ namespace wilt
       throw std::invalid_argument("setTo(arr): dimensions must match");
 
     unaryOp2_(data_.get(), arr.base(), sizes_.data(), steps_.data(), arr.steps().data(),
-      [](type& r, const type& v) {r = v; }, N);
+      [](T& r, const T& v) { r = v; }, N);
   }
 
   template <class T, std::size_t N>
@@ -1542,7 +1542,7 @@ namespace wilt
   {
     static_assert(!std::is_const<T>::value, "setTo(val): invalid when element type is const");
 
-    singleOp2_(data_.get(), sizes_.data(), steps_.data(), [&val](type& r) {r = val; }, N);
+    singleOp2_(data_.get(), sizes_.data(), steps_.data(), [&val](T& r) { r = val; }, N);
   }
 
   template <class T, std::size_t N>
@@ -1554,7 +1554,7 @@ namespace wilt
       throw std::invalid_argument("setTo(arr, mask): dimensions must match");
 
     binaryOp2_(data_.get(), arr.base(), mask.base(), sizes_.data(), steps_.data(), arr.steps().data(), mask.steps().data(),
-      [](type& r, const type& v, uint8_t m) {if (m != 0) r = v; }, N);
+      [](T& r, const T& v, uint8_t m) { if (m != 0) r = v; }, N);
   }
 
   template <class T, std::size_t N>
@@ -1563,7 +1563,7 @@ namespace wilt
     static_assert(!std::is_const<T>::value, "setTo(val, mask): invalid when element type is const");
 
     unaryOp2_(data_.get(), mask.base(), sizes_.data(), steps_.data(), mask.steps().data(),
-      [&val](type& r, uint8_t m) {if (m != 0) r = val; }, N);
+      [&val](T& r, uint8_t m) { if (m != 0) r = val; }, N);
   }
 
   template <class T, std::size_t N>
