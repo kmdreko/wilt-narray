@@ -352,14 +352,14 @@ namespace wilt
     return ret;
   }
 
-inline namespace detail
+namespace detail
 {
   //! @brief      Slices a point by removing an index
   //! @param[in]  pt - point to slice
   //! @param[in]  n - index to remove
   //! @return     point with the index removed
   //!
-  //! Is used to simplify NArray::slice_() calls
+  //! Is used to simplify NArray::slice() calls
   //! Will fail if N==0
   template <std::size_t N>
   Point<N-1> slice_(const Point<N>& pt, std::size_t n)

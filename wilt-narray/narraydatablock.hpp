@@ -47,7 +47,7 @@ namespace wilt
     REFERENCE
   };
 
-inline namespace detail
+namespace detail
 {
   template <class T, class A = std::allocator<T>>
   class NArrayDataBlock : public std::enable_shared_from_this<NArrayDataBlock<T, A>>
