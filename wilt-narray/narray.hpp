@@ -493,7 +493,7 @@ namespace wilt
     SubNArrays(const NArray<T, N>& arr) : array_(arr) {}
 
     NArrayIterator<T, N, M> begin() { return{ array_ }; }
-    NArrayIterator<T, N, M> end() { return{ array_, wilt::detail::size(wilt::detail::chopLow<N - M>(array_.sizes())) }; }
+    NArrayIterator<T, N, M> end() { return{ array_, wilt::detail::size(array_.sizes().high<N-M>()) }; }
   }; // class SubNArrays
 
   //////////////////////////////////////////////////////////////////////////////
@@ -1034,8 +1034,8 @@ namespace wilt
   typename NArray<T, N-1>::exposed_type NArray<T, N>::slice_(std::size_t dim, pos_t n) const
   {
     auto newdata = data_.get() + steps_[dim] * n;
-    auto newsizes = wilt::detail::slice(sizes_, dim);
-    auto newsteps = wilt::detail::slice(steps_, dim);
+    auto newsizes = sizes_.removed(dim);
+    auto newsteps = steps_.removed(dim);
 
     return NArray<T, N-1>(std::shared_ptr<type>(data_, newdata), newsizes, newsteps);
   }
@@ -1253,8 +1253,8 @@ namespace wilt
     if (dim2 >= N)
       throw std::out_of_range("transpose(dim1, dim2): dim2 out of bounds");
 
-    auto newsizes = wilt::detail::swap(sizes_, dim1, dim2);
-    auto newsteps = wilt::detail::swap(steps_, dim1, dim2);
+    auto newsizes = sizes_.swapped(dim1, dim2);
+    auto newsteps = steps_.swapped(dim1, dim2);
 
     return NArray<T, N>(data_, newsizes, newsteps);
   }
@@ -1281,8 +1281,8 @@ namespace wilt
     static_assert(M<=N, "subarrayAt(pos): invalid when pos dimensionality is <= N");
 
     auto newdata = data_.get();
-    auto newsizes = wilt::detail::chopHigh<N - M>(sizes_);
-    auto newsteps = wilt::detail::chopHigh<N - M>(steps_);
+    auto newsizes = sizes_.low<N-M>();
+    auto newsteps = steps_.low<N-M>();
     for (std::size_t i = 0; i < M; ++i)
       if (pos[i] >= sizes_[i] || pos[i] < 0)
         throw std::out_of_range("subarrayAt(pos): pos out of range");
@@ -1347,8 +1347,8 @@ namespace wilt
     if (n <= 0)
       throw std::invalid_argument("repeat(n): n must be positive");
 
-    auto newsizes = wilt::detail::push(sizes_, N, n);
-    auto newsteps = wilt::detail::push(steps_, N, 0);
+    auto newsizes = sizes_.inserted(N, n);
+    auto newsteps = steps_.inserted(N, 0);
 
     return NArray<T, N+1>(data_, newsizes, newsteps);
   }
@@ -1409,8 +1409,8 @@ namespace wilt
   template<class T, std::size_t N>
   NArray<T, N+1> NArray<T, N>::window_(std::size_t dim, pos_t n) const
   {
-    auto newsizes = wilt::detail::push(sizes_, N, n);
-    auto newsteps = wilt::detail::push(steps_, N, steps_[dim]);
+    auto newsizes = sizes_.inserted(N, n);
+    auto newsteps = steps_.inserted(N, steps_[dim]);
     newsizes[dim] -= n - 1;
 
     return NArray<T, N+1>(data_, newsizes, newsteps);
@@ -1505,7 +1505,7 @@ namespace wilt
     static_assert(M <= N, "compress(func): invalid when M > N");
     static_assert(M != 0, "compress(func): invalid when M is zero");
 
-    NArray<T, M> ret(wilt::detail::chopLow<M>(sizes_));
+    NArray<T, M> ret(sizes_.high<M>());
 
     auto dstIt = ret.begin();
     for (auto&& val : subarrays<N-M>())

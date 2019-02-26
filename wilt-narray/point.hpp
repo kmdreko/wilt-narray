@@ -178,6 +178,70 @@ namespace wilt
       m_size.fill(val);
     }
 
+    //! @brief      Slices a point by removing an index
+    //! @param[in]  n - index to remove
+    //! @return     copy with the index removed
+    //!
+    //! Is used to simplify NArray::slice() calls
+    //! Will fail if N==0
+    Point<N-1> removed(std::size_t n) const
+    {
+      Point<N-1> ret;
+      for (std::size_t i = 0, j = 0; i < N; ++i)
+        if (i != n)
+          ret[j++] = m_size[i];
+      return ret;
+    }
+
+    //! @brief      Adds an element to a point at an index
+    //! @param[in]  n - index to add at
+    //! @param[in]  v - value to add
+    //! @return     copy with the value added
+    Point<N+1> inserted(std::size_t n, pos_t v) const
+    {
+      Point<N+1> ret;
+      for (std::size_t i = 0; i < n; ++i)
+        ret[i] = m_size[i];
+      ret[n] = v;
+      for (std::size_t i = n + 1; i < N + 1; ++i)
+        ret[i] = m_size[i - 1];
+      return ret;
+    }
+
+    //! @brief      Creates a point with two index values swapped
+    //! @param[in]  a - first index to swap
+    //! @param[in]  b - second index to swap
+    //! @return     point with the indices swapped
+    //!
+    //! Is used to simplify NArray::transpose() calls
+    //! Will fail if N==0
+    Point<N> swapped(std::size_t a, std::size_t b) const
+    {
+      Point<N> ret = *this;
+      std::swap(ret.m_size[a], ret.m_size[b]);
+      return ret;
+    }
+
+    // gets the first M values
+    template <std::size_t M>
+    Point<M> high() const
+    {
+      Point<M> ret;
+      for (std::size_t i = 0; i < M; ++i)
+        ret[i] = m_size[i];
+      return ret;
+    }
+
+    // gets the last M values
+    template <std::size_t M>
+    Point<M> low() const
+    {
+      Point<M> ret;
+      for (std::size_t i = 0; i < M; ++i)
+        ret[i] = m_size[N - M + i];
+      return ret;
+    }
+
   private:
     //! @brief  internal storage array
     std::array<pos_t, N> m_size;
@@ -354,74 +418,6 @@ namespace wilt
 
 namespace detail
 {
-  //! @brief      Slices a point by removing an index
-  //! @param[in]  pt - point to slice
-  //! @param[in]  n - index to remove
-  //! @return     point with the index removed
-  //!
-  //! Is used to simplify NArray::slice() calls
-  //! Will fail if N==0
-  template <std::size_t N>
-  Point<N-1> slice(const Point<N>& pt, std::size_t n)
-  {
-    Point<N-1> ret;
-    for (std::size_t i = 0, j = 0; i < N; ++i)
-      if (i != n)
-        ret[j++] = pt[i];
-    return ret;
-  }
-
-  //! @brief      Adds an element to a point at an index
-  //! @param[in]  pt - point to add into
-  //! @param[in]  n - index to add at
-  //! @param[in]  v - value to add
-  //! @return     point with the value added
-  template <std::size_t N>
-  Point<N+1> push(const Point<N>& pt, std::size_t n, pos_t v)
-  {
-    Point<N+1> ret;
-    for (std::size_t i = 0; i < n; ++i)
-      ret[i] = pt[i];
-    ret[n] = v;
-    for (std::size_t i = n+1; i < N+1; ++i)
-      ret[i] = pt[i-1];
-    return ret;
-  }
-
-  //! @brief      Creates a point with two index values swapped
-  //! @param[in]  pt - the point to swap indices
-  //! @param[in]  a - first index to swap
-  //! @param[in]  b - second index to swap
-  //! @return     point with the indices swapped
-  //!
-  //! Is used to simplify NArray::transpose() calls
-  //! Will fail if N==0
-  template <std::size_t N>
-  Point<N> swap(const Point<N>& pt, std::size_t a, std::size_t b)
-  {
-    Point<N> ret = pt;
-    std::swap(ret[a], ret[b]);
-    return ret;
-  }
-
-  template <std::size_t N, std::size_t M>
-  Point<N> chopLow(const Point<M>& pt)
-  {
-    Point<N> ret;
-    for (std::size_t i = 0; i < N; ++i)
-      ret[i] = pt[i];
-    return ret;
-  }
-
-  template <std::size_t N, std::size_t M>
-  Point<N> chopHigh(const Point<M>& pt)
-  {
-    Point<N> ret;
-    for (std::size_t i = 0; i < N; ++i)
-      ret[i] = pt[M-N+i];
-    return ret;
-  }
-
   //! @brief      Creates a step array from a dim array
   //! @param[in]  sizes - the dimension array as a point
   //! @return     step array created from sizes as a point

@@ -172,7 +172,7 @@ namespace wilt
     //!             pointing to
     Point<N-M> position() const
     {
-      return wilt::detail::idx2pos(wilt::detail::chopLow<N-M>(array_->sizes()), index_);
+      return wilt::detail::idx2pos(array_->sizes().high<N-M>(), index_);
     }
 
   public:
