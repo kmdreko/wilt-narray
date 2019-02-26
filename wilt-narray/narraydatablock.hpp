@@ -5,7 +5,7 @@
 // DESC: Defines a shared-resource class for holding N-dimensional data
 
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Trevor Wilson
+// Copyright (c) 2019 Trevor Wilson
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files(the "Software"), to deal
