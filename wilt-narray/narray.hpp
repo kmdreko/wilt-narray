@@ -180,9 +180,9 @@ namespace wilt
     //
     // NOTE: 'arr' is empty after being moved
     // NOTE: only exists on 'const T' arrays
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
+    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
     NArray(const NArray<U, N>& arr);
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
+    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
     NArray(NArray<U, N>&& arr);
 
   public:
@@ -203,9 +203,9 @@ namespace wilt
     // reference) or destroyed (if it holds the last reference).
     //
     // NOTE: 'arr' is empty after being moved
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
+    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
     NArray<T, N>& operator= (const NArray<U, N>& arr);
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::type>::type>
+    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
     NArray<T, N>& operator= (NArray<U, N>&& arr);
 
     // Element-wise modifying assigment operators, modifies the underlying data,
@@ -702,37 +702,21 @@ namespace wilt
   template <class T, std::size_t N>
   template <class U, typename>
   NArray<T, N>::NArray(const NArray<U, N>& arr)
-    : data_()
+    : data_(arr.data_)
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
   {
-    if constexpr (std::is_const<T>::value)
-    {
-      data_ = arr.data_;
-    }
-    else
-    {
-      data_ = std::make_shared<NArrayDataBlock<type>>(size_(sizes_))->data();
-      setTo(arr);
-    }
+    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>(const NArray<T, N>&): invalid for any other conversions");
   }
 
   template <class T, std::size_t N>
   template <class U, typename>
   NArray<T, N>::NArray(NArray<U, N>&& arr)
-    : data_()
+    : data_(std::move(arr.data_))
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
   {
-    if constexpr (std::is_const<T>::value)
-    {
-      data_ = arr.data_;
-    }
-    else
-    {
-      data_ = std::make_shared<NArrayDataBlock<type>>(size_(sizes_))->data();
-      setTo(arr);
-    }
+    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>(NArray<T, N>&&): invalid for any other conversions");
 
     arr.clear();
   }
@@ -763,18 +747,11 @@ namespace wilt
   template <class U, typename>
   NArray<T, N>& NArray<T, N>::operator= (const NArray<U, N>& arr)
   {
+    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>::operator=(const NArray<T, N>&): invalid for any other conversions");
+
+    data_ = arr.data_;
     sizes_ = arr.sizes_;
     steps_ = arr.steps_;
-
-    if (std::is_const<T>::value)
-    {
-      data_ = arr.data_;
-    }
-    else
-    {
-      data_ = std::make_shared<NArrayDataBlock<type>>(size_(sizes_))->data();
-      setTo(arr);
-    }
 
     return *this;
   }
@@ -783,18 +760,13 @@ namespace wilt
   template <class U, typename>
   NArray<T, N>& NArray<T, N>::operator= (NArray<U, N>&& arr)
   {
+    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>::operator=(NArray<T, N>&&): invalid for any other conversions");
+
+    data_ = std::move(arr.data_);
     sizes_ = arr.sizes_;
     steps_ = arr.steps_;
 
-    if (std::is_const<T>::value || arr.unique())
-    {
-      data_ = arr.data_;
-    }
-    else
-    {
-      data_ = std::make_shared<NArrayDataBlock<type>>(size_(sizes_))->data();
-      setTo(arr);
-    }
+    arr.clear();
 
     return *this;
   }

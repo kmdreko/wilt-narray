@@ -178,6 +178,35 @@ void testCopyConstructorSharesData()
   }
 }
 
+void testConstNArrayConstructor()
+{
+  { // T=TrackDefault
+    wilt::NArray<TrackDefault, 1> a({ 3 });
+    TrackDefault::reset();
+    wilt::NArray<const TrackDefault, 1> b(a);
+
+    assert(TrackDefault::count == 0);
+  }
+
+  { // T=TrackCopy
+    wilt::NArray<TrackCopy, 1> a({ 3 });
+    TrackCopy::reset();
+    wilt::NArray<const TrackCopy, 1> b(a);
+
+    assert(TrackCopy::count == 0);
+  }
+
+  { // (const T) -> (T) : doesn't compile
+    //wilt::NArray<const int, 1> a({ 3 });
+    //wilt::NArray<int, 1> b(a);
+  }
+
+  { // (const T).clone() -> (T) : does compile
+    wilt::NArray<const int, 1> a({ 3 });
+    wilt::NArray<int, 1> b(a.clone());
+  }
+}
+
 void testAsCondensedCreatesCorrectNArray()
 {
   { // T=int N=1
@@ -488,6 +517,7 @@ void testNArray()
   testSizedConstructorHasConstructedSize();
   testSizedWithDefaultConstructorHasConstructedSize();
   testCopyConstructorSharesData();
+  testConstNArrayConstructor();
   testAsCondensedCreatesCorrectNArray();
   testSkipNCreatesCorrectNArray();
   testReshapeCreatesCorrectNArray();
