@@ -884,7 +884,7 @@ namespace wilt
   template <class T, std::size_t N>
   bool NArray<T, N>::empty() const
   {
-    return data_.use_count() == 0;
+    return data_.get() == nullptr;
   }
 
   template <class T, std::size_t N>
@@ -896,7 +896,7 @@ namespace wilt
   template <class T, std::size_t N>
   bool NArray<T, N>::shared() const
   {
-    return data_.use_count() > 0;
+    return data_.use_count() > 1;
   }
 
   template <class T, std::size_t N>
