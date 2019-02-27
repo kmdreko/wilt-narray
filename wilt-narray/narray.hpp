@@ -595,6 +595,159 @@ namespace wilt
               dst.steps().data(), src.steps().data(), op, N);
   }
 
+namespace detail
+{
+  //! @brief      Creates a step array from a dim array
+  //! @param[in]  sizes - the dimension array as a point
+  //! @return     step array created from sizes as a point
+  //!
+  //! Step array for {..., a, b, c, d} would be {..., b*c*d, c*d, d, 1}
+  //! Dimension array should all be positive and non-zero to produce a
+  //! meaningful result
+  //! Will fail if N==0
+  template <std::size_t N>
+  Point<N> step(const Point<N>& sizes)
+  {
+    Point<N> ret;
+    ret[N-1] = 1;
+    for (std::size_t i = N-1; i > 0; --i)
+      ret[i-1] = ret[i] * sizes[i];
+    return ret;
+  }
+
+  //! @brief      Determines the size from a dim array
+  //! @param[in]  sizes - the dimension array as a point
+  //! @return     total size denoted by the dimensions
+  //!
+  //! Size of {a, b, c, d} would be a*b*c*d
+  //! Dimension array should all be positive to produce a meaningful result
+  //! Will be zero if any dimension is zero
+  //! Will fail if N==0
+  template <std::size_t N>
+  pos_t size(const Point<N>& sizes)
+  {
+    pos_t ret = sizes[0];
+    for (std::size_t i = 1; i < N; ++i)
+      ret *= sizes[i];
+    return ret;
+  }
+
+  template <std::size_t N>
+  bool validSize(const Point<N>& size)
+  {
+    for (std::size_t i = 0; i < N; ++i)
+      if (size[i] <= 0)
+        return false;
+    return true;
+  }
+
+  //! @brief         Aligns the dim and step arrays such that the step values
+  //!                are increasing and positive
+  //! @param[in,out] sizes - the dimension array as a point
+  //! @param[in,out] steps - the step array as a point
+  //! @return        offset to adjust the original base pointer
+  //!
+  //! Is used exclusively in NArray::align() to create an aligned NArray
+  template <std::size_t N>
+  pos_t align(Point<N>& sizes, Point<N>& steps)
+  {
+    pos_t offset = 0;
+    for (std::size_t i = 0; i < N; ++i)
+    {
+      if (steps[i] < 0)
+      {
+        steps[i] = -steps[i];
+        offset -= steps[i] * (sizes[i] - 1);
+      }
+    }
+    for (std::size_t i = 1; i < N; ++i)
+    {
+      for (std::size_t j = i; j > 0 && steps[j] > steps[j-1]; --j)
+      {
+        std::swap(steps[j], steps[j-1]);
+        std::swap(sizes[j], sizes[j-1]);
+      }
+    }
+    return offset;
+  }
+
+  //! @brief         Condenses a dim array and steps array into smaller arrays
+  //!                if able to
+  //! @param[in,out] sizes - dimension array as a point
+  //! @param[in,out] steps - step array as a point
+  //! @return        the dimension of the arrays after condensing, values at or
+  //!                after n in the arrays are junk
+  //!
+  //! Is used when applying operations on arrays to effectively reduce the
+  //! dimensionality of the data which will reduce loops and function calls.
+  //! Condensing the dim and step arrays from an aligned and continuous NArray
+  //! should result in return=1, sizes=size(sizes), steps={1}
+  //! Dimension array should all be positive and non-zero and step arrays must 
+  //! be valid to produce a meaningful result
+  template <std::size_t N>
+  std::size_t condense(Point<N>& sizes, Point<N>& steps)
+  {
+    std::size_t j = N-1;
+    for (int i = N-2; i >= 0; --i)
+    {
+      if (steps[j] * sizes[j] == steps[i])
+      {
+        sizes[j] *= sizes[i];
+      }
+      else
+      {
+        --j;
+        sizes[j] = sizes[i];
+        steps[j] = steps[i];
+      }
+    }
+    for (std::size_t i = 0; i < j; ++i)
+    {
+      sizes[i] = 1;
+      steps[i] = std::abs(sizes[j] * steps[j]);
+    }
+
+    return N - j;
+  }
+
+  //! @brief         Condenses a dim array and step arrays into smaller arrays
+  //!                if able to
+  //! @param[in,out] sizes - dimension array as a point
+  //! @param[in,out] step1 - step array as a point
+  //! @param[in,out] step2 - step array as a point that relates to another
+  //!                NArray, must be aligned and related to the same dimension
+  //!                array
+  //! @return        the dimension of the arrays after condensing, values at or
+  //!                after n in the arrays are junk
+  //!
+  //! Is used when applying operations on arrays to effectively reduce the
+  //! dimensionality of the data which will reduce loops and function calls.
+  //! Condensing the dim and step arrays from an aligned and continuous NArray
+  //! should result in return=1, sizes=size(sizes), step1={1}, step2={1}
+  //! Dimension array should all be positive and non-zero and step arrays must 
+  //! be valid to produce a meaningful result
+  template <std::size_t N>
+  std::size_t condense(Point<N>& sizes, Point<N>& step1, Point<N>& step2)
+  {
+    std::size_t j = 0;
+    for (std::size_t i = 1; i < N; ++i)
+    {
+      if (sizes[i] * step1[i] == step1[i-1])
+        sizes[j] *= sizes[i];
+      else
+      {
+        step1[j] = step1[i-1];
+        step2[j] = step2[i-1];
+        sizes[++j] = sizes[i];
+      }
+    }
+    step1[j] = step1[N-1];
+    step2[j] = step2[N-1];
+    return j+1;
+  }
+
+} // namespace detail
+
   template <class T, std::size_t N>
   NArray<T, N>::NArray()
     : data_()
