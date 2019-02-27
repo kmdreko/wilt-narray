@@ -492,8 +492,16 @@ namespace wilt
   public:
     SubNArrays(const NArray<T, N>& arr) : array_(arr) {}
 
-    NArrayIterator<T, N, M> begin() { return{ array_ }; }
-    NArrayIterator<T, N, M> end() { return{ array_, wilt::detail::size(array_.sizes().high<N-M>()) }; }
+    NArrayIterator<T, N, M> begin()
+    {
+      return{ array_ };
+    }
+    NArrayIterator<T, N, M> end() 
+    { 
+      Point<N-M> pos;
+      pos[0] = array_.size(0);
+      return{ array_, pos };
+    }
   }; // class SubNArrays
 
   //////////////////////////////////////////////////////////////////////////////
@@ -1425,7 +1433,9 @@ namespace wilt
   template <class T, std::size_t N>
   typename NArray<T, N>::iterator NArray<T, N>::end() const
   {
-    return iterator(*this, size());
+    Point<N> pos;
+    pos[0] = sizes_[0];
+    return iterator(*this, pos);
   }
 
   template <class T, std::size_t N>

@@ -596,6 +596,72 @@ namespace detail
     return idx;
   }
 
+  template <std::size_t N>
+  void addIndex(Point<N>& pos, const Point<N>& sizes, pos_t index)
+  {
+    for (int i = N-1; i > 0; --i)
+    {
+      pos[i] += index;
+      if (pos[i] < sizes[i])
+        return;
+      index = pos[i] / sizes[i];
+      pos[i] = pos[i] % sizes[i];
+    }
+    pos[0] += index;
+  }
+
+  template <std::size_t N>
+  void addOne(Point<N>& pos, const Point<N>& sizes)
+  {
+    for (int i = N-1; i > 0; --i)
+    {
+      pos[i] += 1;
+      if (pos[i] < sizes[i])
+        return;
+      pos[i] = 0;
+    }
+    pos[0] += 1;
+  }
+
+  template <std::size_t N>
+  void subIndex(Point<N>& pos, const Point<N>& sizes, pos_t index)
+  {
+    for (int i = N-1; i > 0; --i)
+    {
+      pos[i] -= index;
+      if (pos[i] >= 0)
+        return;
+      index = -(pos[i] / sizes[i]);
+      pos[i] = (pos[i] % sizes[i]) + sizes[i];
+    }
+    pos[0] -= index;
+  }
+
+  template <std::size_t N>
+  void subOne(Point<N>& pos, const Point<N>& sizes)
+  {
+    for (int i = N-1; i > 0; --i)
+    {
+      pos[i] -= 1;
+      if (pos[i] >= 0)
+        return;
+      pos[i] = sizes[i]-1;
+    }
+    pos[0] -= 1;
+  }
+
+  template <std::size_t N>
+  pos_t diff(const Point<N>& p1, const Point<N>& p2, const Point<N>& sizes)
+  {
+    pos_t d = 0;
+    for (int i = 0; i < N; ++i)
+    {
+      d *= sizes[i];
+      d += (p1[i] - p2[i]);
+    }
+    return d;
+  }
+
 } // namespace detail
 
 } // namespace wilt
