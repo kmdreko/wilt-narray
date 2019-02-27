@@ -47,7 +47,7 @@ namespace wilt
     //! @brief  Default constructor. Sets all values to 0
     Point()
     {
-      m_size.fill(0);
+      data_.fill(0);
     }
 
     //! @brief      Value constructor. 
@@ -60,13 +60,13 @@ namespace wilt
 
       auto iter = list.begin();
       for (pos_t i = 0; i < N; ++i, ++iter)
-        m_size[i] = *iter;
+        data_[i] = *iter;
     }
 
     //! @brief      Copy constructor
     //! @param[in]  pt - Point to copy from
     Point(const Point<N>& pt)
-      : m_size(pt.m_size)
+      : data_(pt.data_)
     {
 
     }
@@ -77,7 +77,7 @@ namespace wilt
     //! @return     reference to this point
     Point<N>& operator = (const Point<N>& pt)
     {
-      m_size = pt.m_size;
+      data_ = pt.data_;
       return *this;
     }
 
@@ -87,7 +87,7 @@ namespace wilt
     Point<N>& operator+= (const Point<N>& pt)
     {
       for (std::size_t i = 0; i < N; ++i)
-        m_size[i] += pt.m_size[i];
+        data_[i] += pt.data_[i];
       return *this;
     }
 
@@ -97,7 +97,7 @@ namespace wilt
     Point<N>& operator-= (const Point<N>& pt)
     {
       for (std::size_t i = 0; i < N; ++i)
-        m_size[i] -= pt.m_size[i];
+        data_[i] -= pt.data_[i];
       return *this;
     }
 
@@ -107,7 +107,7 @@ namespace wilt
     Point<N>& operator+= (pos_t val)
     {
       for (std::size_t i = 0; i < N; ++i)
-        m_size[i] += val;
+        data_[i] += val;
       return *this;
     }
 
@@ -117,7 +117,7 @@ namespace wilt
     Point<N>& operator-= (pos_t val)
     {
       for (std::size_t i = 0; i < N; ++i)
-        m_size[i] -= val;
+        data_[i] -= val;
       return *this;
     }
 
@@ -127,7 +127,7 @@ namespace wilt
     Point<N>& operator*= (pos_t val)
     {
       for (std::size_t i = 0; i < N; ++i)
-        m_size[i] *= val;
+        data_[i] *= val;
       return *this;
     }
 
@@ -137,7 +137,7 @@ namespace wilt
     Point<N>& operator/= (pos_t val)
     {
       for (std::size_t i = 0; i < N; ++i)
-        m_size[i] /= val;
+        data_[i] /= val;
       return *this;
     }
 
@@ -147,7 +147,7 @@ namespace wilt
     //! @return     reference to value at the index
     pos_t& operator[] (std::size_t n)
     {
-      return m_size[n];
+      return data_[n];
     }
 
     //! @brief      Indexing operator
@@ -155,27 +155,27 @@ namespace wilt
     //! @return     reference to value at the index
     const pos_t& operator[] (std::size_t n) const
     {
-      return m_size[n];
+      return data_[n];
     }
 
     pos_t* data()
     {
-      return m_size.data();
+      return data_.data();
     }
 
     const pos_t* data() const
     {
-      return m_size.data();
+      return data_.data();
     }
 
     void clear()
     {
-      m_size.fill(0);
+      data_.fill(0);
     }
     
     void fill(pos_t val)
     {
-      m_size.fill(val);
+      data_.fill(val);
     }
 
     //! @brief      Slices a point by removing an index
@@ -189,7 +189,7 @@ namespace wilt
       Point<N-1> ret;
       for (std::size_t i = 0, j = 0; i < N; ++i)
         if (i != n)
-          ret[j++] = m_size[i];
+          ret[j++] = data_[i];
       return ret;
     }
 
@@ -201,10 +201,10 @@ namespace wilt
     {
       Point<N+1> ret;
       for (std::size_t i = 0; i < n; ++i)
-        ret[i] = m_size[i];
+        ret[i] = data_[i];
       ret[n] = v;
       for (std::size_t i = n + 1; i < N + 1; ++i)
-        ret[i] = m_size[i - 1];
+        ret[i] = data_[i - 1];
       return ret;
     }
 
@@ -218,7 +218,7 @@ namespace wilt
     Point<N> swapped(std::size_t a, std::size_t b) const
     {
       Point<N> ret = *this;
-      std::swap(ret.m_size[a], ret.m_size[b]);
+      std::swap(ret.data_[a], ret.data_[b]);
       return ret;
     }
 
@@ -228,7 +228,7 @@ namespace wilt
     {
       Point<M> ret;
       for (std::size_t i = 0; i < M; ++i)
-        ret[i] = m_size[i];
+        ret[i] = data_[i];
       return ret;
     }
 
@@ -238,13 +238,13 @@ namespace wilt
     {
       Point<M> ret;
       for (std::size_t i = 0; i < M; ++i)
-        ret[i] = m_size[N - M + i];
+        ret[i] = data_[N - M + i];
       return ret;
     }
 
   private:
     //! @brief  internal storage array
-    std::array<pos_t, N> m_size;
+    std::array<pos_t, N> data_;
     
   }; // class Point
 
