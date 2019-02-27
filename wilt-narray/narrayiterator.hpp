@@ -141,7 +141,7 @@ namespace wilt
     //! @return     reference to this object
     NArrayIterator<T, N, M>& operator+= (const ptrdiff_t pos)
     {
-      wilt::detail::addIndex(position_, array_->sizes().high<N-M>(), pos);
+      wilt::detail::addValueToPosition(position_, array_->sizes().data(), pos);
       return *this;
     }
 
@@ -150,7 +150,7 @@ namespace wilt
     //! @return     reference to this object
     NArrayIterator<T, N, M>& operator-= (const ptrdiff_t pos)
     {
-      wilt::detail::subIndex(position_, array_->sizes().high<N-M>(), pos);
+      wilt::detail::subValueFromPosition(position_, array_->sizes().data(), pos);
       return *this;
     }
 
@@ -172,7 +172,7 @@ namespace wilt
     value_type operator[] (pos_t pos) const
     {
       auto newposition = position_;
-      wilt::detail::addIndex(newposition, array_->sizes().high<N-M>(), pos);
+      wilt::detail::addValueToPosition(newposition, array_->sizes().data(), pos);
       return at_(newposition);
     }
 
@@ -271,7 +271,7 @@ namespace wilt
     //! @return     reference to this object
     NArrayIterator<T, N, M>& operator++ ()
     {
-      wilt::detail::addOne(position_, array_->sizes().high<N-M>());
+      wilt::detail::addOneToPosition(position_, array_->sizes().data());
       return *this;
     }
 
@@ -279,7 +279,7 @@ namespace wilt
     //! @return     reference to this object
     NArrayIterator<T, N, M>& operator-- ()
     {
-      wilt::detail::subOne(position_, array_->sizes().high<N-M>());
+      wilt::detail::subOneFromPosition(position_, array_->sizes().data());
       return *this;
     }
 
@@ -288,7 +288,7 @@ namespace wilt
     NArrayIterator<T, N, M> operator++ (int)
     {
       auto oldposition = position_;
-      wilt::detail::addOne(position_, array_->sizes().high<N-M>());
+      ++(*this);
       return NArrayIterator<T, N, M>(*this, oldposition);
     }
 
@@ -297,7 +297,7 @@ namespace wilt
     NArrayIterator<T, N, M> operator-- (int)
     {
       auto oldposition = position_;
-      wilt::detail::subOne(position_, array_->sizes().high<N-M>());
+      --(*this);
       return NArrayIterator<T, N, M>(*this, oldposition);
     }
 
@@ -306,7 +306,15 @@ namespace wilt
     //! @return     the difference of the two data offset values
     difference_type operator- (const NArrayIterator<T, N, M>& iter) const
     {
-      return wilt::detail::diff(position_, iter.position_);
+      assert(array_ == iter.array_);
+
+      pos_t diff = 0;
+      for (int i = 0; i < N-M; ++i)
+      {
+        diff *= sizes[i];
+        diff += (position_[i] - iter.position_[i]);
+      }
+      return diff;
     }
 
     //! @brief      addition operator
@@ -314,9 +322,9 @@ namespace wilt
     //! @return     this iterator plus the offset
     NArrayIterator<T, N, M> operator+ (const ptrdiff_t pos)
     {
-      auto newposition = position_;
-      wilt::detail::addIndex(newposition, array_->sizes().high<N-M>(), pos);
-      return NArrayIterator<T, N, M>(*this, newposition);
+      auto newiter = *this;
+      newiter += pos;
+      return newiter;
     }
 
     //! @brief      subtraction operator
@@ -324,9 +332,9 @@ namespace wilt
     //! @return     this iterator minus the offset
     NArrayIterator<T, N, M> operator- (const ptrdiff_t pos)
     {
-      auto newposition = position_;
-      wilt::detail::subIndex(newposition, array_->sizes().high<N-M>(), pos);
-      return NArrayIterator<T, N, M>(*this, newposition);
+      auto newiter = *this;
+      newiter -= pos;
+      return newiter;
     }
 
   private:
@@ -347,21 +355,21 @@ namespace wilt
 namespace detail
 {
   template <std::size_t N>
-  void addIndex(Point<N>& pos, const Point<N>& sizes, pos_t index)
+  void addValueToPosition(Point<N>& pos, const pos_t* sizes, pos_t value)
   {
     for (int i = N-1; i > 0; --i)
     {
-      pos[i] += index;
+      pos[i] += value;
       if (pos[i] < sizes[i])
         return;
-      index = pos[i] / sizes[i];
+      value = pos[i] / sizes[i];
       pos[i] = pos[i] % sizes[i];
     }
-    pos[0] += index;
+    pos[0] += value;
   }
 
   template <std::size_t N>
-  void addOne(Point<N>& pos, const Point<N>& sizes)
+  void addOneToPosition(Point<N>& pos, const pos_t* sizes)
   {
     for (int i = N-1; i > 0; --i)
     {
@@ -374,21 +382,21 @@ namespace detail
   }
 
   template <std::size_t N>
-  void subIndex(Point<N>& pos, const Point<N>& sizes, pos_t index)
+  void subValueFromPosition(Point<N>& pos, const pos_t* sizes, pos_t value)
   {
     for (int i = N-1; i > 0; --i)
     {
-      pos[i] -= index;
+      pos[i] -= value;
       if (pos[i] >= 0)
         return;
-      index = -(pos[i] / sizes[i]);
+      value = -(pos[i] / sizes[i]);
       pos[i] = (pos[i] % sizes[i]) + sizes[i];
     }
-    pos[0] -= index;
+    pos[0] -= value;
   }
 
   template <std::size_t N>
-  void subOne(Point<N>& pos, const Point<N>& sizes)
+  void subOneFromPosition(Point<N>& pos, const pos_t* sizes)
   {
     for (int i = N-1; i > 0; --i)
     {
@@ -398,18 +406,6 @@ namespace detail
       pos[i] = sizes[i]-1;
     }
     pos[0] -= 1;
-  }
-
-  template <std::size_t N>
-  pos_t diff(const Point<N>& p1, const Point<N>& p2, const Point<N>& sizes)
-  {
-    pos_t d = 0;
-    for (int i = 0; i < N; ++i)
-    {
-      d *= sizes[i];
-      d += (p1[i] - p2[i]);
-    }
-    return d;
   }
 
 } // namespace detail
