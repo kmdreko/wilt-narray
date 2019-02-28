@@ -5,7 +5,7 @@
 // DESC: Tests for the wilt NArray library
 
 ////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Trevor Wilson
+// Copyright (c) 2019 Trevor Wilson
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files(the "Software"), to deal
@@ -25,9 +25,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "tests.h"
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
-void testAll()
-{
-  testNArray();
-}
+// Catch2 provides 'main()' and runs the tests
