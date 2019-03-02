@@ -1198,7 +1198,7 @@ namespace detail
     auto newsizes = sizes_.removed(dim);
     auto newsteps = steps_.removed(dim);
 
-    return NArray<T, N-1>(std::shared_ptr<type>(data_, newdata), newsizes, newsteps);
+    return NArray<T, N-1>(std::shared_ptr<T>(data_, newdata), newsizes, newsteps);
   }
 
   template <class T, std::size_t N>
@@ -1271,7 +1271,7 @@ namespace detail
     auto newsizes = sizes_;
     newsizes[dim] = length;
 
-    return NArray<T, N>(std::shared_ptr<type>(data_, newdata), newsizes, steps_);
+    return NArray<T, N>(std::shared_ptr<T>(data_, newdata), newsizes, steps_);
   }
 
   template <class T, std::size_t N>
@@ -1320,7 +1320,7 @@ namespace detail
     auto newsteps = steps_;
     newsteps[dim] = -newsteps[dim];
 
-    return NArray<T, N>(std::shared_ptr<type>(data_, newdata), sizes_, newsteps);
+    return NArray<T, N>(std::shared_ptr<T>(data_, newdata), sizes_, newsteps);
   }
 
   template <class T, std::size_t N>
@@ -1395,7 +1395,7 @@ namespace detail
     newsizes[dim] = (sizes_[dim] - start + n - 1) / n;
     newsteps[dim] = steps_[dim] * n;
 
-    return NArray<T, N>(std::shared_ptr<type>(data_, newdata), newsizes, newsteps);
+    return NArray<T, N>(std::shared_ptr<T>(data_, newdata), newsizes, newsteps);
   }
 
   template <class T, std::size_t N>

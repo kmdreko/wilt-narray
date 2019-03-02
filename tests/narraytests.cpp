@@ -56,284 +56,858 @@ public:
 };
 int TrackCopy::count = 0;
 
-TEST_CASE("testDefaultConstructorHasSizeZero", "[narray]")
+class Tracker
 {
-  { // T=int N=1
+public:
+  Tracker() { ++defaultConstructorCalls; }
+  Tracker(const Tracker&) { ++copyConstructorCalls; }
+  Tracker(Tracker&&) { ++moveConstructorCalls; }
+  Tracker& operator=(const Tracker&) { ++copyAssignmentCalls; }
+  Tracker& operator=(Tracker&&) { ++moveAssignmentCalls; }
+
+  static int defaultConstructorCalls;
+  static int copyConstructorCalls;
+  static int moveConstructorCalls;
+  static int copyAssignmentCalls;
+  static int moveAssignmentCalls;
+
+  static void reset()
+  {
+    defaultConstructorCalls = 0;
+    copyConstructorCalls = 0;
+    moveConstructorCalls = 0;
+    copyAssignmentCalls = 0;
+    moveAssignmentCalls = 0;
+  }
+};
+
+int Tracker::defaultConstructorCalls = 0;
+int Tracker::copyConstructorCalls = 0;
+int Tracker::moveConstructorCalls = 0;
+int Tracker::copyAssignmentCalls = 0;
+int Tracker::moveAssignmentCalls = 0;
+
+TEST_CASE("NArray default constructor", "[narray]")
+{
+  SECTION("creates empty 1-dimensional array")
+  {
+    // act
     wilt::NArray<int, 1> a;
 
+    // assert
+    REQUIRE(a.empty());
     REQUIRE(a.size() == 0);
-    REQUIRE(a.sizes() == wilt::Point<1>({ 0 }));
+    REQUIRE(a.sizes() == wilt::Point<1>());
+    REQUIRE(a.steps() == wilt::Point<1>());
   }
 
-  { // T=int N=2
+  SECTION("creates empty 2-dimensional array")
+  {
+    // act
     wilt::NArray<int, 2> a;
 
+    // assert
+    REQUIRE(a.empty());
     REQUIRE(a.size() == 0);
-    REQUIRE(a.sizes() == wilt::Point<2>({ 0, 0 }));
+    REQUIRE(a.sizes() == wilt::Point<2>());
+    REQUIRE(a.steps() == wilt::Point<2>());
   }
 
-  { // T=int N=5
+  SECTION("creates empty 5-dimensional array")
+  {
+    // act
     wilt::NArray<int, 5> a;
 
+    // assert
+    REQUIRE(a.empty());
     REQUIRE(a.size() == 0);
-    REQUIRE(a.sizes() == wilt::Point<5>({ 0, 0, 0, 0, 0 }));
+    REQUIRE(a.sizes() == wilt::Point<5>());
+    REQUIRE(a.steps() == wilt::Point<5>());
   }
 
-  { // T=NoDefault N=1
+  SECTION("does not construct any elements")
+  {
+    // arrange
+    Tracker::reset();
+
+    // act
+    wilt::NArray<Tracker, 1> a;
+
+    // assert
+    REQUIRE(a.empty());
+    REQUIRE(a.size() == 0);
+    REQUIRE(a.sizes() == wilt::Point<1>());
+    REQUIRE(a.steps() == wilt::Point<1>());
+    REQUIRE(Tracker::defaultConstructorCalls == 0);
+    REQUIRE(Tracker::copyConstructorCalls == 0);
+    REQUIRE(Tracker::moveConstructorCalls == 0);
+  }
+
+  SECTION("does not require default constructor")
+  {
+    // act
     wilt::NArray<NoDefault, 1> a;
 
+    // assert
+    REQUIRE(a.empty());
     REQUIRE(a.size() == 0);
-    REQUIRE(a.sizes() == wilt::Point<1>({ 0 }));
-  }
-
-  { // T=TrackDefault N=1
-    TrackDefault::reset();
-
-    wilt::NArray<TrackDefault, 1> a;
-
-    REQUIRE(a.size() == 0);
-    REQUIRE(a.sizes() == wilt::Point<1>({ 0 }));
-    REQUIRE(TrackDefault::count == 0);
+    REQUIRE(a.sizes() == wilt::Point<1>());
+    REQUIRE(a.steps() == wilt::Point<1>());
   }
 }
 
-TEST_CASE("testSizedConstructorHasConstructedSize", "[narray]")
+TEST_CASE("NArray sized constructor", "[narray]")
 {
-  { // T=int N=1
+  SECTION("creates a sized 1-dimensional array")
+  {
+    // act
     wilt::NArray<int, 1> a({ 3 });
 
+    // assert
+    REQUIRE(!a.empty());
     REQUIRE(a.size() == 3);
     REQUIRE(a.sizes() == wilt::Point<1>({ 3 }));
+    REQUIRE(a.steps() == wilt::Point<1>({ 1 }));
   }
 
-  { // T=int N=2
+  SECTION("creates a sized 2-dimensional array")
+  {
+    // act
     wilt::NArray<int, 2> a({ 3, 2 });
 
+    // assert
+    REQUIRE(!a.empty());
     REQUIRE(a.size() == 6);
     REQUIRE(a.sizes() == wilt::Point<2>({ 3, 2 }));
+    REQUIRE(a.steps() == wilt::Point<2>({ 2, 1 }));
   }
 
-  { // T=int N=5
+  SECTION("creates a sized 5-dimensional array")
+  {
+    // act
     wilt::NArray<int, 5> a({ 3, 2, 5, 1, 7 });
 
+    // assert
+    REQUIRE(!a.empty());
     REQUIRE(a.size() == 210);
     REQUIRE(a.sizes() == wilt::Point<5>({ 3, 2, 5, 1, 7 }));
+    REQUIRE(a.steps() == wilt::Point<5>({ 70, 35, 7, 7, 1 }));
   }
 
-  { // T=TrackDefault N=1
-    TrackDefault::reset();
+  SECTION("default constructs elements equal to the constructed size")
+  {
+    // arrange
+    Tracker::reset();
 
-    wilt::NArray<TrackDefault, 1> a({ 3 });
+    // act
+    wilt::NArray<Tracker, 5> a({ 3, 2, 5, 1, 7 });
 
-    REQUIRE(a.size() == 3);
-    REQUIRE(a.sizes() == wilt::Point<1>({ 3 }));
-    REQUIRE(TrackDefault::count == 3);
+    // assert
+    REQUIRE(!a.empty());
+    REQUIRE(a.size() == 210);
+    REQUIRE(a.sizes() == wilt::Point<5>({ 3, 2, 5, 1, 7 }));
+    REQUIRE(Tracker::defaultConstructorCalls == 210);
+    REQUIRE(Tracker::copyConstructorCalls == 0);
+    REQUIRE(Tracker::moveConstructorCalls == 0);
+  }
+
+  SECTION("creates empty array when given size with a 0-sized dimension")
+  {
+    // act
+    wilt::NArray<int, 2> a({ 3, 0 });
+
+    // assert
+    REQUIRE(a.empty());
+    REQUIRE(a.size() == 0);
+    REQUIRE(a.sizes() == wilt::Point<2>());
+    REQUIRE(a.steps() == wilt::Point<2>());
+  }
+
+  SECTION("creates empty array when given size with a negative-sized dimension")
+  {
+    // act
+    wilt::NArray<int, 2> a({ 3, -2 });
+
+    // assert
+    REQUIRE(a.empty());
+    REQUIRE(a.size() == 0);
+    REQUIRE(a.sizes() == wilt::Point<2>());
+    REQUIRE(a.steps() == wilt::Point<2>());
   }
 }
 
-TEST_CASE("testSizedWithDefaultConstructorHasConstructedSize", "[narray]")
+TEST_CASE("NArray size+value constructor", "[narray]")
 {
-  { // T=int N=1
+  SECTION("creates a sized 1-dimensional array with the copied values")
+  {
+    // act
     wilt::NArray<int, 1> a({ 3 }, 1);
 
+    // assert
+    REQUIRE(!a.empty());
     REQUIRE(a.size() == 3);
     REQUIRE(a.sizes() == wilt::Point<1>({ 3 }));
+    REQUIRE(a.steps() == wilt::Point<1>({ 1 }));
+    REQUIRE(a[0] == 1);
+    REQUIRE(a[1] == 1);
+    REQUIRE(a[2] == 1);
   }
 
-  { // T=int N=2
+  SECTION("creates a sized 2-dimensional array with the copied values")
+  {
+    // act
     wilt::NArray<int, 2> a({ 3, 2 }, 1);
 
+    // assert
+    REQUIRE(!a.empty());
     REQUIRE(a.size() == 6);
     REQUIRE(a.sizes() == wilt::Point<2>({ 3, 2 }));
+    REQUIRE(a.steps() == wilt::Point<2>({ 2, 1 }));
+    REQUIRE(a[0][0] == 1);
+    REQUIRE(a[0][1] == 1);
+    REQUIRE(a[1][0] == 1);
+    REQUIRE(a[1][1] == 1);
+    REQUIRE(a[2][0] == 1);
+    REQUIRE(a[2][1] == 1);
   }
 
-  { // T=int N=5
-    wilt::NArray<int, 5> a({ 3, 2, 5, 1, 7 }, 1);
+  SECTION("copy constructs elements equal to the constructed size")
+  {
+    // arrange
+    Tracker value;
+    Tracker::reset();
 
-    REQUIRE(a.size() == 210);
-    REQUIRE(a.sizes() == wilt::Point<5>({ 3, 2, 5, 1, 7 }));
-  }
+    // act
+    wilt::NArray<Tracker, 1> a({ 3 }, value);
 
-  { // T=TrackCopy N=1
-    TrackCopy::reset();
-
-    wilt::NArray<TrackCopy, 1> a({ 3 }, TrackCopy{});
-
+    // assert
+    REQUIRE(!a.empty());
     REQUIRE(a.size() == 3);
     REQUIRE(a.sizes() == wilt::Point<1>({ 3 }));
-    REQUIRE(TrackCopy::count == 3);
+    REQUIRE(Tracker::defaultConstructorCalls == 0);
+    REQUIRE(Tracker::copyConstructorCalls == 3);
+    REQUIRE(Tracker::moveConstructorCalls == 0);
+  }
+
+  SECTION("creates empty array when given size with a 0-sized dimension")
+  {
+    // act
+    wilt::NArray<int, 2> a({ 3, 0 }, 1);
+
+    // assert
+    REQUIRE(a.empty());
+    REQUIRE(a.size() == 0);
+    REQUIRE(a.sizes() == wilt::Point<2>());
+    REQUIRE(a.steps() == wilt::Point<2>());
+  }
+
+  SECTION("creates empty array when given size with a negative-sized dimension")
+  {
+    // act
+    wilt::NArray<int, 2> a({ 3, -2 }, 1);
+
+    // assert
+    REQUIRE(a.empty());
+    REQUIRE(a.size() == 0);
+    REQUIRE(a.sizes() == wilt::Point<2>());
+    REQUIRE(a.steps() == wilt::Point<2>());
   }
 }
 
-TEST_CASE("testCopyConstructorSharesData", "[narray]")
+TEST_CASE("NArray copy constructor", "[narray]")
 {
-  { // T=int N=1
-    wilt::NArray<int, 1> a({ 3 }, 0);
-    wilt::NArray<int, 1> b(a);
-    b[1] = 1;
+  SECTION("creates an array of the correct size")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 3, 2 });
 
-    REQUIRE(a.size() == b.size());
-    REQUIRE(a.sizes() == b.sizes());
-    REQUIRE(a[1] == 1);
-    REQUIRE(&a[0] == &b[0]);
+    // act
+    wilt::NArray<int, 2> b(a);
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.shared());
+    REQUIRE(b.size() == 6);
+    REQUIRE(b.sizes() == wilt::Point<2>({ 3, 2 }));
+    REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
+  }
+
+  SECTION("creates an array that uses the same shared data")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 3, 2 });
+
+    // act
+    wilt::NArray<int, 2> b(a);
+    a[1][1] = 5;
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.shared());
+    REQUIRE(b[1][1] == 5);
+    REQUIRE(&a[0][0] == &b[0][0]);
+    REQUIRE(&a[0][1] == &b[0][1]);
+    REQUIRE(&a[1][0] == &b[1][0]);
+    REQUIRE(&a[1][1] == &b[1][1]);
+    REQUIRE(&a[2][0] == &b[2][0]);
+    REQUIRE(&a[2][1] == &b[2][1]);
+  }
+
+  SECTION("creates an empty array if the original was empty")
+  {
+    // arrange
+    wilt::NArray<int, 2> a;
+
+    // act
+    wilt::NArray<int, 2> b(a);
+
+    // assert
+    REQUIRE(b.empty());
+    REQUIRE(!b.shared());
+    REQUIRE(b.size() == 0);
+    REQUIRE(b.sizes() == wilt::Point<2>());
+    REQUIRE(b.steps() == wilt::Point<2>());
+  }
+
+  SECTION("does not copy any elements")
+  {
+    // arrange
+    wilt::NArray<Tracker, 2> a({ 3, 2 });
+    Tracker::reset();
+
+    // act
+    wilt::NArray<Tracker, 2> b(a);
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.shared());
+    REQUIRE(Tracker::defaultConstructorCalls == 0);
+    REQUIRE(Tracker::copyConstructorCalls == 0);
+    REQUIRE(Tracker::moveConstructorCalls == 0);
   }
 }
 
-TEST_CASE("testConstNArrayConstructor", "[narray]")
+TEST_CASE("NArray const-copy constructor", "[narray]")
 {
-  { // T=TrackDefault
-    wilt::NArray<TrackDefault, 1> a({ 3 });
-    TrackDefault::reset();
-    wilt::NArray<const TrackDefault, 1> b(a);
+  SECTION("creates an array of the correct size")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 3, 2 }, 1);
 
-    REQUIRE(TrackDefault::count == 0);
+    // act
+    wilt::NArray<const int, 2> b(a);
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.shared());
+    REQUIRE(b.size() == 6);
+    REQUIRE(b.sizes() == wilt::Point<2>({ 3, 2 }));
+    REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
   }
 
-  { // T=TrackCopy
-    wilt::NArray<TrackCopy, 1> a({ 3 });
-    TrackCopy::reset();
-    wilt::NArray<const TrackCopy, 1> b(a);
+  SECTION("creates an array that uses the same shared data")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 3, 2 }, 1);
 
-    REQUIRE(TrackCopy::count == 0);
+    // act
+    wilt::NArray<const int, 2> b(a);
+    a[1][1] = 5;
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.shared());
+    REQUIRE(b[1][1] == 5);
+    REQUIRE(&a[0][0] == &b[0][0]);
+    REQUIRE(&a[0][1] == &b[0][1]);
+    REQUIRE(&a[1][0] == &b[1][0]);
+    REQUIRE(&a[1][1] == &b[1][1]);
+    REQUIRE(&a[2][0] == &b[2][0]);
+    REQUIRE(&a[2][1] == &b[2][1]);
   }
 
-  { // (const T) -> (T) : doesn't compile
-    //wilt::NArray<const int, 1> a({ 3 });
-    //wilt::NArray<int, 1> b(a);
+  SECTION("creates an empty array if the original was empty")
+  {
+    // arrange
+    wilt::NArray<int, 2> a;
+
+    // act
+    wilt::NArray<const int, 2> b(a);
+
+    // assert
+    REQUIRE(b.empty());
+    REQUIRE(!b.shared());
+    REQUIRE(b.size() == 0);
+    REQUIRE(b.sizes() == wilt::Point<2>());
+    REQUIRE(b.steps() == wilt::Point<2>());
   }
 
-  { // (const T).clone() -> (T) : does compile
-    wilt::NArray<const int, 1> a({ 3 });
-    wilt::NArray<int, 1> b(a.clone());
+  SECTION("does not copy any elements")
+  {
+    // arrange
+    wilt::NArray<Tracker, 2> a({ 3, 2 });
+    Tracker::reset();
+
+    // act
+    wilt::NArray<const Tracker, 2> b(a);
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.shared());
+    REQUIRE(Tracker::defaultConstructorCalls == 0);
+    REQUIRE(Tracker::copyConstructorCalls == 0);
+    REQUIRE(Tracker::moveConstructorCalls == 0);
   }
 }
 
-TEST_CASE("testCloneConstructsNewArrayCorrectly", "[narray]")
+TEST_CASE("clone()", "[narray]")
 {
-  { // T=int N=3
-    wilt::NArray<int, 3> a({ 3, 4, 5 }, 1);
-    wilt::NArray<int, 3> b = a.flipY().transpose();
-    wilt::NArray<int, 3> c = b.clone();
-    b[0][0][0] = 5;
+  SECTION("creates an array of the correct size")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 3, 2 }, 1);
 
-    REQUIRE(c.size() == a.size());
-    REQUIRE(c.sizes() == wilt::Point<3>({ 4, 3, 5 }));
-    REQUIRE(c.steps() == wilt::Point<3>({ 15, 5, 1 }));
-    for (auto v : c)
-      REQUIRE(v == 1);
+    // act
+    wilt::NArray<int, 2> b = a.clone();
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.size() == 6);
+    REQUIRE(b.sizes() == wilt::Point<2>({ 3, 2 }));
+    REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
   }
 
-  { // makes exactly N copies
-    wilt::NArray<TrackCopy, 1> a({ 3 });
-    TrackCopy::reset();
-    wilt::NArray<TrackCopy, 1> b = a.clone();
+  SECTION("creates an array that does not share elements")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 3, 2 }, 1);
 
-    REQUIRE(TrackCopy::count == 3);
+    // act
+    wilt::NArray<int, 2> b = a.clone();
+    a[1][1] = 5;
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(!b.shared());
+    REQUIRE(b[0][0] == 1);
+    REQUIRE(b[0][1] == 1);
+    REQUIRE(b[1][0] == 1);
+    REQUIRE(b[1][1] == 1); // not 5
+    REQUIRE(b[2][0] == 1);
+    REQUIRE(b[2][1] == 1);
   }
 
-  { // does not default construct any elements
-    wilt::NArray<TrackDefault, 1> a({ 3 });
-    TrackDefault::reset();
-    wilt::NArray<TrackDefault, 1> b = a.clone();
+  SECTION("calls the copy constructor for each element")
+  {
+    // arrange
+    wilt::NArray<Tracker, 2> a({ 3, 2 });
+    Tracker::reset();
 
-    REQUIRE(TrackDefault::count == 0);
+    // act
+    wilt::NArray<Tracker, 2> b = a.clone();
+
+    // assert
+    REQUIRE(Tracker::defaultConstructorCalls == 0);
+    REQUIRE(Tracker::copyConstructorCalls == 6);
+    REQUIRE(Tracker::moveConstructorCalls == 0);
+  }
+
+  SECTION("creates an empty array when called on an empty array")
+  {
+    // arrange
+    wilt::NArray<int, 2> a;
+
+    // act
+    wilt::NArray<int, 2> b = a.clone();
+
+    // assert
+    REQUIRE(b.empty());
+    REQUIRE(b.size() == 0);
+  }
+
+  SECTION("creates a non-const array from a const array")
+  {
+    // arrange
+    wilt::NArray<const int, 2> a({ 3, 2 }, 1);
+
+    // act
+    wilt::NArray<int, 2> b = a.clone();
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.size() == 6);
+    REQUIRE(b.sizes() == wilt::Point<2>({ 3, 2 }));
+    REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
   }
 }
 
-TEST_CASE("testAsCondensedCreatesCorrectNArray", "[narray]")
+TEST_CASE("asCondensed()", "[narray]")
 {
-  { // T=int N=1
-    wilt::NArray<int, 1> a({ 12 });
-
-    wilt::NArray<int, 1> b = a.asCondensed();
-    REQUIRE(b.sizes() == wilt::Point<1>({ 12 }));
-    REQUIRE(b.steps() == wilt::Point<1>({ 1 }));
-
-    wilt::NArray<int, 1> c = a.flipX().asCondensed();
-    REQUIRE(c.sizes() == wilt::Point<1>({ 12 }));
-    REQUIRE(c.steps() == wilt::Point<1>({ -1 }));
-  }
-
-  { // T=int N=1
-    wilt::NArray<int, 3> a;
-
-    wilt::NArray<int, 3> b = a.asCondensed();
-    REQUIRE(b.sizes() == wilt::Point<3>({ 0, 0, 0 }));
-    REQUIRE(b.steps() == wilt::Point<3>({ 0, 0, 0 }));
-  }
-
-  { // T=int N=3
+  SECTION("creates fully-condensed array from uniform array")
+  {
+    // act
     wilt::NArray<int, 3> a({ 2, 3, 4 });
-
     wilt::NArray<int, 3> b = a.asCondensed();
+
+    // assert
     REQUIRE(b.sizes() == wilt::Point<3>({ 1, 1, 24 }));
     REQUIRE(b.steps() == wilt::Point<3>({ 24, 24, 1 }));
+  }
 
-    wilt::NArray<int, 3> e = a.flipX().flipY().flipZ().asCondensed();
-    REQUIRE(e.sizes() == wilt::Point<3>({ 1, 1, 24 }));
-    REQUIRE(e.steps() == wilt::Point<3>({ 24, 24, -1 }));
+  SECTION("creates fully-condensed array from reverse-uniform array")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+    wilt::NArray<int, 3> transformed = a.flipX().flipY().flipZ();
 
-    wilt::NArray<int, 3> c = a.flipX().asCondensed();
-    REQUIRE(c.sizes() == wilt::Point<3>({ 1, 2, 12 }));
-    REQUIRE(c.steps() == wilt::Point<3>({ 24, -12, 1 }));
+    // act
+    wilt::NArray<int, 3> b = transformed.asCondensed();
 
-    wilt::NArray<int, 3> d = a.subarray({ 0, 0, 0 }, { 1, 2, 3 }).asCondensed();
-    REQUIRE(d.sizes() == wilt::Point<3>({ 1, 2, 3 }));
-    REQUIRE(d.steps() == wilt::Point<3>({ 12, 4, 1 }));
+    // assert
+    REQUIRE(b.sizes() == wilt::Point<3>({ 1, 1, 24 }));
+    REQUIRE(b.steps() == wilt::Point<3>({ 24, 24, -1 }));
+  }
+
+  SECTION("creates fully-condensed array from skipped array")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+    wilt::NArray<int, 3> transformed = a.skipZ(2);
+
+    // act
+    wilt::NArray<int, 3> b = transformed.asCondensed();
+
+    // assert
+    REQUIRE(b.sizes() == wilt::Point<3>({ 1, 1, 12 }));
+    REQUIRE(b.steps() == wilt::Point<3>({ 24, 24, 2 }));
+  }
+
+  SECTION("creates partially-condensed array due to a flipped end dimension")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+    wilt::NArray<int, 3> transformed = a.flipX();
+
+    // act
+    wilt::NArray<int, 3> b = transformed.asCondensed();
+
+    // assert
+    REQUIRE(b.sizes() == wilt::Point<3>({ 1, 2, 12 }));
+    REQUIRE(b.steps() == wilt::Point<3>({ 24, -12, 1 }));
+  }
+
+  SECTION("creates non-condensed array due to a flipped middle dimension")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+    wilt::NArray<int, 3> transformed = a.flipY();
+
+    // act
+    wilt::NArray<int, 3> b = transformed.asCondensed();
+
+    // assert
+    REQUIRE(b.sizes() == wilt::Point<3>({ 2, 3, 4 }));
+    REQUIRE(b.steps() == wilt::Point<3>({ 12, -4, 1 }));
+  }
+
+  SECTION("creates non-condensed array due to a sub-ranges")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+    wilt::NArray<int, 3> transformed = a.subarray({ 0, 0, 0 }, { 1, 2, 3 });
+
+    // act
+    wilt::NArray<int, 3> b = transformed.asCondensed();
+
+    // assert
+    REQUIRE(b.sizes() == wilt::Point<3>({ 1, 2, 3 }));
+    REQUIRE(b.steps() == wilt::Point<3>({ 12, 4, 1 }));
+  }
+
+  SECTION("creates partially-condensed array with repeated elements at the end")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+    wilt::NArray<int, 5> transformed = a.repeat(5).repeat(6);
+
+    // act
+    wilt::NArray<int, 5> b = transformed.asCondensed();
+
+    // assert
+    REQUIRE(b.sizes() == wilt::Point<5>({ 1, 1, 1, 24, 30 }));
+    REQUIRE(b.steps() == wilt::Point<5>({ 24, 24, 24, 1, 0 }));
+  }
+
+  SECTION("creates an empty array when called on an empty array")
+  {
+    // arrange
+    wilt::NArray<int, 3> empty;
+
+    // act
+    wilt::NArray<int, 3> b = empty.asCondensed();
+
+    // assert
+    REQUIRE(b.empty());
+    REQUIRE(b.size() == 0);
+    REQUIRE(b.sizes() == wilt::Point<3>());
+    REQUIRE(b.steps() == wilt::Point<3>());
   }
 }
 
-TEST_CASE("testSkipNCreatesCorrectNArray", "[narray]")
+TEST_CASE("skip()", "[narray]")
 {
-  { // T=int N=1
+  SECTION("creates an array of the correct size")
+  {
+    // arrange
     wilt::NArray<int, 1> a({ 5 });
 
-    wilt::NArray<int, 1> b = a.skipX(2);
+    // act
+    wilt::NArray<int, 1> b = a.skip(0, 2);
+    wilt::NArray<int, 1> c = a.skip(0, 2, 1);
+    wilt::NArray<int, 1> d = a.skip(0, 1);
+    wilt::NArray<int, 1> e = a.skip(0, 1, 2);
+
+    // assert
     REQUIRE(b.sizes() == wilt::Point<1>({ 3 }));
     REQUIRE(b.steps() == wilt::Point<1>({ 2 }));
-
-    wilt::NArray<int, 1> c = a.skipX(2, 1);
     REQUIRE(c.sizes() == wilt::Point<1>({ 2 }));
     REQUIRE(c.steps() == wilt::Point<1>({ 2 }));
-
-    wilt::NArray<int, 1> d = a.skipX(1);
     REQUIRE(d.sizes() == wilt::Point<1>({ 5 }));
     REQUIRE(d.steps() == wilt::Point<1>({ 1 }));
-
-    wilt::NArray<int, 1> e = a.skipX(1, 2);
     REQUIRE(e.sizes() == wilt::Point<1>({ 3 }));
     REQUIRE(e.steps() == wilt::Point<1>({ 1 }));
   }
 
-  { // T=int N=3
-    wilt::NArray<int, 3> a({ 3, 3, 3 });
+  SECTION("creates an array that shares data")
+  {
+    // arrange
+    wilt::NArray<int, 1> a({ 5 });
 
-    wilt::NArray<int, 3> b = a.skipY(2).skipZ(2);
-    REQUIRE(b.sizes() == wilt::Point<3>({ 3, 2, 2 }));
-    REQUIRE(b.steps() == wilt::Point<3>({ 9, 6, 2 }));
+    // act
+    wilt::NArray<int, 1> b = a.skip(0, 2);
+    wilt::NArray<int, 1> c = a.skip(0, 2, 1);
+    wilt::NArray<int, 1> d = a.skip(0, 1);
+    wilt::NArray<int, 1> e = a.skip(0, 1, 2);
+
+    // assert
+    REQUIRE(&b[0] == &a[0]);
+    REQUIRE(&b[1] == &a[2]);
+    REQUIRE(&c[0] == &a[1]);
+    REQUIRE(&c[1] == &a[3]);
+    REQUIRE(&d[0] == &a[0]);
+    REQUIRE(&d[1] == &a[1]);
+    REQUIRE(&e[0] == &a[2]);
+    REQUIRE(&e[1] == &a[3]);
+  }
+
+  SECTION("with dim=0 is identical to skipX()")
+  {
+    // arrange
+    wilt::NArray<int, 5> a({ 3, 4, 5, 6, 7 });
+
+    // assert
+    REQUIRE(a.skip(0, 2) == a.skipX(2));
+    REQUIRE(a.skip(0, 2, 1) == a.skipX(2, 1));
+    REQUIRE(a.skip(0, 1) == a.skipX(1));
+    REQUIRE(a.skip(0, 1, 2) == a.skipX(1, 2));
+  }
+
+  SECTION("with dim=1 is identical to skipY()")
+  {
+    // arrange
+    wilt::NArray<int, 5> a({ 3, 4, 5, 6, 7 });
+
+    // assert
+    REQUIRE(a.skip(1, 2) == a.skipY(2));
+    REQUIRE(a.skip(1, 2, 1) == a.skipY(2, 1));
+    REQUIRE(a.skip(1, 1) == a.skipY(1));
+    REQUIRE(a.skip(1, 1, 1) == a.skipY(1, 1));
+  }
+
+  SECTION("with dim=2 is identical to skipZ()")
+  {
+    // arrange
+    wilt::NArray<int, 5> a({ 3, 4, 5, 6, 7 });
+
+    // assert
+    REQUIRE(a.skip(2, 2) == a.skipZ(2));
+    REQUIRE(a.skip(2, 2, 1) == a.skipZ(2, 1));
+    REQUIRE(a.skip(2, 1) == a.skipZ(1));
+    REQUIRE(a.skip(2, 1, 1) == a.skipZ(1, 1));
+  }
+
+  SECTION("with dim=3 is identical to skipW()")
+  {
+    // arrange
+    wilt::NArray<int, 5> a({ 3, 4, 5, 6, 7 });
+
+    // assert
+    REQUIRE(a.skip(3, 2) == a.skipW(2));
+    REQUIRE(a.skip(3, 2, 1) == a.skipW(2, 1));
+    REQUIRE(a.skip(3, 1) == a.skipW(1));
+    REQUIRE(a.skip(3, 1, 1) == a.skipW(1, 1));
+  }
+
+  SECTION("throws when skip amount is less than 1")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+
+    // assert
+    REQUIRE_NOTHROW(a.skip(0, 1));
+    REQUIRE_THROWS(a.skip(0, 0));
+    REQUIRE_THROWS(a.skip(0, -1));
+
+    REQUIRE_NOTHROW(a.skip(1, 1));
+    REQUIRE_THROWS(a.skip(1, 0));
+    REQUIRE_THROWS(a.skip(1, -1));
+  }
+
+  SECTION("throws when called with a starting position greater than the dimension")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+
+    // assert
+    REQUIRE_NOTHROW(a.skip(0, 1, 0));
+    REQUIRE_NOTHROW(a.skip(0, 1, 1));
+    REQUIRE_THROWS(a.skip(0, 1, 2));
+    REQUIRE_THROWS(a.skip(0, 1, 100));
+
+    REQUIRE_NOTHROW(a.skip(1, 1, 2));
+    REQUIRE_THROWS(a.skip(1, 1, 3));
+    REQUIRE_THROWS(a.skip(1, 1, 100));
+  }
+
+  SECTION("throws when called with a starting position less than 0")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+
+    // assert
+    REQUIRE_THROWS(a.skip(0, 1, -1));
+    REQUIRE_THROWS(a.skip(1, 1, -2));
+    REQUIRE_THROWS(a.skip(2, 1, -100));
+  }
+
+  SECTION("throws when called on an empty array")
+  {
+    // there are no acceptable parameters that can be given to skip() when the
+    // array is empty
+
+    // arrange
+    wilt::NArray<int, 3> empty;
+
+    // assert
+    REQUIRE_THROWS(empty.skip(0, 0));
+    REQUIRE_THROWS(empty.skip(0, 1));
+    REQUIRE_THROWS(empty.skip(1, 1));
+    REQUIRE_THROWS(empty.skip(2, 1));
   }
 }
 
-TEST_CASE("testReshapeCreatesCorrectNArray", "[narray]")
+TEST_CASE("reshape()", "[narray]")
 {
-  { // T=int N=2
+  SECTION("creates an array with the correct size")
+  {
+    // arrange
     wilt::NArray<int, 2> a({ 14, 14 });
 
-    wilt::NArray<int, 4> b = a.subarray({ 1, 1 }, { 12, 12 }).reshape<4>({ 4, 3, 4, 3 });
-    REQUIRE(b.sizes() == wilt::Point<4>({ 4, 3, 4, 3 }));
-    REQUIRE(b.steps() == wilt::Point<4>({ 42, 14, 3, 1 }));
+    // act
+    wilt::NArray<int, 2> b = a.reshape<2>({ 98, 2 });
 
-    wilt::NArray<int, 2> c = a.reshape<2>({ 98, 2 });
-    REQUIRE(c.sizes() == wilt::Point<2>({ 98, 2 }));
-    REQUIRE(c.steps() == wilt::Point<2>({ 2, 1 }));
+    // assert
+    REQUIRE(b.sizes() == wilt::Point<2>({ 98, 2 }));
+    REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
+  }
 
-    wilt::NArray<int, 5> d = a.reshape<5>({ 1, 98, 1, 2, 1 });
-    REQUIRE(d.sizes() == wilt::Point<5>({ 1, 98, 1, 2, 1 }));
-    REQUIRE(d.steps() == wilt::Point<5>({ 196, 2, 2, 1, 1 }));
+  SECTION("can always split single-dimensions into segments")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 14, 14 });
+    wilt::NArray<int, 2> b = a.subarray({ 1, 1 }, { 12, 12 });
 
-    wilt::NArray<int, 2> e = a.flipX().flipY().reshape<2>({ 98, 2 });
-    REQUIRE(e.sizes() == wilt::Point<2>({ 98, 2 }));
-    REQUIRE(e.steps() == wilt::Point<2>({ -2, -1 }));
+    // act
+    wilt::NArray<int, 4> c = b.reshape<4>({ 4, 3, 4, 3 });
+
+    // assert
+    REQUIRE(c.sizes() == wilt::Point<4>({ 4, 3, 4, 3 }));
+    REQUIRE(c.steps() == wilt::Point<4>({ 42, 14, 3, 1 }));
+  }
+
+  SECTION("can always add dimensions of size 1")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 14, 14 });
+
+    // act
+    wilt::NArray<int, 5> b = a.reshape<5>({ 1, 98, 1, 2, 1 });
+
+    // assert
+    REQUIRE(b.sizes() == wilt::Point<5>({ 1, 98, 1, 2, 1 }));
+    REQUIRE(b.steps() == wilt::Point<5>({ 196, 2, 2, 1, 1 }));
+  }
+
+  SECTION("can combine dimensions if underlying access is uniform")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 14, 14 });
+    wilt::NArray<int, 2> b = a.flipX().flipY().skipY(2);
+
+    // act
+    wilt::NArray<int, 1> c = a.reshape<1>({ 196 });
+    wilt::NArray<int, 2> d = b.reshape<2>({ 49, 2 });
+
+    // assert
+    REQUIRE(c.sizes() == wilt::Point<1>({ 196 }));
+    REQUIRE(c.steps() == wilt::Point<1>({ 1 }));
+    REQUIRE(d.sizes() == wilt::Point<2>({ 49, 2 }));
+    REQUIRE(d.steps() == wilt::Point<2>({ -4, -2 }));
+  }
+
+  SECTION("creates an array that shares data")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 14, 14 });
+
+    // act
+    wilt::NArray<int, 1> b = a.reshape<1>({ 196 });
+    wilt::NArray<int, 2> c = a.flipX().flipY().skipY(2).reshape<2>({ 49, 2 });
+    wilt::NArray<int, 4> d = a.subarray({ 1, 1 }, { 12, 12 }).reshape<4>({ 4, 3, 4, 3 });
+    wilt::NArray<int, 5> e = a.reshape<5>({ 1, 98, 1, 2, 1 });
+
+    // assert
+    REQUIRE(&b[0] == &a[0][0]);
+    REQUIRE(&b[1] == &a[0][1]);
+    REQUIRE(&c[0][0] == &a[13][13]);
+    REQUIRE(&c[1][1] == &a[13][7]);
+    REQUIRE(&d[0][0][0][0] == &a[1][1]);
+    REQUIRE(&d[1][1][1][1] == &a[5][5]);
+    REQUIRE(&e[0][0][0][0][0] == &a[0][0]);
+    REQUIRE(&e[0][1][0][1][0] == &a[0][3]);
+  }
+
+  SECTION("throws if sizes don't match")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 14, 14 });
+
+    // assert
+    REQUIRE_THROWS(a.reshape<2>({ 14, 13 }));
+    REQUIRE_THROWS(a.reshape<2>({ 14, 15 }));
+    REQUIRE_THROWS(a.reshape<2>({ 13, 14 }));
+    REQUIRE_THROWS(a.reshape<2>({ 15, 14 }));
+  }
+
+  SECTION("throws if attempting to combine dimensions that aren't uniform")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 14, 14 });
+    wilt::NArray<int, 2> b = a.subarray({ 1, 1 }, { 12, 12 });
+
+    // assert
+    REQUIRE_THROWS(b.reshape<1>({ 144 }));
+    REQUIRE_THROWS(b.reshape<2>({ 3, 48 }));
   }
 }
 
