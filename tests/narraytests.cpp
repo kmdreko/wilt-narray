@@ -38,25 +38,6 @@ public:
   NoDefault() = delete;
 };
 
-class TrackDefault
-{
-public:
-  TrackDefault() { ++count; }
-  static int count;
-  static void reset() { count = 0; }
-};
-int TrackDefault::count = 0;
-
-class TrackCopy
-{
-public:
-  TrackCopy() {}
-  TrackCopy(const TrackCopy&) { ++count; }
-  static int count;
-  static void reset() { count = 0; }
-};
-int TrackCopy::count = 0;
-
 class Tracker
 {
 public:
