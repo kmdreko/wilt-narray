@@ -223,7 +223,7 @@ namespace wilt
       assert(array_ == iter.array_);
 
       // simple lexigraphical comparison
-      for (int i = 0; i < N-M; ++i)
+      for (std::size_t i = 0; i < N-M; ++i)
       {
         if (position_[i] < iter.position_[i]) return true;
         if (position_[i] > iter.position_[i]) return false;
@@ -312,7 +312,7 @@ namespace wilt
       assert(array_ == iter.array_);
 
       pos_t diff = 0;
-      for (int i = 0; i < N-M; ++i)
+      for (std::size_t i = 0; i < N-M; ++i)
       {
         diff *= array_->sizes()[i];
         diff += (position_[i] - iter.position_[i]);
@@ -360,7 +360,7 @@ namespace detail
   template <std::size_t N>
   void addValueToPosition(Point<N>& pos, const pos_t* sizes, pos_t value)
   {
-    for (int i = N-1; i > 0; --i)
+    for (std::size_t i = N-1; i > 0; --i)
     {
       pos[i] += value;
       if (pos[i] < sizes[i])
@@ -374,7 +374,7 @@ namespace detail
   template <std::size_t N>
   void addOneToPosition(Point<N>& pos, const pos_t* sizes)
   {
-    for (int i = N-1; i > 0; --i)
+    for (std::size_t i = N-1; i > 0; --i)
     {
       pos[i] += 1;
       if (pos[i] < sizes[i])
@@ -387,7 +387,7 @@ namespace detail
   template <std::size_t N>
   void subValueFromPosition(Point<N>& pos, const pos_t* sizes, pos_t value)
   {
-    for (int i = N-1; i > 0; --i)
+    for (std::size_t i = N-1; i > 0; --i)
     {
       pos[i] -= value;
       if (pos[i] >= 0)
@@ -401,7 +401,7 @@ namespace detail
   template <std::size_t N>
   void subOneFromPosition(Point<N>& pos, const pos_t* sizes)
   {
-    for (int i = N-1; i > 0; --i)
+    for (std::size_t i = N-1; i > 0; --i)
     {
       pos[i] -= 1;
       if (pos[i] >= 0)

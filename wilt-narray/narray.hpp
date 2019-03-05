@@ -497,7 +497,7 @@ namespace wilt
     NArrayIterator<T, N, M> end() 
     { 
       Point<N-M> pos;
-      pos[0] = array_.size(0);
+      pos[0] = (pos_t)array_.size(0);
       return{ array_, pos };
     }
   }; // class SubNArrays
@@ -686,17 +686,17 @@ namespace detail
   std::size_t condense(Point<N>& sizes, Point<N>& steps)
   {
     std::size_t j = N-1;
-    for (int i = N-2; i >= 0; --i)
+    for (std::size_t i = N-1; i > 0; --i)
     {
-      if (steps[j] * sizes[j] == steps[i])
+      if (steps[j] * sizes[j] == steps[i-1])
       {
-        sizes[j] *= sizes[i];
+        sizes[j] *= sizes[i-1];
       }
       else
       {
         --j;
-        sizes[j] = sizes[i];
-        steps[j] = steps[i];
+        sizes[j] = sizes[i-1];
+        steps[j] = steps[i-1];
       }
     }
     for (std::size_t i = 0; i < j; ++i)
@@ -1473,8 +1473,8 @@ namespace detail
     Point<M> newsteps;
     std::size_t n = wilt::detail::condense(oldsizes, oldsteps);
 
-    int j = 0;
-    int i = N - n;
+    std::size_t j = 0;
+    std::size_t i = N - n;
     for (; i < N && j < M; )
     {
       if (oldsizes[i] / newsizes[j] * newsizes[j] == oldsizes[i])
@@ -1493,10 +1493,10 @@ namespace detail
       }
     }
 
-    for (int k = N; k < N; ++k)
+    for (std::size_t k = N; k < N; ++k)
       if (oldsizes[k] != 1)
         throw std::domain_error("reshape(size): size not compatible");
-    for (int k = j; k < M; ++k)
+    for (std::size_t k = j; k < M; ++k)
       if (newsizes[k] != 1)
         throw std::domain_error("reshape(size): size not compatible");
       else
@@ -1637,7 +1637,7 @@ namespace detail
 
     auto newsizes = sizes_;
     auto newsteps = steps_;
-    std::size_t n = wilt::detail::condense(newsizes, newsteps);
+    wilt::detail::condense(newsizes, newsteps);
 
     return NArray<T, N>(data_, newsizes, newsteps);
   }

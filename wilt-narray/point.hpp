@@ -61,7 +61,7 @@ namespace wilt
         throw std::invalid_argument("Initializer list must match dimensions");
 
       auto iter = list.begin();
-      for (pos_t i = 0; i < N; ++i, ++iter)
+      for (std::size_t i = 0; i < N; ++i, ++iter)
         data_[i] = *iter;
     }
 
@@ -253,14 +253,10 @@ namespace wilt
   //! @brief      Compares the two points
   //! @param[in]  lhs - point to compare
   //! @param[in]  rhs - point to compare
-  //! @return     true if points are equal, false if different dimensions or
-  //!             elements are not equal
-  template <std::size_t N, std::size_t M>
-  bool operator== (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
+  //! @return     true if points are equal, false if elements are not equal
+  template <std::size_t N>
+  bool operator== (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
   {
-    if (N != M)
-      return false;
-
     for (std::size_t i = 0; i < N; ++i)
       if (!(lhs[i] == rhs[i]))
         return false;
@@ -271,14 +267,10 @@ namespace wilt
   //! @brief      Compares the two points
   //! @param[in]  lhs - point to compare
   //! @param[in]  rhs - point to compare
-  //! @return     false if points are equal, true if different dimensions or
-  //!             elements are not equal
-  template <std::size_t N, std::size_t M>
-  bool operator!= (const wilt::Point<N>& lhs, const wilt::Point<M>& rhs)
+  //! @return     false if points are equal, true if elements are not equal
+  template <std::size_t N>
+  bool operator!= (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs)
   {
-    if (N != M)
-      return true;
-
     for (std::size_t i = 0; i < N; ++i)
       if (!(lhs[i] == rhs[i]))
         return true;
