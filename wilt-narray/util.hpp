@@ -28,22 +28,7 @@
 #ifndef WILT_UTIL_HPP
 #define WILT_UTIL_HPP
 
-// libraries
-#include <utility>
-// - std::move
-// - std::forward
-// - std::initializer_list
-// - std::declval
-// - std::swap
 #include <cstddef>
-// - std::size_t
-// - std::ptrdiff_t
-#include <cstdint>
-// - uint8_t
-#include <stdexcept>
-// - std::invalid_argument
-// - std::domain_error
-// - std::out_of_range
 
 namespace wilt
 {

@@ -29,14 +29,16 @@
 #define WILT_POINT_HPP
 
 #include <array>
-// - std::array
-#include <cmath>
-// - std::abs
-
-#include "util.hpp"
+#include <cstddef>
+#include <initializer_list>
+#include <stdexcept>
+#include <utility>
 
 namespace wilt
 {
+  // type aliases
+  using pos_t = std::ptrdiff_t;
+
   //! @class  Point
   //! @brief  An integer point class with arithmetic operations
   template <std::size_t N>

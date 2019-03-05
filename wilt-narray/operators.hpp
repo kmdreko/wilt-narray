@@ -28,11 +28,15 @@
 #ifndef WILT_OPERATORS_HPP
 #define WILT_OPERATORS_HPP
 
-#include "util.hpp"
-#include "narray.hpp"
+#include <cstddef>
+#include <stdexcept>
+#include <utility>
 
 namespace wilt
 {
+  template <class T, std::size_t N> class NArray;
+  // - defined in "narray.hpp"
+
   template <class T, std::size_t N>
   bool operator== (const wilt::NArray<T, N>& lhs, const wilt::NArray<T, N>& rhs)
   {

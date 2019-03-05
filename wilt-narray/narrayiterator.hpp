@@ -28,15 +28,18 @@
 #ifndef WILT_NARRAYITERATOR_HPP
 #define WILT_NARRAYITERATOR_HPP
 
+#include <cstddef>
 #include <iterator>
-// - std::random_access_iterator_tag
+#include <type_traits>
 
 #include "util.hpp"
 #include "point.hpp"
-#include "narray.hpp"
 
 namespace wilt
 {
+  template <class T, std::size_t N> class NArray;
+  // - defined in "narray.hpp"
+
   //! @class  NArrayIterator
   //!
   //! The iterator class retains its own reference to the array data, meaning

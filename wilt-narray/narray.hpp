@@ -28,15 +28,13 @@
 #ifndef WILT_NARRAY_HPP
 #define WILT_NARRAY_HPP
 
-#include <memory>
-// - std::allocator
-#include <type_traits>
-// - std::enable_if
-// - std::is_const
-// - std::remove_const
-// - std::is_same
+#include <cstddef>
+#include <cmath>
 #include <initializer_list>
-// - std::initializer list
+#include <memory>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 #include "util.hpp"
 #include "point.hpp"
@@ -1728,7 +1726,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  void NArray<T, N>::setTo(const T & val, const NArray<uint8_t, N>& mask) const
+  void NArray<T, N>::setTo(const T& val, const NArray<uint8_t, N>& mask) const
   {
     static_assert(!std::is_const<T>::value, "setTo(val, mask): invalid when element type is const");
 

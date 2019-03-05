@@ -29,14 +29,8 @@
 #define WILT_NARRAYDATABLOCK_HPP
 
 #include <memory>
-// - std::allocator
-// - std::shared_ptr
-// - std::enable_shared_from_this
 #include <cstddef>
-// - std::size_t
 #include <type_traits>
-// - std::is_trivially_default_constructible
-// - std::is_trivially_destructible
 
 namespace wilt
 {
