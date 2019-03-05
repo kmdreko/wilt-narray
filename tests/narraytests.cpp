@@ -69,7 +69,7 @@ int Tracker::moveConstructorCalls = 0;
 int Tracker::copyAssignmentCalls = 0;
 int Tracker::moveAssignmentCalls = 0;
 
-TEST_CASE("NArray default constructor", "[narray]")
+TEST_CASE("NArray<T, N>()", "[narray]")
 {
   SECTION("creates empty 1-dimensional array")
   {
@@ -138,7 +138,7 @@ TEST_CASE("NArray default constructor", "[narray]")
   }
 }
 
-TEST_CASE("NArray copy constructor", "[narray]")
+TEST_CASE("NArray<T, N>(arr)", "[narray]")
 {
   SECTION("creates an array of the correct size")
   {
@@ -211,7 +211,7 @@ TEST_CASE("NArray copy constructor", "[narray]")
   }
 }
 
-TEST_CASE("NArray const-copy constructor", "[narray]")
+TEST_CASE("NArray<const T, N>(arr)", "[narray]")
 {
   SECTION("creates an array of the correct size")
   {
@@ -284,7 +284,7 @@ TEST_CASE("NArray const-copy constructor", "[narray]")
   }
 }
 
-TEST_CASE("NArray sized constructor", "[narray]")
+TEST_CASE("NArray<T, N>(size)", "[narray]")
 {
   SECTION("creates a sized 1-dimensional array")
   {
@@ -364,7 +364,7 @@ TEST_CASE("NArray sized constructor", "[narray]")
   }
 }
 
-TEST_CASE("NArray size+value constructor", "[narray]")
+TEST_CASE("NArray<T, N>(size, val)", "[narray]")
 {
   SECTION("creates a sized 1-dimensional array with the copied values")
   {
@@ -442,7 +442,7 @@ TEST_CASE("NArray size+value constructor", "[narray]")
   }
 }
 
-TEST_CASE("NArray size+range constructor", "[narray]")
+TEST_CASE("NArray<T, N>(size, first, last)", "[narray]")
 {
   SECTION("creates array with the correct size")
   {
@@ -502,7 +502,7 @@ TEST_CASE("NArray size+range constructor", "[narray]")
   }
 }
 
-TEST_CASE("skip()", "[narray]")
+TEST_CASE("skip(dim, n, start)", "[narray]")
 {
   SECTION("creates an array of the correct size")
   {
@@ -716,7 +716,7 @@ TEST_CASE("subarrays()", "[narray]")
   }
 }
 
-TEST_CASE("reshape()", "[narray]")
+TEST_CASE("reshape(size)", "[narray]")
 {
   SECTION("creates an array with the correct size")
   {
@@ -872,7 +872,7 @@ TEST_CASE("reshape()", "[narray]")
   }
 }
 
-TEST_CASE("repeat()", "[narray]")
+TEST_CASE("repeat(n)", "[narray]")
 {
   SECTION("creates an array with the correct size")
   {
@@ -940,7 +940,7 @@ TEST_CASE("repeat()", "[narray]")
   }
 }
 
-TEST_CASE("window()", "[narray]")
+TEST_CASE("window(dim, n)", "[narray]")
 {
   SECTION("creates an array with the correct size")
   {
@@ -1270,7 +1270,7 @@ TEST_CASE("clone()", "[narray]")
   }
 }
 
-TEST_CASE("compress()", "[narray]")
+TEST_CASE("compress(compressor)", "[narray]")
 {
   SECTION("creates smaller array using a function")
   {
@@ -1305,7 +1305,7 @@ TEST_CASE("compress()", "[narray]")
   }
 }
 
-TEST_CASE("NArray operator+()", "[narray]")
+TEST_CASE("operator+(arr, arr)", "[narray]")
 {
   SECTION("can add array to array element-wise")
   {
@@ -1354,7 +1354,10 @@ TEST_CASE("NArray operator+()", "[narray]")
     REQUIRE_THROWS(b + c);
     REQUIRE_THROWS(a + empty);
   }
+}
 
+TEST_CASE("operator+(arr, value)", "[narray]")
+{
   SECTION("can add array to value")
   {
     // arrange
@@ -1386,7 +1389,10 @@ TEST_CASE("NArray operator+()", "[narray]")
     REQUIRE(d.empty());
     REQUIRE(e.empty());
   }
+}
 
+TEST_CASE("operator+(value, arr)", "[narray]")
+{
   SECTION("can add value to array")
   {
     // arrange

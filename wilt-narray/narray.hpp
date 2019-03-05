@@ -137,6 +137,22 @@ namespace wilt
     // Default constructor, makes an empty NArray.
     NArray();
 
+    // Copy and move constructor, shares data and uses the same data segment as
+    // 'arr'
+    //
+    // NOTE: 'arr' is empty after being moved
+    NArray(const NArray<T, N>& arr);
+    NArray(NArray<T, N>&& arr);
+
+    // Copy and move constructor from 'T' to 'const T'
+    //
+    // NOTE: 'arr' is empty after being moved
+    // NOTE: only exists on 'const T' arrays
+    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
+    NArray(const NArray<U, N>& arr);
+    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
+    NArray(NArray<U, N>&& arr);
+
     // Creates an array of the given size, elements are default constructed.
     explicit NArray(const Point<N>& size);
 
@@ -168,22 +184,6 @@ namespace wilt
 
     template <class Iterator>
     NArray(const Point<N>& size, Iterator first, Iterator last);
-
-    // Copy and move constructor, shares data and uses the same data segment as
-    // 'arr'
-    //
-    // NOTE: 'arr' is empty after being moved
-    NArray(const NArray<T, N>& arr);
-    NArray(NArray<T, N>&& arr);
-
-    // Copy and move constructor from 'T' to 'const T'
-    //
-    // NOTE: 'arr' is empty after being moved
-    // NOTE: only exists on 'const T' arrays
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
-    NArray(const NArray<U, N>& arr);
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
-    NArray(NArray<U, N>&& arr);
 
   public:
     ////////////////////////////////////////////////////////////////////////////
@@ -758,6 +758,46 @@ namespace detail
   }
 
   template <class T, std::size_t N>
+  NArray<T, N>::NArray(const NArray<T, N>& arr)
+    : data_(arr.data_)
+    , sizes_(arr.sizes_)
+    , steps_(arr.steps_)
+  {
+
+  }
+
+  template <class T, std::size_t N>
+  NArray<T, N>::NArray(NArray<T, N>&& arr)
+    : data_(arr.data_)
+    , sizes_(arr.sizes_)
+    , steps_(arr.steps_)
+  {
+    arr.clear();
+  }
+
+  template <class T, std::size_t N>
+  template <class U, typename>
+  NArray<T, N>::NArray(const NArray<U, N>& arr)
+    : data_(arr.data_)
+    , sizes_(arr.sizes_)
+    , steps_(arr.steps_)
+  {
+    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>(const NArray<T, N>&): invalid for any other conversions");
+  }
+
+  template <class T, std::size_t N>
+  template <class U, typename>
+  NArray<T, N>::NArray(NArray<U, N>&& arr)
+    : data_(std::move(arr.data_))
+    , sizes_(arr.sizes_)
+    , steps_(arr.steps_)
+  {
+    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>(NArray<T, N>&&): invalid for any other conversions");
+
+    arr.clear();
+  }
+
+  template <class T, std::size_t N>
   NArray<T, N>::NArray(const Point<N>& size)
     : data_()
     , sizes_()
@@ -841,46 +881,6 @@ namespace detail
     sizes_ = size;
     steps_ = wilt::detail::step(size);
     data_ = std::make_shared<wilt::detail::NArrayDataBlock<type>>(wilt::detail::size(size), first, last)->data();
-  }
-
-  template <class T, std::size_t N>
-  NArray<T, N>::NArray(const NArray<T, N>& arr)
-    : data_(arr.data_)
-    , sizes_(arr.sizes_)
-    , steps_(arr.steps_)
-  {
-
-  }
-
-  template <class T, std::size_t N>
-  NArray<T, N>::NArray(NArray<T, N>&& arr)
-    : data_(arr.data_)
-    , sizes_(arr.sizes_)
-    , steps_(arr.steps_)
-  {
-    arr.clear();
-  }
-
-  template <class T, std::size_t N>
-  template <class U, typename>
-  NArray<T, N>::NArray(const NArray<U, N>& arr)
-    : data_(arr.data_)
-    , sizes_(arr.sizes_)
-    , steps_(arr.steps_)
-  {
-    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>(const NArray<T, N>&): invalid for any other conversions");
-  }
-
-  template <class T, std::size_t N>
-  template <class U, typename>
-  NArray<T, N>::NArray(NArray<U, N>&& arr)
-    : data_(std::move(arr.data_))
-    , sizes_(arr.sizes_)
-    , steps_(arr.steps_)
-  {
-    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>(NArray<T, N>&&): invalid for any other conversions");
-
-    arr.clear();
   }
 
   template <class T, std::size_t N>
