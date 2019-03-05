@@ -1102,12 +1102,17 @@ namespace detail
   template <class T, std::size_t N>
   bool NArray<T, N>::isAligned() const
   {
-    for (std::size_t i = 0; i < N; ++i)
-      if (steps_[i] <= 0)
+    if (empty())
+      return false;
+
+    pos_t endstep = 0;
+    for (std::size_t i = N; i > 0; --i) {
+      if (sizes_[i-1] == 1)
+        continue;
+      if (endstep > steps_[i-1])
         return false;
-    for (std::size_t i = 1; i < N; ++i)
-      if (steps_[i - 1] < steps_[i])
-        return false;
+      endstep += (sizes_[i-1] - 1) * steps_[i-1];
+    }
     return true;
   }
 
@@ -1265,7 +1270,7 @@ namespace detail
   template <class T, std::size_t N>
   NArray<T, N> NArray<T, N>::range_(std::size_t dim, pos_t n, pos_t length) const
   {
-    auto newdata = data.get() + steps_[dim] * n;
+    auto newdata = data_.get() + steps_[dim] * n;
     auto newsizes = sizes_;
     newsizes[dim] = length;
 

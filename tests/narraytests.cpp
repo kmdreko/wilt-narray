@@ -484,6 +484,88 @@ TEST_CASE("NArray<T, N>(size, first, last) creates array with default values if 
   REQUIRE(Tracker::moveConstructorCalls == 0);
 }
 
+TEST_CASE("isAligned() is true for an un-transformed array")
+{
+  // arrange
+  wilt::NArray<int, 1> a({ 5 });
+  wilt::NArray<int, 3> b({ 2, 3, 4 });
+
+  // assert
+  REQUIRE(a.isAligned());
+  REQUIRE(b.isAligned());
+}
+
+TEST_CASE("isAligned() is true for a ranged array")
+{
+  // arrange
+  wilt::NArray<int, 3> a({ 2, 3, 4 });
+  wilt::NArray<int, 3> b = a.rangeZ(1, 2);
+  wilt::NArray<int, 3> c = a.subarray({ 1, 1, 1 }, { 1, 2, 3 });
+  wilt::NArray<int, 2> d = a.sliceY(1);
+
+  // assert
+  REQUIRE(b.isAligned());
+  REQUIRE(c.isAligned());
+  REQUIRE(d.isAligned());
+}
+
+TEST_CASE("isAligned() is false for transposed array unless its dimension size is one")
+{
+  // arrange
+  wilt::NArray<int, 3> a({ 2, 3, 1 });
+  wilt::NArray<int, 3> b = a.transpose(0, 1);
+  wilt::NArray<int, 3> c = a.transpose(1, 2);
+
+  // assert
+  REQUIRE(!b.isAligned());
+  REQUIRE(c.isAligned());
+}
+
+TEST_CASE("isAligned() is false for flipped array unless its size is one")
+{
+  // arrange
+  wilt::NArray<int, 3> a({ 2, 1, 4 });
+  wilt::NArray<int, 3> b = a.flipZ();
+  wilt::NArray<int, 3> c = a.flipY();
+
+  // assert
+  REQUIRE(!b.isAligned());
+  REQUIRE(c.isAligned());
+}
+
+TEST_CASE("isAligned() is false for array with repeated dimensions unless its at the end")
+{
+  // arrange
+  wilt::NArray<int, 3> a({ 2, 3, 4 });
+  wilt::NArray<int, 4> b = a.repeat(5).transpose(2, 3);
+  wilt::NArray<int, 5> c = a.repeat(5).repeat(6);
+
+  // assert
+  REQUIRE(!b.isAligned());
+  REQUIRE(c.isAligned());
+}
+
+TEST_CASE("isAligned() is false for windowed array unless it only overlaps once")
+{
+  // arrange
+  wilt::NArray<int, 3> a({ 2, 3, 4 });
+  wilt::NArray<int, 4> b = a.windowZ(3);
+  wilt::NArray<int, 4> c = a.windowZ(2); // 1 2 2 3 3 4 4 ...
+
+  // assert
+  REQUIRE(!b.isAligned());
+  REQUIRE(c.isAligned());
+}
+
+TEST_CASE("isAligned() is false for an empty array")
+{
+  // arrange
+  wilt::NArray<int, 3> a;
+
+  // assert
+  REQUIRE(!a.isAligned());
+}
+
 TEST_CASE("skip(dim, n, start) creates an array of the correct size")
 {
   // arrange
