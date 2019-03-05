@@ -1464,6 +1464,11 @@ namespace detail
   template <std::size_t M>
   NArray<T, M> NArray<T, N>::reshape(const Point<M>& size) const
   {
+    if (empty())
+      throw std::domain_error("reshape(size): this is empty");
+    if (!wilt::detail::validSize(size))
+      throw std::invalid_argument("reshape(size): size dimensions must all be positive");
+
     Point<N> oldsizes = sizes_;
     Point<N> oldsteps = steps_;
     Point<M> newsizes = size;
@@ -1505,6 +1510,8 @@ namespace detail
   template<class T, std::size_t N>
   NArray<T, N+1> NArray<T, N>::repeat(pos_t n) const
   {
+    if (empty())
+      throw std::domain_error("repeat(n): this is empty");
     if (n <= 0)
       throw std::invalid_argument("repeat(n): n must be positive");
 

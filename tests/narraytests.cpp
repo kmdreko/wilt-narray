@@ -28,6 +28,7 @@
 #include <catch2/catch.hpp>
 
 #include <cassert>
+#include <algorithm>
 
 #include "../wilt-narray/narray.hpp"
 
@@ -790,6 +791,19 @@ TEST_CASE("skip()", "[narray]")
     REQUIRE_THROWS(a.skip(2, 1, -100));
   }
 
+  SECTION("throws if dimension is larger than N")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 });
+
+    // assert
+    REQUIRE_NOTHROW(a.skip(0, 1));
+    REQUIRE_NOTHROW(a.skip(1, 1));
+    REQUIRE_NOTHROW(a.skip(2, 1));
+    REQUIRE_THROWS(a.skip(3, 1));
+    REQUIRE_THROWS(a.skip(100, 1));
+  }
+
   SECTION("throws when called on an empty array")
   {
     // there are no acceptable parameters that can be given to skip() when the
@@ -821,7 +835,7 @@ TEST_CASE("reshape()", "[narray]")
     REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
   }
 
-  SECTION("can always split single-dimensions into segments")
+  SECTION("can split single-dimensions into segments")
   {
     // arrange
     wilt::NArray<int, 2> a({ 14, 14 });
@@ -865,6 +879,34 @@ TEST_CASE("reshape()", "[narray]")
     REQUIRE(d.steps() == wilt::Point<2>({ -4, -2 }));
   }
 
+  SECTION("can combine repeated dimensions")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 14, 14 });
+    wilt::NArray<int, 4> b = a.repeat(7).repeat(2);
+
+    // act
+    wilt::NArray<int, 3> c = b.reshape<3>({ 14, 14, 14 });
+
+    // assert
+    REQUIRE(c.sizes() == wilt::Point<3>({ 14, 14, 14 }));
+    REQUIRE(c.steps() == wilt::Point<3>({ 14, 1, 0 }));
+  }
+
+  SECTION("can split a repeated dimension")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 14, 14 });
+    wilt::NArray<int, 3> b = a.repeat(14);
+
+    // act
+    wilt::NArray<int, 4> c = b.reshape<4>({ 14, 14, 7, 2 });
+
+    // assert
+    REQUIRE(c.sizes() == wilt::Point<4>({ 14, 14, 7, 2 }));
+    REQUIRE(c.steps() == wilt::Point<4>({ 14, 1, 0, 0 }));
+  }
+
   SECTION("creates an array that shares data")
   {
     // arrange
@@ -899,6 +941,17 @@ TEST_CASE("reshape()", "[narray]")
     REQUIRE_THROWS(a.reshape<2>({ 15, 14 }));
   }
 
+  SECTION("throws if dimension sizes are not positive")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 14, 14 });
+
+    // assert
+    REQUIRE_THROWS(a.reshape<2>({ 98, -2 }));
+    REQUIRE_THROWS(a.reshape<2>({ -7, 28 }));
+    REQUIRE_THROWS(a.reshape<2>({ -14, -14 }));
+  }
+
   SECTION("throws if attempting to combine dimensions that aren't uniform")
   {
     // arrange
@@ -909,39 +962,125 @@ TEST_CASE("reshape()", "[narray]")
     REQUIRE_THROWS(b.reshape<1>({ 144 }));
     REQUIRE_THROWS(b.reshape<2>({ 3, 48 }));
   }
-}
 
-TEST_CASE("testRepeatCreatesCorrectNArray", "[narray]")
-{
-  { // T=int N=1
-    wilt::NArray<int, 1> a({ 1 }, 5);
+  SECTION("throws when called on an empty array")
+  {
+    // arrange
+    wilt::NArray<int, 2> empty;
 
-    wilt::NArray<int, 2> b = a.repeat(100);
-    REQUIRE(b.size() == 100);
-    REQUIRE(b.sizes() == wilt::Point<2>({ 1, 100 }));
-    REQUIRE(b.steps() == wilt::Point<2>({ 1, 0 }));
-    REQUIRE(&b.at({ 0, 0 }) == &b.at({ 0, 99 }));
-
-    wilt::NArray<int, 1> c = a.repeat(100).sliceX(0);
-    REQUIRE(c.size() == 100);
-    REQUIRE(c.sizes() == wilt::Point<1>({ 100 }));
-    REQUIRE(c.steps() == wilt::Point<1>({ 0 }));
-    REQUIRE(&c.at({ 0 }) == &c.at({ 99 }));
-
-    wilt::NArray<int, 3> d = a.repeat(100).reshape<3>({ 1, 5, 20 }).transpose();
-    REQUIRE(d.size() == 100);
-    REQUIRE(d.sizes() == wilt::Point<3>({ 5, 1, 20 }));
-    REQUIRE(d.steps() == wilt::Point<3>({ 0, 1, 0 }));
-    REQUIRE(&d.at({ 0, 0, 0 }) == &d.at({ 4, 0, 19 }));
+    // assert
+    REQUIRE_THROWS(empty.reshape<1>({ 0 }));
+    REQUIRE_THROWS(empty.reshape<1>({ 5 }));
+    REQUIRE_THROWS(empty.reshape<2>({ 92, 2 }));
+    REQUIRE_THROWS(empty.reshape<3>({ 2, 0, 4 }));
   }
 }
 
-TEST_CASE("testWindowCreatesCorrectNArray", "[narray]")
+TEST_CASE("repeat()", "[narray]")
 {
+  SECTION("creates an array with the correct size")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 2, 3 });
+
+    // act
+    wilt::NArray<int, 3> b = a.repeat(4);
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.sizes() == wilt::Point<3>({ 2, 3, 4 }));
+    REQUIRE(b.steps() == wilt::Point<3>({ 3, 1, 0 }));
+  }
+
+  SECTION("creates an array that shares data")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 2, 3 });
+
+    // act
+    wilt::NArray<int, 3> b = a.repeat(4);
+
+    // assert
+    REQUIRE(b.shared());
+    REQUIRE(&b[0][0][0] == &a[0][0]);
+    REQUIRE(&b[0][1][0] == &a[0][1]);
+    REQUIRE(&b[1][0][0] == &a[1][0]);
+  }
+
+  SECTION("creates an array where each element of the repeated dimension refer to the same element")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 2, 3 });
+
+    // act
+    wilt::NArray<int, 3> b = a.repeat(4);
+
+    // assert
+    REQUIRE(&b[0][0][0] == &b[0][0][1]);
+    REQUIRE(&b[0][0][0] == &b[0][0][2]);
+    REQUIRE(&b[0][0][0] == &b[0][0][3]);
+  }
+
+  SECTION("throws when count is not positive")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 2, 3 });
+
+    // assert
+    REQUIRE_THROWS(a.repeat(0));
+    REQUIRE_THROWS(a.repeat(-1));
+    REQUIRE_THROWS(a.repeat(-100));
+  }
+
+  SECTION("throws when called on an empty array")
+  {
+    // if the array is empty, there's nothing to repeat
+
+    // arrange
+    wilt::NArray<int, 2> empty;
+
+    // assert
+    REQUIRE_THROWS(empty.repeat(5));
+  }
+}
+
+TEST_CASE("window()", "[narray]")
+{
+  SECTION("creates an array with the correct size")
+  {
+    // arrange
+    wilt::NArray<int, 1> a({ 10 });
+
+    // act
+    wilt::NArray<int, 2> b = a.window(0, 3);
+
+    // assert
+    REQUIRE(!b.empty());
+    REQUIRE(b.sizes() == wilt::Point<2>({ 8, 3 }));
+    REQUIRE(b.steps() == wilt::Point<2>({ 1, 1 }));
+  }
+
+  SECTION("creates an array that shares data")
+  {
+    // arrange
+    wilt::NArray<int, 1> a({ 10 });
+
+    // act
+    wilt::NArray<int, 2> b = a.window(0, 3);
+
+    // assert
+    REQUIRE(b.shared());
+    REQUIRE(&b[0][0] == &a[0]);
+    REQUIRE(&b[0][1] == &a[1]);
+    REQUIRE(&b[1][0] == &a[1]);
+    REQUIRE(&b[7][2] == &a[9]);
+  }
+
   { // T=int N=2
     wilt::NArray<int, 2> a({ 10, 10 }, 5);
 
     wilt::NArray<int, 4> b = a.windowX(3).windowY(3);
+
     REQUIRE(b.size() == 576);
     REQUIRE(b.sizes() == wilt::Point<4>({ 8, 8, 3, 3 }));
     REQUIRE(b.steps() == wilt::Point<4>({ 10, 1, 10, 1 }));
@@ -949,171 +1088,368 @@ TEST_CASE("testWindowCreatesCorrectNArray", "[narray]")
     REQUIRE(&b.at({ 0, 2, 0, 0 }) == &b.at({ 0, 0, 0, 2 }));
     REQUIRE(&b.at({ 7, 7, 0, 0 }) == &b.at({ 5, 5, 2, 2 }));
   }
+
+  SECTION("with dim=0 is identical to windowX()")
+  {
+    // arrange
+    wilt::NArray<int, 5> a({ 3, 4, 5, 6, 7 });
+
+    // assert
+    REQUIRE(a.window(0, 2) == a.windowX(2));
+    REQUIRE(a.window(0, 1) == a.windowX(1));
+  }
+
+  SECTION("with dim=1 is identical to windowY()")
+  {
+    // arrange
+    wilt::NArray<int, 5> a({ 3, 4, 5, 6, 7 });
+
+    // assert
+    REQUIRE(a.window(1, 2) == a.windowY(2));
+    REQUIRE(a.window(1, 1) == a.windowY(1));
+  }
+
+  SECTION("with dim=2 is identical to windowZ()")
+  {
+    // arrange
+    wilt::NArray<int, 5> a({ 3, 4, 5, 6, 7 });
+
+    // assert
+    REQUIRE(a.window(2, 2) == a.windowZ(2));
+    REQUIRE(a.window(2, 1) == a.windowZ(1));
+  }
+
+  SECTION("with dim=3 is identical to windowW()")
+  {
+    // arrange
+    wilt::NArray<int, 5> a({ 3, 4, 5, 6, 7 });
+
+    // assert
+    REQUIRE(a.window(3, 2) == a.windowW(2));
+    REQUIRE(a.window(3, 1) == a.windowW(1));
+  }
+
+  SECTION("throws if size is larger than dimension")
+  {
+    // arrange
+    wilt::NArray<int, 1> a({ 10 });
+
+    // assert
+    REQUIRE_NOTHROW(a.window(0, 2));
+    REQUIRE_NOTHROW(a.window(0, 10));
+    REQUIRE_THROWS(a.window(0, 11));
+    REQUIRE_THROWS(a.window(0, 100));
+  }
+
+  SECTION("throws if size is not positive")
+  {
+    // arrange
+    wilt::NArray<int, 1> a({ 10 });
+
+    // assert
+    REQUIRE_NOTHROW(a.window(0, 1));
+    REQUIRE_THROWS(a.window(0, 0));
+    REQUIRE_THROWS(a.window(0, -1));
+    REQUIRE_THROWS(a.window(0, -100));
+  }
+
+  SECTION("throws if dimension is larger than N")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 10, 10 });
+
+    // assert
+    REQUIRE_NOTHROW(a.window(0, 3));
+    REQUIRE_NOTHROW(a.window(1, 3));
+    REQUIRE_THROWS(a.window(2, 3));
+    REQUIRE_THROWS(a.window(100, 3));
+  }
+
+  SECTION("throws when called on an empty array")
+  {
+    // there are no acceptable parameters that can be given to window() when
+    // the array is empty
+
+    // arrange
+    wilt::NArray<int, 3> empty;
+
+    // assert
+    REQUIRE_THROWS(empty.window(0, 1));
+    REQUIRE_THROWS(empty.window(0, 0));
+    REQUIRE_THROWS(empty.window(1, 0));
+  }
 }
 
-TEST_CASE("testSubarraysIteratesCorrectly", "[narray]")
+TEST_CASE("subarrays()", "[narray]")
 {
+  SECTION("can iterate over elements")
   {
-    int count;
+    // arrange
     wilt::NArray<int, 3> a({ 2, 3, 4 }, 5);
 
-    count = 0;
-    for (auto arr : a.subarrays<2>()) {
-      REQUIRE((std::is_same<decltype(arr), wilt::NArray<int, 2>>::value));
-      REQUIRE(arr.size() == 12);
-      REQUIRE(arr.sizes() == wilt::Point<2>({ 3, 4 }));
-      count++;
-    }
-    REQUIRE(count == 2);
+    // act
+    auto subarrays = a.subarrays<0>();
 
-    count = 0;
-    for (auto arr : a.subarrays<1>()) {
+    // assert
+    for (auto arr : subarrays) {
+      REQUIRE((std::is_same<decltype(arr), int>::value));
+      REQUIRE(arr == 5);
+    }
+    REQUIRE(std::distance(subarrays.begin(), subarrays.end()) == 24);
+  }
+
+  SECTION("can iterate over subarrays")
+  {
+    // arrange
+    wilt::NArray<int, 3> a({ 2, 3, 4 }, 5);
+
+    // act
+    auto subarrays = a.subarrays<1>();
+
+    // assert
+    for (auto arr : subarrays) {
       REQUIRE((std::is_same<decltype(arr), wilt::NArray<int, 1>>::value));
       REQUIRE(arr.size() == 4);
       REQUIRE(arr.sizes() == wilt::Point<1>({ 4 }));
-      count++;
     }
-    REQUIRE(count == 6);
+    REQUIRE(std::distance(subarrays.begin(), subarrays.end()) == 6);
+  }
 
-    count = 0;
-    for (auto arr : a.subarrays<0>()) {
-      REQUIRE((std::is_same<decltype(arr), int>::value));
-      REQUIRE(arr == 5);
-      count++;
-    }
-    REQUIRE(count == 24);
+  SECTION("can iterate over an empty array")
+  {
+    // arrange
+    wilt::NArray<int, 3> a;
+
+    // act
+    auto subarrays = a.subarrays<1>();
+    for (auto arr : subarrays) {}
+
+    // assert
+    REQUIRE(std::distance(subarrays.begin(), subarrays.end()) == 0);
   }
 }
 
-TEST_CASE("testCompressCreatesCorrectNArray", "[narray]")
+TEST_CASE("compress()", "[narray]")
 {
-  { // T=int N=3
+  SECTION("creates smaller array using a function")
+  {
+    // arrange
     wilt::NArray<int, 3> a({ 2, 3, 4 }, 5);
 
+    // act
     wilt::NArray<int, 1> b = a.compress<1>([](wilt::NArray<int, 2> m) { return m[0][0] + 1; });
-    REQUIRE(b.size() == 2);
-    for (auto v : b)
-      REQUIRE(v == 6);
-
     wilt::NArray<int, 2> c = a.compress<2>([](wilt::NArray<int, 1> m) { return m[0] + 1; });
+
+    // assert
+    REQUIRE(b.size() == 2);
+    REQUIRE(b.sizes() == wilt::Point<1>({ 2 }));
     REQUIRE(c.size() == 6);
-    for (auto v : c)
-      REQUIRE(v == 6);
+    REQUIRE(c.sizes() == wilt::Point<2>({ 2, 3 }));
+    REQUIRE(std::all_of(b.begin(), b.end(), [](int v) { return v == 6; }));
+    REQUIRE(std::all_of(c.begin(), c.end(), [](int v) { return v == 6; }));
+  }
+
+  SECTION("creates an empty array when called on an empty array")
+  {
+    // arrange
+    wilt::NArray<int, 3> a;
+
+    // act
+    wilt::NArray<int, 2> b = a.compress<2>([](wilt::NArray<int, 1> m) { return m[0] + 1; });
+    wilt::NArray<int, 1> c = a.compress<1>([](wilt::NArray<int, 2> m) { return m[0][0] + 1; });
+
+    // assert
+    REQUIRE(b.empty());
+    REQUIRE(c.empty());
   }
 }
 
-TEST_CASE("testNArrayIteratorConstructor", "[narray]")
+TEST_CASE("NArray range constructor", "[narray]")
 {
-  { // T=int N=2 with smaller array
-    int data[] = { 1, 2, 3 };
+  SECTION("creates array with the correct size")
+  {
+    // arrange
+    int data[] = { 1, 2, 3, 4 };
 
+    // act
     wilt::NArray<int, 2> a({ 2, 2 }, std::begin(data), std::end(data));
-    REQUIRE(a[0][0] == 1);
-    REQUIRE(a[0][1] == 2);
-    REQUIRE(a[1][0] == 3);
-    REQUIRE(a[1][1] == 0);
+
+    // assert
+    REQUIRE(!a.empty());
+    REQUIRE(a.size() == 4);
+    REQUIRE(a.sizes() == wilt::Point<2>({ 2, 2 }));
+    REQUIRE(a.steps() == wilt::Point<2>({ 2, 1 }));
   }
 
-  { // T=int N=2 with larger array
+  SECTION("creates array with values from the iterator even when range is larger")
+  {
+    // arrange
     int data[] = { 1, 2, 3, 4, 5 };
+    Tracker tracker_data[5];
+    Tracker::reset();
 
+    // act
     wilt::NArray<int, 2> a({ 2, 2 }, std::begin(data), std::end(data));
+    wilt::NArray<Tracker, 2> b({ 2, 2 }, std::begin(tracker_data), std::end(tracker_data));
+
+    // assert
     REQUIRE(a[0][0] == 1);
     REQUIRE(a[0][1] == 2);
     REQUIRE(a[1][0] == 3);
     REQUIRE(a[1][1] == 4);
+    REQUIRE(Tracker::defaultConstructorCalls == 0);
+    REQUIRE(Tracker::copyConstructorCalls == 4);
+    REQUIRE(Tracker::moveConstructorCalls == 0);
   }
 
-  { // T=TrackDefault N=2 with smaller array
-    TrackDefault data[3];
+  SECTION("creates array with default values if range is too small")
+  {
+    // arrange
+    int data[] = { 1, 2, 3 };
+    Tracker tracker_data[3];
+    Tracker::reset();
 
-    TrackDefault::reset();
-    wilt::NArray<TrackDefault, 2> a({ 2, 2 }, std::begin(data), std::end(data));
-    REQUIRE(TrackDefault::count == 1);
-  }
+    // act
+    wilt::NArray<int, 2> a({ 2, 2 }, std::begin(data), std::end(data));
+    wilt::NArray<Tracker, 2> b({ 2, 2 }, std::begin(tracker_data), std::end(tracker_data));
 
-  { // T=TrackCopy N=2 with larger array
-    TrackCopy data[5];
-
-    TrackCopy::reset();
-    wilt::NArray<TrackCopy, 2> a({ 2, 2 }, std::begin(data), std::end(data));
-    REQUIRE(TrackCopy::count == 4);
-  }
-}
-
-TEST_CASE("testNArrayAddition", "[narray]")
-{
-  { // NArray<int, 2> + NArray<int, 2>
-    wilt::NArray<int, 2> a({ 5, 5 }, 1);
-    wilt::NArray<int, 2> b({ 5, 5 }, 2);
-
-    auto c = a + b;
-    REQUIRE((std::is_same<decltype(c), wilt::NArray<int, 2>>::value));
-    REQUIRE(c.sizes() == wilt::Point<2>({ 5, 5 }));
-    for (auto v : c)
-      REQUIRE(v == 3);
-  }
-
-  { // NArray<int, 2> + int
-    wilt::NArray<int, 2> a({ 5, 5 }, 1);
-
-    auto c = a + 2;
-    REQUIRE((std::is_same<decltype(c), wilt::NArray<int, 2>>::value));
-    REQUIRE(c.sizes() == wilt::Point<2>({ 5, 5 }));
-    for (auto v : c)
-      REQUIRE(v == 3);
-  }
-
-  { // int + NArray<int, 2>
-    wilt::NArray<int, 2> b({ 5, 5 }, 2);
-
-    auto c = 1 + b;
-    REQUIRE((std::is_same<decltype(c), wilt::NArray<int, 2>>::value));
-    REQUIRE(c.sizes() == wilt::Point<2>({ 5, 5 }));
-    for (auto v : c)
-      REQUIRE(v == 3);
-  }
-
-  { // NArray<int, 2> + NArray<double, 2>
-    wilt::NArray<int, 2> a({ 5, 5 }, 1);
-    wilt::NArray<double, 2> b({ 5, 5 }, 2.25);
-
-    auto c = a + b;
-    REQUIRE((std::is_same<decltype(c), wilt::NArray<double, 2>>::value));
-    REQUIRE(c.sizes() == wilt::Point<2>({ 5, 5 }));
-    for (auto v : c)
-      REQUIRE(v == 3.25);
-  }
-
-  { // NArray<int, 2> + double
-    wilt::NArray<int, 2> a({ 5, 5 }, 1);
-
-    auto c = a + 2.25;
-    REQUIRE((std::is_same<decltype(c), wilt::NArray<double, 2>>::value));
-    REQUIRE(c.sizes() == wilt::Point<2>({ 5, 5 }));
-    for (auto v : c)
-      REQUIRE(v == 3.25);
-  }
-
-  { // int + NArray<double, 2>
-    wilt::NArray<double, 2> b({ 5, 5 }, 2.25);
-
-    auto c = 1 + b;
-    REQUIRE((std::is_same<decltype(c), wilt::NArray<double, 2>>::value));
-    REQUIRE(c.sizes() == wilt::Point<2>({ 5, 5 }));
-    for (auto v : c)
-      REQUIRE(v == 3.25);
+    // assert
+    REQUIRE(a[0][0] == 1);
+    REQUIRE(a[0][1] == 2);
+    REQUIRE(a[1][0] == 3);
+    REQUIRE(a[1][1] == 0);
+    REQUIRE(Tracker::defaultConstructorCalls == 1);
+    REQUIRE(Tracker::copyConstructorCalls == 3);
+    REQUIRE(Tracker::moveConstructorCalls == 0);
   }
 }
 
-TEST_CASE("testMisc", "[narray]")
+TEST_CASE("NArray operator+()", "[narray]")
 {
-  { // test that window+skip can give the same result as a reshape+transpose
-    auto arr = wilt::NArray<int, 2>({ 9, 16 }, 1);
-    auto a = arr.reshape<4>({ 3, 3, 4, 4 }).transpose(1, 2);
-    auto b = arr.windowX(3).windowY(4).skipX(3).skipY(4);
-    REQUIRE(b.sizes() == a.sizes());
-    REQUIRE(b.steps() == a.steps());
-    REQUIRE(b == a);
+  SECTION("can add array to array element-wise")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 5, 5 }, 1);
+    wilt::NArray<int, 2> b({ 5, 5 }, 2);
+    wilt::NArray<double, 2> c({ 5, 5 }, 2.25);
+
+    // act
+    auto d = a + b;
+    auto e = a + c;
+
+    // assert
+    REQUIRE((std::is_same<decltype(d), wilt::NArray<int, 2>>::value));
+    REQUIRE(d.sizes() == wilt::Point<2>({ 5, 5 }));
+    REQUIRE(std::all_of(d.begin(), d.end(), [](int v) { return v == 3; }));
+    REQUIRE((std::is_same<decltype(e), wilt::NArray<double, 2>>::value));
+    REQUIRE(e.sizes() == wilt::Point<2>({ 5, 5 }));
+    REQUIRE(std::all_of(e.begin(), e.end(), [](double v) { return v == 3.25; }));
   }
+
+  SECTION("creates empty array when called with empty arrays")
+  {
+    // arrange
+    wilt::NArray<int, 2> a;
+    wilt::NArray<int, 2> b;
+
+    // act
+    auto c = a + b;
+
+    // assert
+    REQUIRE(c.empty());
+  }
+
+  SECTION("throws if array dimensions don't match")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 5, 5 }, 1);
+    wilt::NArray<int, 2> b({ 5, 4 }, 2);
+    wilt::NArray<int, 2> c({ 4, 5 }, 2);
+    wilt::NArray<int, 2> empty;
+
+    // assert
+    REQUIRE_THROWS(a + b);
+    REQUIRE_THROWS(a + c);
+    REQUIRE_THROWS(b + c);
+    REQUIRE_THROWS(a + empty);
+  }
+
+  SECTION("can add array to value")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 5, 5 }, 1);
+
+    // act
+    auto d = a + 2;
+    auto e = a + 2.25;
+
+    // assert
+    REQUIRE((std::is_same<decltype(d), wilt::NArray<int, 2>>::value));
+    REQUIRE(d.sizes() == wilt::Point<2>({ 5, 5 }));
+    REQUIRE(std::all_of(d.begin(), d.end(), [](int v) { return v == 3; }));
+    REQUIRE((std::is_same<decltype(e), wilt::NArray<double, 2>>::value));
+    REQUIRE(e.sizes() == wilt::Point<2>({ 5, 5 }));
+    REQUIRE(std::all_of(e.begin(), e.end(), [](double v) { return v == 3.25; }));
+  }
+
+  SECTION("creates empty array when called with an empty array")
+  {
+    // arrange
+    wilt::NArray<int, 2> a;
+
+    // act
+    auto d = a + 2;
+    auto e = a + 2.25;
+
+    // assert
+    REQUIRE(d.empty());
+    REQUIRE(e.empty());
+  }
+
+  SECTION("can add value to array")
+  {
+    // arrange
+    wilt::NArray<int, 2> a({ 5, 5 }, 1);
+
+    // act
+    auto d = 2 + a;
+    auto e = 2.25 + a;
+
+    // assert
+    REQUIRE((std::is_same<decltype(d), wilt::NArray<int, 2>>::value));
+    REQUIRE(d.sizes() == wilt::Point<2>({ 5, 5 }));
+    REQUIRE(std::all_of(d.begin(), d.end(), [](int v) { return v == 3; }));
+    REQUIRE((std::is_same<decltype(e), wilt::NArray<double, 2>>::value));
+    REQUIRE(e.sizes() == wilt::Point<2>({ 5, 5 }));
+    REQUIRE(std::all_of(e.begin(), e.end(), [](double v) { return v == 3.25; }));
+  }
+
+  SECTION("creates empty array when called with an empty array")
+  {
+    // arrange
+    wilt::NArray<int, 2> a;
+
+    // act
+    auto d = 2 + a;
+    auto e = 2.25 + a;
+
+    // assert
+    REQUIRE(d.empty());
+    REQUIRE(e.empty());
+  }
+}
+
+TEST_CASE("window()+skip() can give the same result as a reshape()+transpose()", "[narray]")
+{
+  // arrange
+  auto arr = wilt::NArray<int, 2>({ 9, 16 }, 1);
+
+  // act
+  auto a = arr.reshape<4>({ 3, 3, 4, 4 }).transpose(1, 2);
+  auto b = arr.windowX(3).windowY(4).skipX(3).skipY(4);
+
+  // assert
+  REQUIRE(b.sizes() == a.sizes());
+  REQUIRE(b.steps() == a.steps());
+  REQUIRE(b == a);
 }

@@ -311,7 +311,7 @@ namespace wilt
       pos_t diff = 0;
       for (int i = 0; i < N-M; ++i)
       {
-        diff *= sizes[i];
+        diff *= array_->sizes()[i];
         diff += (position_[i] - iter.position_[i]);
       }
       return diff;
