@@ -269,6 +269,10 @@ namespace wilt
 
     // Gets the element at that location.
     reference at(const Point<N>& loc) const;
+    reference at(pos_t p1) const;
+    reference at(pos_t p1, pos_t p2) const;
+    reference at(pos_t p1, pos_t p2, pos_t p3) const;
+    reference at(pos_t p1, pos_t p2, pos_t p3, pos_t p4) const;
 
     // Indexing operator, will return an N-1 NArray at the location 'x' along
     // the 0th dimension.
@@ -1130,6 +1134,38 @@ namespace detail
         ptr += loc[i] * steps_[i];
 
     return *ptr;
+  }
+
+  template<class T, std::size_t N>
+  typename NArray<T, N>::reference NArray<T, N>::at(pos_t p1) const
+  {
+    static_assert(N == 1, "at(p1): invalid when N != 1");
+
+    return at({ p1 });
+  }
+
+  template<class T, std::size_t N>
+  typename NArray<T, N>::reference NArray<T, N>::at(pos_t p1, pos_t p2) const
+  {
+    static_assert(N == 2, "at(p1, p2): invalid when N != 2");
+
+    return at({ p1, p2 });
+  }
+
+  template<class T, std::size_t N>
+  typename NArray<T, N>::reference NArray<T, N>::at(pos_t p1, pos_t p2, pos_t p3) const
+  {
+    static_assert(N == 3, "at(p1, p2, p3): invalid when N != 3");
+
+    return at({ p1, p2, p3 });
+  }
+
+  template<class T, std::size_t N>
+  typename NArray<T, N>::reference NArray<T, N>::at(pos_t p1, pos_t p2, pos_t p3, pos_t p4) const
+  {
+    static_assert(N == 4, "at(p1, p2, p3, p4): invalid when N != 4");
+
+    return at({ p1, p2, p3, p4 });
   }
 
   template <class T, std::size_t N>
