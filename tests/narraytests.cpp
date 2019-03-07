@@ -147,8 +147,8 @@ TEST_CASE("NArray<T, N>(arr) creates an array of the correct size")
   REQUIRE(!b.empty());
   REQUIRE(b.shared());
   REQUIRE(b.size() == 6);
-  REQUIRE(b.sizes() == wilt::Point<2>({ 3, 2 }));
-  REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<2>(3, 2));
+  REQUIRE(b.steps() == wilt::Point<2>(2, 1));
 }
 
 TEST_CASE("NArray<T, N>(arr) creates an array that uses the same shared data")
@@ -217,8 +217,8 @@ TEST_CASE("NArray<const T, N>(arr) creates an array of the correct size")
   REQUIRE(!b.empty());
   REQUIRE(b.shared());
   REQUIRE(b.size() == 6);
-  REQUIRE(b.sizes() == wilt::Point<2>({ 3, 2 }));
-  REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<2>(3, 2));
+  REQUIRE(b.steps() == wilt::Point<2>(2, 1));
 }
 
 TEST_CASE("NArray<const T, N>(arr) creates an array that uses the same shared data")
@@ -283,8 +283,8 @@ TEST_CASE("NArray<T, N>(size) creates a sized 1-dimensional array")
   // assert
   REQUIRE(!a.empty());
   REQUIRE(a.size() == 3);
-  REQUIRE(a.sizes() == wilt::Point<1>({ 3 }));
-  REQUIRE(a.steps() == wilt::Point<1>({ 1 }));
+  REQUIRE(a.sizes() == wilt::Point<1>(3));
+  REQUIRE(a.steps() == wilt::Point<1>(1));
 }
 
 TEST_CASE("NArray<T, N>(size) creates a sized 2-dimensional array")
@@ -295,8 +295,8 @@ TEST_CASE("NArray<T, N>(size) creates a sized 2-dimensional array")
   // assert
   REQUIRE(!a.empty());
   REQUIRE(a.size() == 6);
-  REQUIRE(a.sizes() == wilt::Point<2>({ 3, 2 }));
-  REQUIRE(a.steps() == wilt::Point<2>({ 2, 1 }));
+  REQUIRE(a.sizes() == wilt::Point<2>(3, 2));
+  REQUIRE(a.steps() == wilt::Point<2>(2, 1));
 }
 
 TEST_CASE("NArray<T, N>(size) creates a sized 5-dimensional array")
@@ -307,8 +307,8 @@ TEST_CASE("NArray<T, N>(size) creates a sized 5-dimensional array")
   // assert
   REQUIRE(!a.empty());
   REQUIRE(a.size() == 210);
-  REQUIRE(a.sizes() == wilt::Point<5>({ 3, 2, 5, 1, 7 }));
-  REQUIRE(a.steps() == wilt::Point<5>({ 70, 35, 7, 7, 1 }));
+  REQUIRE(a.sizes() == wilt::Point<5>(3, 2, 5, 1, 7));
+  REQUIRE(a.steps() == wilt::Point<5>(70, 35, 7, 7, 1));
 }
 
 TEST_CASE("NArray<T, N>(size) default constructs elements equal to the constructed size")
@@ -322,7 +322,7 @@ TEST_CASE("NArray<T, N>(size) default constructs elements equal to the construct
   // assert
   REQUIRE(!a.empty());
   REQUIRE(a.size() == 210);
-  REQUIRE(a.sizes() == wilt::Point<5>({ 3, 2, 5, 1, 7 }));
+  REQUIRE(a.sizes() == wilt::Point<5>(3, 2, 5, 1, 7));
   REQUIRE(Tracker::defaultConstructorCalls == 210);
   REQUIRE(Tracker::copyConstructorCalls == 0);
   REQUIRE(Tracker::moveConstructorCalls == 0);
@@ -360,8 +360,8 @@ TEST_CASE("NArray<T, N>(size, val) creates a sized 1-dimensional array with the 
   // assert
   REQUIRE(!a.empty());
   REQUIRE(a.size() == 3);
-  REQUIRE(a.sizes() == wilt::Point<1>({ 3 }));
-  REQUIRE(a.steps() == wilt::Point<1>({ 1 }));
+  REQUIRE(a.sizes() == wilt::Point<1>(3));
+  REQUIRE(a.steps() == wilt::Point<1>(1));
   REQUIRE(a[0] == 1);
   REQUIRE(a[1] == 1);
   REQUIRE(a[2] == 1);
@@ -375,8 +375,8 @@ TEST_CASE("NArray<T, N>(size, val) creates a sized 2-dimensional array with the 
   // assert
   REQUIRE(!a.empty());
   REQUIRE(a.size() == 6);
-  REQUIRE(a.sizes() == wilt::Point<2>({ 3, 2 }));
-  REQUIRE(a.steps() == wilt::Point<2>({ 2, 1 }));
+  REQUIRE(a.sizes() == wilt::Point<2>(3, 2));
+  REQUIRE(a.steps() == wilt::Point<2>(2, 1));
   REQUIRE(a[0][0] == 1);
   REQUIRE(a[0][1] == 1);
   REQUIRE(a[1][0] == 1);
@@ -397,7 +397,7 @@ TEST_CASE("NArray<T, N>(size, val) copy constructs elements equal to the constru
   // assert
   REQUIRE(!a.empty());
   REQUIRE(a.size() == 3);
-  REQUIRE(a.sizes() == wilt::Point<1>({ 3 }));
+  REQUIRE(a.sizes() == wilt::Point<1>(3));
   REQUIRE(Tracker::defaultConstructorCalls == 0);
   REQUIRE(Tracker::copyConstructorCalls == 3);
   REQUIRE(Tracker::moveConstructorCalls == 0);
@@ -438,8 +438,8 @@ TEST_CASE("NArray<T, N>(size, first, last) creates array with the correct size")
   // assert
   REQUIRE(!a.empty());
   REQUIRE(a.size() == 4);
-  REQUIRE(a.sizes() == wilt::Point<2>({ 2, 2 }));
-  REQUIRE(a.steps() == wilt::Point<2>({ 2, 1 }));
+  REQUIRE(a.sizes() == wilt::Point<2>(2, 2));
+  REQUIRE(a.steps() == wilt::Point<2>(2, 1));
 }
 
 TEST_CASE("NArray<T, N>(size, first, last) creates array with values from the iterator even when range is larger")
@@ -578,14 +578,14 @@ TEST_CASE("skip(dim, n, start) creates an array of the correct size")
   wilt::NArray<int, 1> e = a.skip(0, 1, 2);
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<1>({ 3 }));
-  REQUIRE(b.steps() == wilt::Point<1>({ 2 }));
-  REQUIRE(c.sizes() == wilt::Point<1>({ 2 }));
-  REQUIRE(c.steps() == wilt::Point<1>({ 2 }));
-  REQUIRE(d.sizes() == wilt::Point<1>({ 5 }));
-  REQUIRE(d.steps() == wilt::Point<1>({ 1 }));
-  REQUIRE(e.sizes() == wilt::Point<1>({ 3 }));
-  REQUIRE(e.steps() == wilt::Point<1>({ 1 }));
+  REQUIRE(b.sizes() == wilt::Point<1>(3));
+  REQUIRE(b.steps() == wilt::Point<1>(2));
+  REQUIRE(c.sizes() == wilt::Point<1>(2));
+  REQUIRE(c.steps() == wilt::Point<1>(2));
+  REQUIRE(d.sizes() == wilt::Point<1>(5));
+  REQUIRE(d.steps() == wilt::Point<1>(1));
+  REQUIRE(e.sizes() == wilt::Point<1>(3));
+  REQUIRE(e.steps() == wilt::Point<1>(1));
 }
 
 TEST_CASE("skip(dim, n, start) creates an array that shares data")
@@ -756,7 +756,7 @@ TEST_CASE("subarrays() can iterate over subarrays")
   for (auto arr : subarrays) {
     REQUIRE((std::is_same<decltype(arr), wilt::NArray<int, 1>>::value));
     REQUIRE(arr.size() == 4);
-    REQUIRE(arr.sizes() == wilt::Point<1>({ 4 }));
+    REQUIRE(arr.sizes() == wilt::Point<1>(4));
   }
   REQUIRE(std::distance(subarrays.begin(), subarrays.end()) == 6);
 }
@@ -783,8 +783,8 @@ TEST_CASE("reshape(size) creates an array with the correct size")
   wilt::NArray<int, 2> b = a.reshape<2>({ 98, 2 });
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<2>({ 98, 2 }));
-  REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<2>(98, 2));
+  REQUIRE(b.steps() == wilt::Point<2>(2, 1));
 }
 
 TEST_CASE("reshape(size) can split single-dimensions into segments")
@@ -797,8 +797,8 @@ TEST_CASE("reshape(size) can split single-dimensions into segments")
   wilt::NArray<int, 4> c = b.reshape<4>({ 4, 3, 4, 3 });
 
   // assert
-  REQUIRE(c.sizes() == wilt::Point<4>({ 4, 3, 4, 3 }));
-  REQUIRE(c.steps() == wilt::Point<4>({ 42, 14, 3, 1 }));
+  REQUIRE(c.sizes() == wilt::Point<4>(4, 3, 4, 3));
+  REQUIRE(c.steps() == wilt::Point<4>(42, 14, 3, 1));
 }
 
 TEST_CASE("reshape(size) can always add dimensions of size 1")
@@ -810,8 +810,8 @@ TEST_CASE("reshape(size) can always add dimensions of size 1")
   wilt::NArray<int, 5> b = a.reshape<5>({ 1, 98, 1, 2, 1 });
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<5>({ 1, 98, 1, 2, 1 }));
-  REQUIRE(b.steps() == wilt::Point<5>({ 196, 2, 2, 1, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<5>(1, 98, 1, 2, 1));
+  REQUIRE(b.steps() == wilt::Point<5>(196, 2, 2, 1, 1));
 }
 
 TEST_CASE("reshape(size) can combine dimensions if underlying access is uniform")
@@ -825,10 +825,10 @@ TEST_CASE("reshape(size) can combine dimensions if underlying access is uniform"
   wilt::NArray<int, 2> d = b.reshape<2>({ 49, 2 });
 
   // assert
-  REQUIRE(c.sizes() == wilt::Point<1>({ 196 }));
-  REQUIRE(c.steps() == wilt::Point<1>({ 1 }));
-  REQUIRE(d.sizes() == wilt::Point<2>({ 49, 2 }));
-  REQUIRE(d.steps() == wilt::Point<2>({ -4, -2 }));
+  REQUIRE(c.sizes() == wilt::Point<1>(196));
+  REQUIRE(c.steps() == wilt::Point<1>(1));
+  REQUIRE(d.sizes() == wilt::Point<2>(49, 2));
+  REQUIRE(d.steps() == wilt::Point<2>(-4, -2));
 }
 
 TEST_CASE("reshape(size) can combine repeated dimensions")
@@ -841,8 +841,8 @@ TEST_CASE("reshape(size) can combine repeated dimensions")
   wilt::NArray<int, 3> c = b.reshape<3>({ 14, 14, 14 });
 
   // assert
-  REQUIRE(c.sizes() == wilt::Point<3>({ 14, 14, 14 }));
-  REQUIRE(c.steps() == wilt::Point<3>({ 14, 1, 0 }));
+  REQUIRE(c.sizes() == wilt::Point<3>(14, 14, 14));
+  REQUIRE(c.steps() == wilt::Point<3>(14, 1, 0));
 }
 
 TEST_CASE("reshape(size) can split a repeated dimension")
@@ -855,8 +855,8 @@ TEST_CASE("reshape(size) can split a repeated dimension")
   wilt::NArray<int, 4> c = b.reshape<4>({ 14, 14, 7, 2 });
 
   // assert
-  REQUIRE(c.sizes() == wilt::Point<4>({ 14, 14, 7, 2 }));
-  REQUIRE(c.steps() == wilt::Point<4>({ 14, 1, 0, 0 }));
+  REQUIRE(c.sizes() == wilt::Point<4>(14, 14, 7, 2));
+  REQUIRE(c.steps() == wilt::Point<4>(14, 1, 0, 0));
 }
 
 TEST_CASE("reshape(size) creates an array that shares data")
@@ -937,8 +937,8 @@ TEST_CASE("repeat(n) creates an array with the correct size")
 
   // assert
   REQUIRE(!b.empty());
-  REQUIRE(b.sizes() == wilt::Point<3>({ 2, 3, 4 }));
-  REQUIRE(b.steps() == wilt::Point<3>({ 3, 1, 0 }));
+  REQUIRE(b.sizes() == wilt::Point<3>(2, 3, 4));
+  REQUIRE(b.steps() == wilt::Point<3>(3, 1, 0));
 }
 
 TEST_CASE("repeat(n) creates an array that shares data")
@@ -1002,8 +1002,8 @@ TEST_CASE("window(dim, n) creates an array with the correct size")
 
   // assert
   REQUIRE(!b.empty());
-  REQUIRE(b.sizes() == wilt::Point<2>({ 8, 3 }));
-  REQUIRE(b.steps() == wilt::Point<2>({ 1, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<2>(8, 3));
+  REQUIRE(b.steps() == wilt::Point<2>(1, 1));
 }
 
 TEST_CASE("window(dim, n) creates an array that shares data")
@@ -1119,8 +1119,8 @@ TEST_CASE("asCondensed() creates fully-condensed array from uniform array")
   wilt::NArray<int, 3> b = a.asCondensed();
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<3>({ 1, 1, 24 }));
-  REQUIRE(b.steps() == wilt::Point<3>({ 24, 24, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<3>(1, 1, 24));
+  REQUIRE(b.steps() == wilt::Point<3>(24, 24, 1));
 }
 
 TEST_CASE("asCondensed() creates fully-condensed array from reverse-uniform array")
@@ -1133,8 +1133,8 @@ TEST_CASE("asCondensed() creates fully-condensed array from reverse-uniform arra
   wilt::NArray<int, 3> b = transformed.asCondensed();
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<3>({ 1, 1, 24 }));
-  REQUIRE(b.steps() == wilt::Point<3>({ 24, 24, -1 }));
+  REQUIRE(b.sizes() == wilt::Point<3>(1, 1, 24));
+  REQUIRE(b.steps() == wilt::Point<3>(24, 24, -1));
 }
 
 TEST_CASE("asCondensed() creates fully-condensed array from skipped array")
@@ -1147,8 +1147,8 @@ TEST_CASE("asCondensed() creates fully-condensed array from skipped array")
   wilt::NArray<int, 3> b = transformed.asCondensed();
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<3>({ 1, 1, 12 }));
-  REQUIRE(b.steps() == wilt::Point<3>({ 24, 24, 2 }));
+  REQUIRE(b.sizes() == wilt::Point<3>(1, 1, 12));
+  REQUIRE(b.steps() == wilt::Point<3>(24, 24, 2));
 }
 
 TEST_CASE("asCondensed() creates partially-condensed array due to a flipped end dimension")
@@ -1161,8 +1161,8 @@ TEST_CASE("asCondensed() creates partially-condensed array due to a flipped end 
   wilt::NArray<int, 3> b = transformed.asCondensed();
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<3>({ 1, 2, 12 }));
-  REQUIRE(b.steps() == wilt::Point<3>({ 24, -12, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<3>(1, 2, 12));
+  REQUIRE(b.steps() == wilt::Point<3>(24, -12, 1));
 }
 
 TEST_CASE("asCondensed() creates non-condensed array due to a flipped middle dimension")
@@ -1175,8 +1175,8 @@ TEST_CASE("asCondensed() creates non-condensed array due to a flipped middle dim
   wilt::NArray<int, 3> b = transformed.asCondensed();
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<3>({ 2, 3, 4 }));
-  REQUIRE(b.steps() == wilt::Point<3>({ 12, -4, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<3>(2, 3, 4));
+  REQUIRE(b.steps() == wilt::Point<3>(12, -4, 1));
 }
 
 TEST_CASE("asCondensed() creates non-condensed array due to a sub-ranges")
@@ -1189,8 +1189,8 @@ TEST_CASE("asCondensed() creates non-condensed array due to a sub-ranges")
   wilt::NArray<int, 3> b = transformed.asCondensed();
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<3>({ 1, 2, 3 }));
-  REQUIRE(b.steps() == wilt::Point<3>({ 12, 4, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<3>(1, 2, 3));
+  REQUIRE(b.steps() == wilt::Point<3>(12, 4, 1));
 }
 
 TEST_CASE("asCondensed() creates partially-condensed array with repeated elements at the end")
@@ -1203,8 +1203,8 @@ TEST_CASE("asCondensed() creates partially-condensed array with repeated element
   wilt::NArray<int, 5> b = transformed.asCondensed();
 
   // assert
-  REQUIRE(b.sizes() == wilt::Point<5>({ 1, 1, 1, 24, 30 }));
-  REQUIRE(b.steps() == wilt::Point<5>({ 24, 24, 24, 1, 0 }));
+  REQUIRE(b.sizes() == wilt::Point<5>(1, 1, 1, 24, 30));
+  REQUIRE(b.steps() == wilt::Point<5>(24, 24, 24, 1, 0));
 }
 
 TEST_CASE("asCondensed() creates an empty array when called on an empty array")
@@ -1233,8 +1233,8 @@ TEST_CASE("clone() creates an array of the correct size")
   // assert
   REQUIRE(!b.empty());
   REQUIRE(b.size() == 6);
-  REQUIRE(b.sizes() == wilt::Point<2>({ 3, 2 }));
-  REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<2>(3, 2));
+  REQUIRE(b.steps() == wilt::Point<2>(2, 1));
 }
 
 TEST_CASE("clone() creates an array that does not share elements")
@@ -1296,8 +1296,8 @@ TEST_CASE("clone() creates a non-const array from a const array")
   // assert
   REQUIRE(!b.empty());
   REQUIRE(b.size() == 6);
-  REQUIRE(b.sizes() == wilt::Point<2>({ 3, 2 }));
-  REQUIRE(b.steps() == wilt::Point<2>({ 2, 1 }));
+  REQUIRE(b.sizes() == wilt::Point<2>(3, 2));
+  REQUIRE(b.steps() == wilt::Point<2>(2, 1));
 }
 
 TEST_CASE("compress(compressor) creates smaller array using a function")
@@ -1345,10 +1345,10 @@ TEST_CASE("operator+(arr, arr) can add array to array element-wise")
 
   // assert
   REQUIRE((std::is_same<decltype(d), wilt::NArray<int, 2>>::value));
-  REQUIRE(d.sizes() == wilt::Point<2>({ 5, 5 }));
+  REQUIRE(d.sizes() == wilt::Point<2>(5, 5));
   REQUIRE(std::all_of(d.begin(), d.end(), [](int v) { return v == 3; }));
   REQUIRE((std::is_same<decltype(e), wilt::NArray<double, 2>>::value));
-  REQUIRE(e.sizes() == wilt::Point<2>({ 5, 5 }));
+  REQUIRE(e.sizes() == wilt::Point<2>(5, 5));
   REQUIRE(std::all_of(e.begin(), e.end(), [](double v) { return v == 3.25; }));
 }
 
@@ -1391,10 +1391,10 @@ TEST_CASE("operator+(arr, value) can add array to value")
 
   // assert
   REQUIRE((std::is_same<decltype(d), wilt::NArray<int, 2>>::value));
-  REQUIRE(d.sizes() == wilt::Point<2>({ 5, 5 }));
+  REQUIRE(d.sizes() == wilt::Point<2>(5, 5));
   REQUIRE(std::all_of(d.begin(), d.end(), [](int v) { return v == 3; }));
   REQUIRE((std::is_same<decltype(e), wilt::NArray<double, 2>>::value));
-  REQUIRE(e.sizes() == wilt::Point<2>({ 5, 5 }));
+  REQUIRE(e.sizes() == wilt::Point<2>(5, 5));
   REQUIRE(std::all_of(e.begin(), e.end(), [](double v) { return v == 3.25; }));
 }
 
@@ -1423,10 +1423,10 @@ TEST_CASE("operator+(value, arr) can add value to array")
 
   // assert
   REQUIRE((std::is_same<decltype(d), wilt::NArray<int, 2>>::value));
-  REQUIRE(d.sizes() == wilt::Point<2>({ 5, 5 }));
+  REQUIRE(d.sizes() == wilt::Point<2>(5, 5));
   REQUIRE(std::all_of(d.begin(), d.end(), [](int v) { return v == 3; }));
   REQUIRE((std::is_same<decltype(e), wilt::NArray<double, 2>>::value));
-  REQUIRE(e.sizes() == wilt::Point<2>({ 5, 5 }));
+  REQUIRE(e.sizes() == wilt::Point<2>(5, 5));
   REQUIRE(std::all_of(e.begin(), e.end(), [](double v) { return v == 3.25; }));
 }
 

@@ -52,17 +52,11 @@ namespace wilt
       data_.fill(0);
     }
 
-    //! @brief      Value constructor. 
-    //! @param[in]  list - initializer list to copy from
-    //! @exception  std::exception if list size doesn't match dimensions
-    Point(std::initializer_list<pos_t> list)
+    template <class... Args, typename std::enable_if<sizeof...(Args) == N, int>::type* = nullptr>
+    Point(Args... args)
+      : data_{ args... }
     {
-      if (list.size() != N)
-        throw std::invalid_argument("Initializer list must match dimensions");
 
-      auto iter = list.begin();
-      for (std::size_t i = 0; i < N; ++i, ++iter)
-        data_[i] = *iter;
     }
 
     //! @brief      Copy constructor
