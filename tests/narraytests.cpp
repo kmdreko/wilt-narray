@@ -29,6 +29,8 @@
 
 #include <cassert>
 #include <algorithm>
+#include <chrono>
+#include <iostream>
 
 #include "../wilt-narray/narray.hpp"
 
@@ -1458,3 +1460,214 @@ TEST_CASE("window()+skip() can give the same result as a reshape()+transpose()")
   REQUIRE(b.steps() == a.steps());
   REQUIRE(b == a);
 }
+
+int usingIterator(const wilt::NArray<int, 3>& arr)
+{
+  int sum = 0;
+  for (int v : arr)
+    sum += v;
+  return sum;
+}
+
+int usingIterator(const wilt::NArray<int, 1>& arr)
+{
+  int sum = 0;
+  for (int v : arr)
+    sum += v;
+  return sum;
+}
+
+int usingBrackets(const wilt::NArray<int, 3>& arr)
+{
+  int sum = 0;
+  for (int x = 0; x < arr.width(); ++x)
+    for (int y = 0; y < arr.height(); ++y)
+      for (int z = 0; z < arr.height(); ++z)
+        sum += arr[x][y][z];
+  return sum;
+}
+
+int usingBrackets(const wilt::NArray<int, 1>& arr)
+{
+  int sum = 0;
+  for (int x = 0; x < arr.width(); ++x)
+    sum += arr[x];
+  return sum;
+}
+
+int usingAt(const wilt::NArray<int, 3>& arr)
+{
+  int sum = 0;
+  for (int x = 0; x < arr.width(); ++x)
+    for (int y = 0; y < arr.height(); ++y)
+      for (int z = 0; z < arr.height(); ++z)
+        sum += arr.atUnchecked(wilt::Point<3>(x, y, z));
+  return sum;
+}
+
+int usingAt(const wilt::NArray<int, 1>& arr)
+{
+  int sum = 0;
+  for (int x = 0; x < arr.width(); ++x)
+    sum += arr.atUnchecked(wilt::Point<1>(x));
+  return sum;
+}
+
+int usingRaw(const wilt::NArray<int, 3>& arr)
+{
+  int sum = 0;
+  int* base = arr.base();
+  for (int x = 0; x < arr.width(); ++x)
+  {
+    int* basex = base + x * arr.steps()[0];
+    for (int y = 0; y < arr.height(); ++y)
+    {
+      int* basey = basex + y * arr.steps()[1];
+      for (int z = 0; z < arr.height(); ++z)
+      {
+        int* basez = basey + z * arr.steps()[2];
+        sum += *basez;
+      }
+    }
+  }
+  return sum;
+}
+
+int usingRaw(const wilt::NArray<int, 1>& arr)
+{
+  int sum = 0;
+  int* base = arr.base();
+  for (int x = 0; x < arr.width(); ++x)
+  {
+    int* basex = base + x * arr.steps()[0];
+    sum += *basex;
+  }
+  return sum;
+}
+
+TEST_CASE("iteration performance comparisons (N=3)")
+{
+  // arrange
+  wilt::NArray<int, 3> arr = wilt::NArray<int, 3>({ 100, 100, 100 }, 1);
+  const int iterations = 10;
+
+  SECTION("using iterator")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingIterator(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "iterator: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == 1000000 * iterations);
+  }
+
+  SECTION("using brackets")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingBrackets(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "brackets: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == 1000000 * iterations);
+  }
+
+  SECTION("using at")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingAt(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "fun at(): " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == 1000000 * iterations);
+  }
+
+  SECTION("using raw")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingRaw(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "raw math: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == 1000000 * iterations);
+  }
+}
+
+TEST_CASE("iteration performance comparisons (N=1)")
+{
+  // arrange
+  wilt::NArray<int, 1> arr = wilt::NArray<int, 1>({ 1000000 }, 1);
+  const int iterations = 2;
+
+  SECTION("using iterator")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingIterator(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "iterator: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == 1000000 * iterations);
+  }
+
+  SECTION("using brackets")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingBrackets(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "brackets: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == 1000000 * iterations);
+  }
+
+  SECTION("using at")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingAt(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "fun at(): " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == 1000000 * iterations);
+  }
+
+  SECTION("using raw")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingRaw(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "raw math: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == 1000000 * iterations);
+  }
+}
+
