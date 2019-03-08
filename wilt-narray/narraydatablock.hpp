@@ -76,10 +76,10 @@ namespace detail
         alloc_(),
         owned_(true)
     {
-      data_ = alloc_.allocate(size);
+      data_ = std::allocator_traits<A>::allocate(alloc_, size);
       if (!std::is_trivially_default_constructible<T>::value)
         for (std::size_t i = 0; i < size; ++i)
-          alloc_.construct(data_ + i);
+          std::allocator_traits<A>::construct(alloc_, data_ + i);
     }
 
     NArrayDataBlock(std::size_t size, const T& val)
@@ -88,9 +88,9 @@ namespace detail
         alloc_(),
         owned_(true)
     {
-      data_ = alloc_.allocate(size);
+      data_ = std::allocator_traits<A>::allocate(alloc_, size);
       for (std::size_t i = 0; i < size; ++i)
-        alloc_.construct(data_ + i, val);
+        std::allocator_traits<A>::construct(alloc_, data_ + i, val);
     }
 
     NArrayDataBlock(std::size_t size, T* data, NArrayDataAcquireType atype)
@@ -105,9 +105,9 @@ namespace detail
         data_ = data;
         break;
       case wilt::COPY:
-        data_ = alloc_.allocate(size);
+        data_ = std::allocator_traits<A>::allocate(alloc_, size);
         for (size_t i = 0; i < size; ++i)
-          alloc_.construct(data_ + i, data[i]);
+          std::allocator_traits<A>::construct(alloc_, data_ + i, data[i]);
         break;
       case wilt::REFERENCE:
         data_ = data;
@@ -123,9 +123,9 @@ namespace detail
         alloc_(),
         owned_(true)
     {
-      data_ = alloc_.allocate(size);
+      data_ = std::allocator_traits<A>::allocate(alloc_, size);
       for (std::size_t i = 0; i < size; ++i)
-        alloc_.construct(data_ + i, gen());
+        std::allocator_traits<A>::construct(alloc_, data_ + i, gen());
     }
 
     template <class Iterator>
@@ -135,15 +135,15 @@ namespace detail
         alloc_(),
         owned_(true)
     {
-      data_ = alloc_.allocate(size);
+      data_ = std::allocator_traits<A>::allocate(alloc_, size);
 
       std::size_t i = 0;
       for (; i < size && first != last; ++i, ++first)
-        alloc_.construct(data_ + i, *first);
+        std::allocator_traits<A>::construct(alloc_, data_ + i, *first);
 
       if (i != size)
         for (; i < size; ++i)
-          alloc_.construct(data_ + i);
+          std::allocator_traits<A>::construct(alloc_, data_ + i);
     }
 
     ~NArrayDataBlock()
@@ -152,8 +152,8 @@ namespace detail
       {
         if (!std::is_trivially_destructible<T>::value)
           for (std::size_t i = 0; i < size_; ++i)
-            alloc_.destroy(data_ + i);
-        alloc_.deallocate(data_, size_);
+            std::allocator_traits<A>::destroy(alloc_, data_ + i);
+        std::allocator_traits<A>::deallocate(alloc_, data_, size_);
       }
     }
 
