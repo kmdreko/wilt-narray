@@ -1489,6 +1489,11 @@ namespace detail
       else
         newdata += steps_[i] * pos[i];
 
+#if __cplusplus >= 201703L
+    if constexpr (M == N)
+      return *newdata;
+#endif
+
     return NArray<T, N-M>(std::shared_ptr<T>(data_, newdata), newsizes, newsteps);
   }
 
