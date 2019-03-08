@@ -251,6 +251,32 @@ namespace detail
     }
   }
 
+  template <std::size_t N, class T, class Operator>
+  struct singleOp2Helper {
+    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op)
+    {
+      T* end = dst + *sizes * *dsteps;
+      for (; dst != end; dst += *dsteps)
+        singleOp2Helper<N-1, T, Operator>::call(dst, sizes + 1, dsteps + 1, op);
+    }
+  };
+
+  template <class T, class Operator>
+  struct singleOp2Helper<1u, T, Operator> {
+    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op)
+    {
+      T* end = dst + *sizes * *dsteps;
+      for (; dst != end; dst += *dsteps)
+        op(*dst);
+    }
+  };
+
+  template <std::size_t N, class T, class Operator>
+  void singleOp2Templated(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator op)
+  {
+    singleOp2Helper<N, T, Operator>::call(dst, sizes, dsteps, op);
+  }
+
   //! @brief         applies an operation between two source arrays and returns
   //!                a bool. Returns false upon getting the first false, or
   //!                or returns true if all operations return true

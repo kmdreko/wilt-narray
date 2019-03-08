@@ -1666,7 +1666,7 @@ namespace detail
   template <class Operator>
   void NArray<T, N>::foreach(Operator op) const
   {
-    wilt::detail::singleOp2(data_.get(), sizes_.data(), steps_.data(), op, N);
+    wilt::detail::singleOp2Templated<N>(data_.get(), sizes_.data(), steps_.data(), op);
   }
 
   template <class T, std::size_t N>
