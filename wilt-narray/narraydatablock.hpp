@@ -164,7 +164,7 @@ namespace detail
 
     std::shared_ptr<T> data() const
     {
-      return std::shared_ptr<T>(shared_from_this(), data_);
+      return std::shared_ptr<T>(this->shared_from_this(), data_);
     }
 
   }; // class NArrayDataBlock

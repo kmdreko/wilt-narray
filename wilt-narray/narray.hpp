@@ -146,9 +146,9 @@ namespace wilt
     //
     // NOTE: 'arr' is empty after being moved
     // NOTE: only exists on 'const T' arrays
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
+    template <class U, typename = typename std::enable_if<std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value>::type>
     NArray(const NArray<U, N>& arr);
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
+    template <class U, typename = typename std::enable_if<std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value>::type>
     NArray(NArray<U, N>&& arr);
 
     // Creates an array of the given size, elements are default constructed.
@@ -201,9 +201,9 @@ namespace wilt
     // reference) or destroyed (if it holds the last reference).
     //
     // NOTE: 'arr' is empty after being moved
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
+    template <class U, typename = typename std::enable_if<std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value>::type>
     NArray<T, N>& operator= (const NArray<U, N>& arr);
-    template <class U, typename = std::enable_if<std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value>::type>
+    template <class U, typename = typename std::enable_if<std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value>::type>
     NArray<T, N>& operator= (NArray<U, N>&& arr);
 
     // Element-wise modifying assigment operators, modifies the underlying data,
@@ -786,7 +786,7 @@ namespace detail
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
   {
-    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>(const NArray<T, N>&): invalid for any other conversions");
+    static_assert(std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value, "NArray<const T, N>(const NArray<T, N>&): invalid for any other conversions");
   }
 
   template <class T, std::size_t N>
@@ -796,7 +796,7 @@ namespace detail
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
   {
-    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>(NArray<T, N>&&): invalid for any other conversions");
+    static_assert(std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value, "NArray<const T, N>(NArray<T, N>&&): invalid for any other conversions");
 
     arr.clear();
   }
@@ -913,7 +913,7 @@ namespace detail
   template <class U, typename>
   NArray<T, N>& NArray<T, N>::operator= (const NArray<U, N>& arr)
   {
-    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>::operator=(const NArray<T, N>&): invalid for any other conversions");
+    static_assert(std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value, "NArray<const T, N>::operator=(const NArray<T, N>&): invalid for any other conversions");
 
     data_ = arr.data_;
     sizes_ = arr.sizes_;
@@ -926,7 +926,7 @@ namespace detail
   template <class U, typename>
   NArray<T, N>& NArray<T, N>::operator= (NArray<U, N>&& arr)
   {
-    static_assert(std::is_const<T>::value && std::is_same<U, std::remove_const<T>::type>::value, "NArray<const T, N>::operator=(NArray<T, N>&&): invalid for any other conversions");
+    static_assert(std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value, "NArray<const T, N>::operator=(NArray<T, N>&&): invalid for any other conversions");
 
     data_ = std::move(arr.data_);
     sizes_ = arr.sizes_;
@@ -1504,8 +1504,8 @@ namespace detail
     static_assert(M<=N, "subarrayAt(pos): invalid when pos dimensionality is <= N");
 
     auto newdata = data_.get();
-    auto newsizes = sizes_.low<N-M>();
-    auto newsteps = steps_.low<N-M>();
+    auto newsizes = sizes_.template low<N-M>();
+    auto newsteps = steps_.template low<N-M>();
     for (std::size_t i = 0; i < M; ++i)
       newdata += steps_[i] * pos[i];
 
@@ -1739,7 +1739,7 @@ namespace detail
     static_assert(M <= N, "compress(func): invalid when M > N");
     static_assert(M != 0, "compress(func): invalid when M is zero");
 
-    NArray<T, M> ret(sizes_.high<M>());
+    NArray<T, M> ret(sizes_.template high<M>());
 
     auto dstIt = ret.begin();
     for (auto&& val : subarrays<N-M>())

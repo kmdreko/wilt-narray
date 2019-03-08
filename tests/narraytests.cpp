@@ -46,8 +46,8 @@ public:
   Tracker() { ++defaultConstructorCalls; }
   Tracker(const Tracker&) { ++copyConstructorCalls; }
   Tracker(Tracker&&) { ++moveConstructorCalls; }
-  Tracker& operator=(const Tracker&) { ++copyAssignmentCalls; }
-  Tracker& operator=(Tracker&&) { ++moveAssignmentCalls; }
+  Tracker& operator=(const Tracker&) { ++copyAssignmentCalls; return *this; }
+  Tracker& operator=(Tracker&&) { ++moveAssignmentCalls; return *this; }
 
   static int defaultConstructorCalls;
   static int copyConstructorCalls;
@@ -1480,9 +1480,9 @@ int usingIterator(const wilt::NArray<int, 1>& arr)
 int usingBrackets(const wilt::NArray<int, 3>& arr)
 {
   int sum = 0;
-  for (int x = 0; x < arr.width(); ++x)
-    for (int y = 0; y < arr.height(); ++y)
-      for (int z = 0; z < arr.height(); ++z)
+  for (std::size_t x = 0; x < arr.width(); ++x)
+    for (std::size_t y = 0; y < arr.height(); ++y)
+      for (std::size_t z = 0; z < arr.height(); ++z)
         sum += arr[x][y][z];
   return sum;
 }
@@ -1490,7 +1490,7 @@ int usingBrackets(const wilt::NArray<int, 3>& arr)
 int usingBrackets(const wilt::NArray<int, 1>& arr)
 {
   int sum = 0;
-  for (int x = 0; x < arr.width(); ++x)
+  for (std::size_t x = 0; x < arr.width(); ++x)
     sum += arr[x];
   return sum;
 }
@@ -1498,18 +1498,18 @@ int usingBrackets(const wilt::NArray<int, 1>& arr)
 int usingAt(const wilt::NArray<int, 3>& arr)
 {
   int sum = 0;
-  for (int x = 0; x < arr.width(); ++x)
-    for (int y = 0; y < arr.height(); ++y)
-      for (int z = 0; z < arr.height(); ++z)
-        sum += arr.atUnchecked(wilt::Point<3>(x, y, z));
+  for (std::size_t x = 0; x < arr.width(); ++x)
+    for (std::size_t y = 0; y < arr.height(); ++y)
+      for (std::size_t z = 0; z < arr.height(); ++z)
+        sum += arr.atUnchecked(wilt::Point<3>((wilt::pos_t)x, (wilt::pos_t)y, (wilt::pos_t)z));
   return sum;
 }
 
 int usingAt(const wilt::NArray<int, 1>& arr)
 {
   int sum = 0;
-  for (int x = 0; x < arr.width(); ++x)
-    sum += arr.atUnchecked(wilt::Point<1>(x));
+  for (std::size_t x = 0; x < arr.width(); ++x)
+    sum += arr.atUnchecked(wilt::Point<1>((wilt::pos_t)x));
   return sum;
 }
 
@@ -1517,13 +1517,13 @@ int usingRaw(const wilt::NArray<int, 3>& arr)
 {
   int sum = 0;
   int* base = arr.base();
-  for (int x = 0; x < arr.width(); ++x)
+  for (std::size_t x = 0; x < arr.width(); ++x)
   {
     int* basex = base + x * arr.steps()[0];
-    for (int y = 0; y < arr.height(); ++y)
+    for (std::size_t y = 0; y < arr.height(); ++y)
     {
       int* basey = basex + y * arr.steps()[1];
-      for (int z = 0; z < arr.height(); ++z)
+      for (std::size_t z = 0; z < arr.height(); ++z)
       {
         int* basez = basey + z * arr.steps()[2];
         sum += *basez;
@@ -1537,7 +1537,7 @@ int usingRaw(const wilt::NArray<int, 1>& arr)
 {
   int sum = 0;
   int* base = arr.base();
-  for (int x = 0; x < arr.width(); ++x)
+  for (std::size_t x = 0; x < arr.width(); ++x)
   {
     int* basex = base + x * arr.steps()[0];
     sum += *basex;
