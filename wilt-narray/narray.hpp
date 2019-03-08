@@ -274,6 +274,8 @@ namespace wilt
     reference at(pos_t p1, pos_t p2, pos_t p3) const;
     reference at(pos_t p1, pos_t p2, pos_t p3, pos_t p4) const;
 
+    reference atUnchecked(const Point<N>& loc) const;
+
     // Indexing operator, will return an N-1 NArray at the location 'x' along
     // the 0th dimension.
     //
@@ -1126,14 +1128,11 @@ namespace detail
     if (empty())
       throw std::runtime_error("at(): invalid when empty");
 
-    T* ptr = data_.get();
     for (std::size_t i = 0; i < N; ++i)
       if (loc[i] >= sizes_[i] || loc[i] < 0)
         throw std::out_of_range("at(loc): element larger then dimensions");
-      else
-        ptr += loc[i] * steps_[i];
 
-    return *ptr;
+    return atUnchecked(loc);
   }
 
   template<class T, std::size_t N>
@@ -1166,6 +1165,16 @@ namespace detail
     static_assert(N == 4, "at(p1, p2, p3, p4): invalid when N != 4");
 
     return at({ p1, p2, p3, p4 });
+  }
+
+  template<class T, std::size_t N>
+  typename NArray<T, N>::reference NArray<T, N>::atUnchecked(const Point<N>& loc) const
+  {
+    T* ptr = data_.get();
+    for (std::size_t i = 0; i < N; ++i)
+      ptr += loc[i] * steps_[i];
+
+    return *ptr;
   }
 
   template <class T, std::size_t N>
