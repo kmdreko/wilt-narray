@@ -278,7 +278,7 @@ TEST_CASE("NArray<const T, N>(arr) does not copy any elements")
 TEST_CASE("NArray<T, N>(size) creates a sized 1-dimensional array")
 {
   // act
-  wilt::NArray<int, 1> a({ 3 });
+  wilt::NArray<int, 1> a(3);
 
   // assert
   REQUIRE(!a.empty());
@@ -487,7 +487,7 @@ TEST_CASE("NArray<T, N>(size, first, last) creates array with default values if 
 TEST_CASE("isAligned() is true for an un-transformed array")
 {
   // arrange
-  wilt::NArray<int, 1> a({ 5 });
+  wilt::NArray<int, 1> a(5);
   wilt::NArray<int, 3> b({ 2, 3, 4 });
 
   // assert
@@ -569,7 +569,7 @@ TEST_CASE("isAligned() is false for an empty array")
 TEST_CASE("skip(dim, n, start) creates an array of the correct size")
 {
   // arrange
-  wilt::NArray<int, 1> a({ 5 });
+  wilt::NArray<int, 1> a(5);
 
   // act
   wilt::NArray<int, 1> b = a.skip(0, 2);
@@ -591,7 +591,7 @@ TEST_CASE("skip(dim, n, start) creates an array of the correct size")
 TEST_CASE("skip(dim, n, start) creates an array that shares data")
 {
   // arrange
-  wilt::NArray<int, 1> a({ 5 });
+  wilt::NArray<int, 1> a(5);
 
   // act
   wilt::NArray<int, 1> b = a.skip(0, 2);
@@ -995,7 +995,7 @@ TEST_CASE("repeat(n) throws when called on an empty array")
 TEST_CASE("window(dim, n) creates an array with the correct size")
 {
   // arrange
-  wilt::NArray<int, 1> a({ 10 });
+  wilt::NArray<int, 1> a(10);
 
   // act
   wilt::NArray<int, 2> b = a.window(0, 3);
@@ -1009,7 +1009,7 @@ TEST_CASE("window(dim, n) creates an array with the correct size")
 TEST_CASE("window(dim, n) creates an array that shares data")
 {
   // arrange
-  wilt::NArray<int, 1> a({ 10 });
+  wilt::NArray<int, 1> a(10);
 
   // act
   wilt::NArray<int, 2> b = a.window(0, 3);
@@ -1065,7 +1065,7 @@ TEST_CASE("window(dim, n) with dim=3 is identical to windowW()")
 TEST_CASE("window(dim, n) throws if size is larger than dimension")
 {
   // arrange
-  wilt::NArray<int, 1> a({ 10 });
+  wilt::NArray<int, 1> a(10);
 
   // assert
   REQUIRE_NOTHROW(a.window(0, 2));
@@ -1077,7 +1077,7 @@ TEST_CASE("window(dim, n) throws if size is larger than dimension")
 TEST_CASE("window(dim, n) throws if size is not positive")
 {
   // arrange
-  wilt::NArray<int, 1> a({ 10 });
+  wilt::NArray<int, 1> a(10);
 
   // assert
   REQUIRE_NOTHROW(a.window(0, 1));
