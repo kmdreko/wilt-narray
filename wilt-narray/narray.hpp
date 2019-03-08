@@ -1141,7 +1141,7 @@ namespace detail
   {
     static_assert(N == 1, "at(p1): invalid when N != 1");
 
-    return at({ p1 });
+    return at(Point<1>(p1));
   }
 
   template<class T, std::size_t N>
