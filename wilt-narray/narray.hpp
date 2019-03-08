@@ -356,6 +356,8 @@ namespace wilt
     // Gets the array at that location. M must be less than N.
     template <std::size_t M>
     typename NArray<T, N-M>::exposed_type subarrayAt(const Point<M>& pos) const;
+    template <std::size_t M>
+    typename NArray<T, N-M>::exposed_type subarrayAtUnchecked(const Point<M>& pos) const;
 
     // Gets an iterable for all subarrays
     template <std::size_t M>
@@ -1167,7 +1169,7 @@ namespace detail
     return at({ p1, p2, p3, p4 });
   }
 
-  template<class T, std::size_t N>
+  template <class T, std::size_t N>
   typename NArray<T, N>::reference NArray<T, N>::atUnchecked(const Point<N>& loc) const
   {
     T* ptr = data_.get();
@@ -1486,6 +1488,20 @@ namespace detail
   template <std::size_t M>
   typename NArray<T, N-M>::exposed_type NArray<T, N>::subarrayAt(const Point<M>& pos) const
   {
+    if (empty())
+      throw std::runtime_error("subarrayAt(pos): invalid when empty");
+
+    for (std::size_t i = 0; i < M; ++i)
+      if (pos[i] >= sizes_[i] || pos[i] < 0)
+        throw std::out_of_range("subarrayAt(pos): pos out of range");
+
+    return subarrayAtUnchecked(pos);
+  }
+
+  template<class T, std::size_t N>
+  template <std::size_t M>
+  typename NArray<T, N-M>::exposed_type NArray<T, N>::subarrayAtUnchecked(const Point<M>& pos) const
+  {
     static_assert(M>0, "subarrayAt(pos): invalid when pos dimensionality is 0");
     static_assert(M<=N, "subarrayAt(pos): invalid when pos dimensionality is <= N");
 
@@ -1493,10 +1509,7 @@ namespace detail
     auto newsizes = sizes_.low<N-M>();
     auto newsteps = steps_.low<N-M>();
     for (std::size_t i = 0; i < M; ++i)
-      if (pos[i] >= sizes_[i] || pos[i] < 0)
-        throw std::out_of_range("subarrayAt(pos): pos out of range");
-      else
-        newdata += steps_[i] * pos[i];
+      newdata += steps_[i] * pos[i];
 
 #if __cplusplus >= 201703L
     if constexpr (M == N)

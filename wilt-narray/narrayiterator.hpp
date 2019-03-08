@@ -350,7 +350,7 @@ namespace wilt
     //! @return     pointer to data at the offset
     value_type at_(const Point<N-M>& pos) const
     {
-      return array_->subarrayAt(pos);
+      return array_->subarrayAtUnchecked(pos);
     }
 
   }; // class NArrayIterator
