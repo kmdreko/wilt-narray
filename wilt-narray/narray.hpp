@@ -468,8 +468,6 @@ namespace wilt
 
     template <class U, std::size_t M>
     friend class NArray;
-    friend class NArrayIterator<type, N>;
-    friend class NArrayIterator<cvalue, N>;
 
   private:
     ////////////////////////////////////////////////////////////////////////////
