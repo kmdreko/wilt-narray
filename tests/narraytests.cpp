@@ -1495,6 +1495,20 @@ int usingBrackets(const wilt::NArray<int, 1>& arr)
   return sum;
 }
 
+int usingForeach(const wilt::NArray<int, 3>& arr)
+{
+  int sum = 0;
+  arr.foreach([&](int) mutable { sum++; });
+  return sum;
+}
+
+int usingForeach(const wilt::NArray<int, 1>& arr)
+{
+  int sum = 0;
+  arr.foreach([&](int) mutable { sum++; });
+  return sum;
+}
+
 int usingAt(const wilt::NArray<int, 3>& arr)
 {
   int sum = 0;
@@ -1548,7 +1562,8 @@ int usingRaw(const wilt::NArray<int, 1>& arr)
 TEST_CASE("iteration performance comparisons (N=3)")
 {
   // arrange
-  wilt::NArray<int, 3> arr = wilt::NArray<int, 3>({ 100, 100, 100 }, 1);
+  wilt::NArray<int, 3> arr = wilt::NArray<int, 3>({ 100, 100, 100 }, 1).subarray({ 1, 1, 1 }, { 98, 98, 98 });
+  const int count = arr.size();
   const int iterations = 10;
 
   SECTION("using iterator")
@@ -1562,7 +1577,7 @@ TEST_CASE("iteration performance comparisons (N=3)")
     std::cout << "iterator: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
 
     // assert
-    REQUIRE(sum == 1000000 * iterations);
+    REQUIRE(sum == count * iterations);
   }
 
   SECTION("using brackets")
@@ -1576,7 +1591,21 @@ TEST_CASE("iteration performance comparisons (N=3)")
     std::cout << "brackets: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
 
     // assert
-    REQUIRE(sum == 1000000 * iterations);
+    REQUIRE(sum == count * iterations);
+  }
+
+  SECTION("using foreach")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingForeach(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "for each: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == count * iterations);
   }
 
   SECTION("using at")
@@ -1590,7 +1619,7 @@ TEST_CASE("iteration performance comparisons (N=3)")
     std::cout << "fun at(): " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
 
     // assert
-    REQUIRE(sum == 1000000 * iterations);
+    REQUIRE(sum == count * iterations);
   }
 
   SECTION("using raw")
@@ -1604,7 +1633,7 @@ TEST_CASE("iteration performance comparisons (N=3)")
     std::cout << "raw math: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
 
     // assert
-    REQUIRE(sum == 1000000 * iterations);
+    REQUIRE(sum == count * iterations);
   }
 }
 
@@ -1637,6 +1666,20 @@ TEST_CASE("iteration performance comparisons (N=1)")
       sum += usingBrackets(arr);
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "brackets: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
+
+    // assert
+    REQUIRE(sum == 1000000 * iterations);
+  }
+
+  SECTION("using foreach")
+  {
+    // act
+    auto start = std::chrono::high_resolution_clock::now();
+    auto sum = 0;
+    for (int i = 0; i < iterations; ++i)
+      sum += usingForeach(arr);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "for each: " << (end - start).count() / 1000000.0 / iterations << "ms" << std::endl;
 
     // assert
     REQUIRE(sum == 1000000 * iterations);
