@@ -40,7 +40,7 @@ namespace wilt
   template <class T, std::size_t N>
   bool operator== (const wilt::NArray<T, N>& lhs, const wilt::NArray<T, N>& rhs)
   {
-    return lhs.base() == rhs.base() && lhs.sizes() == rhs.sizes() && lhs.steps() == rhs.steps();
+    return lhs.data() == rhs.data() && lhs.sizes() == rhs.sizes() && lhs.steps() == rhs.steps();
   }
 
   template <class T, std::size_t N>
