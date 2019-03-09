@@ -252,6 +252,8 @@ namespace wilt
     std::size_t height() const;
     std::size_t depth() const;
 
+    pos_t step(std::size_t dim) const;
+
     // Functions for determining the data organization for this array.
     //   - isContiguous = the array accesses data with no gaps
     //   - isAligned    = the array accesses data linearly
@@ -1068,7 +1070,7 @@ namespace detail
   std::size_t NArray<T, N>::size(std::size_t dim) const
   {
     if (dim >= N)
-      throw std::out_of_range("length(dim): dim out of bounds");
+      throw std::out_of_range("size(dim): dim out of bounds");
 
     return (std::size_t)sizes_[dim];
   }
@@ -1093,6 +1095,15 @@ namespace detail
     static_assert(N >= 3, "depth(): invalid when N < 3");
 
     return (std::size_t)sizes_[2];
+  }
+
+  template <class T, std::size_t N>
+  pos_t NArray<T, N>::step(std::size_t dim) const
+  {
+    if (dim >= N)
+      throw std::out_of_range("step(dim): dim out of bounds");
+
+    return steps_[dim];
   }
 
   template <class T, std::size_t N>

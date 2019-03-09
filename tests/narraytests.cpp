@@ -1533,13 +1533,13 @@ int usingRaw(const wilt::NArray<int, 3>& arr)
   int* base = arr.base();
   for (std::size_t x = 0; x < arr.width(); ++x)
   {
-    int* basex = base + x * arr.steps()[0];
+    int* basex = base + x * arr.step(0);
     for (std::size_t y = 0; y < arr.height(); ++y)
     {
-      int* basey = basex + y * arr.steps()[1];
+      int* basey = basex + y * arr.step(1);
       for (std::size_t z = 0; z < arr.height(); ++z)
       {
-        int* basez = basey + z * arr.steps()[2];
+        int* basez = basey + z * arr.step(2);
         sum += *basez;
       }
     }
@@ -1553,7 +1553,7 @@ int usingRaw(const wilt::NArray<int, 1>& arr)
   int* base = arr.base();
   for (std::size_t x = 0; x < arr.width(); ++x)
   {
-    int* basex = base + x * arr.steps()[0];
+    int* basex = base + x * arr.step(0);
     sum += *basex;
   }
   return sum;
