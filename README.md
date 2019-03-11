@@ -59,9 +59,7 @@ for (auto subarray : data.subarrays<1>())
 
 ## Modify
 
-You can of course assign to individual elements, but array assignment (`=`) only changes what data is referenced. To assign to all elements at once, use `setTo()` with a single value or an equally-sized array.
-
-The operators `+=`, `-=`, `*=`, and `/=`  are also available for element-wise or single-element reassignment.
+You can of course assign to individual elements, but array assignment (`=`) only changes what data is referenced. To assign to all elements at once, use `setTo()` with a single value or an equally-sized array. There are also the operators `+=`, `-=`, `*=`, and `/=`  available for element-wise or single-element reassignment.
 
 ## Usage
 
@@ -71,7 +69,7 @@ This library is header-only, so it can either be added through include directori
 #include "wilt-narray/narray.hpp"
 ```
 
-This library was built and tested using C++14.
+This library was built using C++14 and tested using Catch2.
 
 Check out the [overview](/docs/overview.md) for implementation details.
 
