@@ -1,6 +1,18 @@
 # wilt::NArray<T, N> ![logo](/docs/images/logo.png)
 
-This library is designed to access, transform, and modify N-dimensional data in an efficient and uniform manner. It is similar to Boost's `multi_array` and OpenCV's `Mat` classes but focuses on generalized ease-of-use without sacrificing performance.
+This library is designed to transform, access, and modify N-dimensional data in an efficient and uniform manner. It is similar to Boost's `multi_array` and OpenCV's `Mat` classes but focuses on generalized ease-of-use without sacrificing performance.
+
+## Transform
+
+An array can be transformed a number of ways; including ranging, skipping, and flipping:
+
+![1-D demo](/docs/images/1D-demo.png)
+
+These works for any number of dimensions and most transformations have X, Y, Z, and W variants for manipulating the those dimensions. Some transformations can manipulate multiple dimensions or are shown better in two dimensions:
+
+![2-D demo](/docs/images/2D-demo.png)
+
+Transformations can be chained together to create more complex access patterns to access the data in whatever way is necessary. All transformations reference the same shared data; no data is copied.
 
 ## Access
 
@@ -29,17 +41,21 @@ for (auto& elem : data)
 
 You can iterate over transformed arrays and even iterate over subarrays.
 
-## Transform
+```C++
+for (auto& elem : data.sliceY(1).skipX(4))
+{
+  // will loop 20 times
+}
 
-An array can be transformed a number of ways; including ranging, skipping, and flipping:
-
-![1-D demo](/docs/images/1D-demo.png)
-
-These works for any number of dimensions and most transformations have X, Y, Z, and W variants for manipulating the those dimensions. Some transformations can manipulate multiple dimensions or are shown better in two dimensions:
-
-![2-D demo](/docs/images/2D-demo.png)
-
-Transformations can be chained together to create more complex access patterns to access the data in whatever way is necessary. All transformations reference the same shared data; no data is copied.
+for (auto subarray : data.subarrays<1>())
+{
+  // will loop 100 times
+  for (auto& elem : subarray)
+  {
+    // will loop 100 times
+  }
+}
+```
 
 ## Modify
 
@@ -56,6 +72,8 @@ This library is header-only, so it can either be added through include directori
 ```
 
 This library was built and tested using C++14.
+
+Check out the [overview](/docs/overview.md) for implementation details.
 
 ## Contact
 
