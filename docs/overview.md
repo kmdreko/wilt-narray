@@ -1,4 +1,4 @@
-# Overview
+# Overview ![logo](/docs/images/logo.png)
 
 This is a more detailed overview of the inner workings of the library. It doesn't document any functions, but rather documents the class behaviors and design decisions. It is good to consider the implementation to know what is possible and what is optimal.
 
@@ -22,7 +22,7 @@ The `NArray` class is fairly simple. It consists of:
 
 The data pointer is a `std::shared_ptr<T>` and points at an element in an array (`[]`) of shared data. Array transformations do not copy or modify the data so they all share the same resource. The pointer always points to the first accessed element; however, the first element may change between arrays even if they use the same shared data. This is because many transformations, like `range()` and `flip()`, can change what the first element is.
 
-Keeping the data shared between arrays can introduce some inefficiencies. However, there are a couple reasons why I decided to go with this design:
+Keeping the data shared between arrays can introduce some inefficiencies. However, there are a couple reasons why this design was used:
 
 - Separate "data" and "view" classes are annoying. In such designs, the "view" classes are the types most seen, often as variables and function parameters. But that means the "data" object, that you still need somewhere, is an outlier in comparison. Using the same type for everything means there's no ambiguity or cognitive overhead needed when handling transformations.
 - The arrays don't need to care about the data source beyond holding a handle to it. This library was designed so that arrays an be constructed from different sources with different requirements. The `std::shared_ptr` class has a built-in abstraction between the element it points to and the shared data. The pointer could be referencing a plain array, a vector, or a set of data with a different type entirely and it doesn't change how the array fundamentally accesses and manipulates the data. This abstraction works for data cleanup as well.
@@ -70,7 +70,7 @@ In addition to these methods, the access order of the array should be considered
 
 ### Transformation Performance
 
-As said above, transformations, and making new arrays in general, have a cost due to the use of `shared_ptr`. The individual cost isn't really that significant and I encourage the use of transformations, but it can add up. Transformation chaining and `arr[x][y][z]` accesses could be made better by transfering the `shared_ptr` on temporaries, which would have negligible cost. However, since transformations use the "aliasing constructor" for making the new array, it can't transfer ownership. This will be available in `C++20`.
+As said above, transformations, and making new arrays in general, have a cost due to the use of `shared_ptr`. The individual cost isn't really that significant and the use of transformations is encouraged, but it can add up. Transformation chaining and `arr[x][y][z]` accesses could be made better by transfering the `shared_ptr` on temporaries, which would have negligible cost. However, since transformations use the "aliasing constructor" for making the new array, it can't transfer ownership. This will be available in `C++20`.
 
 ## Exception Policy
 
@@ -80,4 +80,4 @@ A macro could be added to allow customization on bad input (assert, check-and-th
 
 ## Const Correctness
 
-Because this library uses shared data, making an array `const` is not enough to protect the data from modification. A non-const copy can always be made that would be able to modify the data. To protect data, you must convert to a `NArray<const T, N>` object; this follows the design of other shared data classes. This can be done directly, or it may be convenient to use `asConst()`.
+Because this library uses shared data, making an array `const` is not enough to protect the data from modification. A non-const copy can always be made that would be able to modify the data. To protect data, you must convert to a `NArray<const T, N>` object; this follows the design of other shared data classes. This can be done directly or it may be convenient to use `asConst()`.

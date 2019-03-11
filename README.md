@@ -13,6 +13,9 @@ wilt::NArray<int, 2> data({ 100, 100 }, 0);
 // access with traditional array syntax
 data[0][0] = 42;
 
+// access with function
+data.at(0, 0);
+
 // iterate over all elements
 for (auto& elem : data)
 {
@@ -46,7 +49,7 @@ The operators `+=`, `-=`, `*=`, and `/=`  are also available for element-wise or
 
 ## Usage
 
-This library is header-only. So you would just use the library like so:
+This library is header-only, so it can either be added through include directories or copied in directly. You would just use the library but including the `narray.hpp` header like so:
 
 ```C++
 #include "wilt-narray/narray.hpp"
