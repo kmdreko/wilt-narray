@@ -1449,7 +1449,7 @@ TEST_CASE("operator+(value, arr) creates empty array when called with an empty a
 TEST_CASE("window()+skip() can give the same result as a reshape()+transpose()")
 {
   // arrange
-  auto arr = wilt::NArray<int, 2>({ 9, 16 }, 1);
+  wilt::NArray<int, 2> arr({ 9, 16 }, 1);
 
   // act
   auto a = arr.reshape<4>({ 3, 3, 4, 4 }).transpose(1, 2);
@@ -1459,6 +1459,59 @@ TEST_CASE("window()+skip() can give the same result as a reshape()+transpose()")
   REQUIRE(b.sizes() == a.sizes());
   REQUIRE(b.steps() == a.steps());
   REQUIRE(b == a);
+}
+
+TEST_CASE("byMember(member) creates an array of the correct size and type")
+{
+  // arrange
+  struct HasMember { int member1; float member2; };
+  wilt::NArray<HasMember, 2> a({ 2, 3 });
+
+  // act
+  auto b = a.byMember(&HasMember::member1);
+  auto c = a.byMember(&HasMember::member2);
+
+  // assert
+  REQUIRE(b.size() == a.size());
+  REQUIRE(b.sizes() == a.sizes());
+  REQUIRE((std::is_same_v<decltype(b), wilt::NArray<int, 2>>));
+  REQUIRE(c.size() == a.size());
+  REQUIRE(c.sizes() == a.sizes());
+  REQUIRE((std::is_same_v<decltype(c), wilt::NArray<float, 2>>));
+}
+
+TEST_CASE("byMember(member) creates an array that shares data")
+{
+  // arrange
+  struct HasMember { int member1; float member2; };
+  wilt::NArray<HasMember, 2> a({ 2, 3 });
+
+  // act
+  auto b = a.byMember(&HasMember::member1);
+  auto c = a.byMember(&HasMember::member2);
+
+  // assert
+  REQUIRE(b.shared());
+  REQUIRE(&(b[0][0]) == &(a[0][0].member1));
+  REQUIRE(&(b[1][1]) == &(a[1][1].member1));
+  REQUIRE(c.shared());
+  REQUIRE(&(c[0][0]) == &(a[0][0].member2));
+  REQUIRE(&(c[1][1]) == &(a[1][1].member2));
+}
+
+TEST_CASE("byMember(member) creates an empty array when called on an empty array")
+{
+  // arrange
+  struct HasMember { int member1; float member2; };
+  wilt::NArray<HasMember, 2> a;
+
+  // act
+  auto b = a.byMember(&HasMember::member1);
+  auto c = a.byMember(&HasMember::member2);
+
+  // assert
+  REQUIRE(b.empty());
+  REQUIRE(c.empty());
 }
 
 int usingIterator(const wilt::NArray<int, 3>& arr)

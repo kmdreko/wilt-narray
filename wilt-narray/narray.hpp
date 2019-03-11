@@ -425,6 +425,9 @@ namespace wilt
     // internally to reduce recursive calls and can be useful for reshaping.
     NArray<T, N> asCondensed() const;
 
+    template <class U, class T2 = T>
+    NArray<U, N> byMember(U T2::* member) const;
+
   public:
     ////////////////////////////////////////////////////////////////////////////
     // TRANSFORMATION FUNCTIONS
@@ -1717,6 +1720,21 @@ namespace detail
     wilt::detail::condense(newsizes, newsteps);
 
     return NArray<T, N>(data_, newsizes, newsteps);
+  }
+
+  template <class T, std::size_t N>
+  template <class U, class T2>
+  NArray<U, N> NArray<T, N>::byMember(U T2::*member) const
+  {
+    static_assert(std::is_same<T, T2>::value, "byMember(): invalid when types don't match");
+
+    if (empty())
+      return NArray<U, N>();
+
+    auto newdata = &(data_.get()->*member);
+    auto newsteps = steps_ * sizeof(T) / sizeof(U);
+
+    return NArray<U, N>(std::shared_ptr<U>(data_, newdata), sizes_, newsteps);
   }
 
   template <class T, std::size_t N>
