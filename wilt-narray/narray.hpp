@@ -813,7 +813,7 @@ namespace detail
     , steps_()
   {
     if (!wilt::detail::validSize(size))
-      return;
+      throw std::invalid_argument("NArray(size): size is not valid");
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
@@ -827,7 +827,7 @@ namespace detail
     , steps_()
   {
     if (!wilt::detail::validSize(size))
-      return;
+      throw std::invalid_argument("NArray(size, val): size is not valid");
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
@@ -841,7 +841,7 @@ namespace detail
     , steps_()
   {
     if (!wilt::detail::validSize(size))
-      return;
+      throw std::invalid_argument("NArray(size, ptr, atype): size is not valid");
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
@@ -855,7 +855,7 @@ namespace detail
     , steps_()
   {
     if (!wilt::detail::validSize(size))
-      return;
+      throw std::invalid_argument("NArray(size, list): size is not valid");
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
@@ -870,7 +870,7 @@ namespace detail
     , steps_()
   {
     if (!wilt::detail::validSize(size))
-      return;
+      throw std::invalid_argument("NArray(size, gen): size is not valid");
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
@@ -885,7 +885,7 @@ namespace detail
     , steps_()
   {
     if (!wilt::detail::validSize(size))
-      return;
+      throw std::invalid_argument("NArray(size, first, last): size is not valid");
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
@@ -1740,6 +1740,9 @@ namespace detail
   template <class T, std::size_t N>
   NArray<typename std::remove_const<T>::type, N> NArray<T, N>::clone() const
   {
+    if (empty())
+      return NArray<typename std::remove_const<T>::type, N>();
+
     return NArray<typename std::remove_const<T>::type, N>(sizes_, [iter = this->begin()]() mutable -> T& { return *iter++; });
   }
 
@@ -1767,6 +1770,9 @@ namespace detail
   {
     static_assert(M <= N, "compress(func): invalid when M > N");
     static_assert(M != 0, "compress(func): invalid when M is zero");
+
+    if (empty())
+      return NArray<T, M>();
 
     NArray<T, M> ret(sizes_.template high<M>());
 

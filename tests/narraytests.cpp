@@ -330,28 +330,16 @@ TEST_CASE("NArray<T, N>(size) default constructs elements equal to the construct
   REQUIRE(Tracker::moveConstructorCalls == 0);
 }
 
-TEST_CASE("NArray<T, N>(size) creates empty array when given size with a 0-sized dimension")
+TEST_CASE("NArray<T, N>(size) throws when given size with a 0-sized dimension")
 {
-  // act
-  wilt::NArray<int, 2> a({ 3, 0 });
-
   // assert
-  REQUIRE(a.empty());
-  REQUIRE(a.size() == 0);
-  REQUIRE(a.sizes() == wilt::Point<2>());
-  REQUIRE(a.steps() == wilt::Point<2>());
+  REQUIRE_THROWS(wilt::NArray<int, 2>({ 3, 0 }));
 }
 
-TEST_CASE("NArray<T, N>(size) creates empty array when given size with a negative-sized dimension")
+TEST_CASE("NArray<T, N>(size) throws when given size with a negative-sized dimension")
 {
-  // act
-  wilt::NArray<int, 2> a({ 3, -2 });
-
   // assert
-  REQUIRE(a.empty());
-  REQUIRE(a.size() == 0);
-  REQUIRE(a.sizes() == wilt::Point<2>());
-  REQUIRE(a.steps() == wilt::Point<2>());
+  REQUIRE_THROWS(wilt::NArray<int, 2>({ 3, -2 }));
 }
 
 TEST_CASE("NArray<T, N>(size, val) creates a sized 1-dimensional array with the copied values")
@@ -405,28 +393,16 @@ TEST_CASE("NArray<T, N>(size, val) copy constructs elements equal to the constru
   REQUIRE(Tracker::moveConstructorCalls == 0);
 }
 
-TEST_CASE("NArray<T, N>(size, val) creates empty array when given size with a 0-sized dimension")
+TEST_CASE("NArray<T, N>(size, val) throws when given size with a 0-sized dimension")
 {
-  // act
-  wilt::NArray<int, 2> a({ 3, 0 }, 1);
-
   // assert
-  REQUIRE(a.empty());
-  REQUIRE(a.size() == 0);
-  REQUIRE(a.sizes() == wilt::Point<2>());
-  REQUIRE(a.steps() == wilt::Point<2>());
+  REQUIRE_THROWS(wilt::NArray<int, 2>({ 3, 0 }, 1));
 }
 
 TEST_CASE("NArray<T, N>(size, val) creates empty array when given size with a negative-sized dimension")
 {
-  // act
-  wilt::NArray<int, 2> a({ 3, -2 }, 1);
-
   // assert
-  REQUIRE(a.empty());
-  REQUIRE(a.size() == 0);
-  REQUIRE(a.sizes() == wilt::Point<2>());
-  REQUIRE(a.steps() == wilt::Point<2>());
+  REQUIRE_THROWS(wilt::NArray<int, 2>({ 3, -2 }, 1));
 }
 
 TEST_CASE("NArray<T, N>(size, first, last) creates array with the correct size")
