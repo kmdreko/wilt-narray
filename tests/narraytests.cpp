@@ -1490,6 +1490,120 @@ TEST_CASE("byMember(member) creates an empty array when called on an empty array
   REQUIRE(c.empty());
 }
 
+TEST_CASE("make_narray(source) creates proper array from plain array")
+{
+  // arrange
+  int data[] = { 0, 1, 2, 3 };
+
+  // act
+  auto a = wilt::make_narray(data);
+
+  // assert
+  REQUIRE((std::is_same<decltype(a), wilt::NArray<int, 1>>::value));
+  REQUIRE(!a.empty());
+  REQUIRE(a.size() == 4);
+  REQUIRE(a.sizes() == wilt::Point<1>(4));
+  REQUIRE(a.steps() == wilt::Point<1>(1));
+  REQUIRE(&a[0] == &data[0]);
+  REQUIRE(&a[1] == &data[1]);
+}
+
+TEST_CASE("make_narray(source) creates proper array from plain multi-dimensional array")
+{
+  // arrange
+  int data[2][3][4] =
+  {
+    {
+      {  0,  1,  2,  3 },
+      {  4,  5,  6,  7 },
+      {  8,  9, 10, 11 }
+    },
+    {
+      { 12, 13, 14, 15 },
+      { 16, 17, 18, 19 },
+      { 20, 21, 22, 23 }
+    }
+  };
+
+  // act
+  auto a = wilt::make_narray(data);
+
+  // assert
+  REQUIRE((std::is_same<decltype(a), wilt::NArray<int, 3>>::value));
+  REQUIRE(!a.empty());
+  REQUIRE(a.size() == 24);
+  REQUIRE(a.sizes() == wilt::Point<3>(2, 3, 4));
+  REQUIRE(a.steps() == wilt::Point<3>(12, 4, 1));
+  REQUIRE(&a[0][0][0] == &data[0][0][0]);
+  REQUIRE(&a[1][1][1] == &data[1][1][1]);
+}
+
+TEST_CASE("make_narray(source) creates proper array from std::array")
+{
+  // arrange
+  std::array<int, 4> data = { 0, 1, 2, 3 };
+
+  // act
+  auto a = wilt::make_narray(data);
+
+  // assert
+  REQUIRE((std::is_same<decltype(a), wilt::NArray<int, 1>>::value));
+  REQUIRE(!a.empty());
+  REQUIRE(a.size() == 4);
+  REQUIRE(a.sizes() == wilt::Point<1>(4));
+  REQUIRE(a.steps() == wilt::Point<1>(1));
+  REQUIRE(&a[0] == &data[0]);
+  REQUIRE(&a[1] == &data[1]);
+}
+
+TEST_CASE("make_narray(source) creates proper array from multi-dimensional std::array")
+{
+  // arrange
+  std::array<std::array<std::array<int, 4>, 3>, 2> data =
+  { {
+    { {
+      {  0,  1,  2,  3 },
+      {  4,  5,  6,  7 },
+      {  8,  9, 10, 11 }
+    } },
+    { {
+      { 12, 13, 14, 15 },
+      { 16, 17, 18, 19 },
+      { 20, 21, 22, 23 }
+    } }
+  } };
+
+  // act
+  auto a = wilt::make_narray(data);
+
+  // assert
+  REQUIRE((std::is_same<decltype(a), wilt::NArray<int, 3>>::value));
+  REQUIRE(!a.empty());
+  REQUIRE(a.size() == 24);
+  REQUIRE(a.sizes() == wilt::Point<3>(2, 3, 4));
+  REQUIRE(a.steps() == wilt::Point<3>(12, 4, 1));
+  REQUIRE(&a[0][0][0] == &data[0][0][0]);
+  REQUIRE(&a[1][1][1] == &data[1][1][1]);
+}
+
+TEST_CASE("make_narray(source) creates proper array from std::vector")
+{
+  // arrange
+  std::vector<int> data = { 0, 1, 2, 3 };
+
+  // act
+  auto a = wilt::make_narray(data);
+
+  // assert
+  REQUIRE((std::is_same<decltype(a), wilt::NArray<int, 1>>::value));
+  REQUIRE(!a.empty());
+  REQUIRE(a.size() == 4);
+  REQUIRE(a.sizes() == wilt::Point<1>(4));
+  REQUIRE(a.steps() == wilt::Point<1>(1));
+  REQUIRE(&a[0] == &data[0]);
+  REQUIRE(&a[1] == &data[1]);
+}
+
 int usingIterator(const wilt::NArray<int, 3>& arr)
 {
   int sum = 0;

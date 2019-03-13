@@ -183,6 +183,8 @@ namespace wilt
     template <class Iterator>
     NArray(const Point<N>& size, Iterator first, Iterator last);
 
+    NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps);
+
   public:
     ////////////////////////////////////////////////////////////////////////////
     // ASSIGNMENT OPERATORS
@@ -479,8 +481,6 @@ namespace wilt
     // PRIVATE FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps);
-
     typename NArray<T, N-1>::exposed_type slice_(std::size_t dim, pos_t n) const;
     NArray<T, N> range_(std::size_t dim, pos_t n, pos_t length) const;
     NArray<T, N> flip_(std::size_t dim) const;
@@ -756,6 +756,21 @@ namespace detail
   }
 
 } // namespace detail
+
+  template <class T>
+  NArray<typename detail::narray_source_traits<T>::type, detail::narray_source_traits<T>::dimensions> make_narray(T& source)
+  {
+    using type_traits = detail::narray_source_traits<T>;
+    using type = typename type_traits::type;
+
+    static_assert(type_traits::dimensions > 0, "invalid source: data has no deducible dimensions");
+
+    auto data = type_traits::getData(source);
+    auto sizes = type_traits::getSizes(source);
+    auto steps = type_traits::getSteps(source);
+
+    return NArray<type, type_traits::dimensions>(std::shared_ptr<type>(data, [](auto*){}), sizes, steps);
+  }
 
   template <class T, std::size_t N>
   NArray<T, N>::NArray()

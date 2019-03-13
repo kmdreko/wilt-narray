@@ -353,6 +353,97 @@ namespace detail
     return true;
   }
 
+  template <class T>
+  struct narray_source_traits
+  {
+    using type = T;
+
+    static constexpr bool contiguous = true;
+    static constexpr std::size_t dimensions = 0;
+
+    static auto getSizes(T& t) { return Point<0>(); }
+    static auto getSteps(T& t) { return Point<0>(); }
+    static auto getData(T& t) { return &t; }
+  };
+
+  template <class T>
+  struct narray_source_traits<std::vector<T>>
+  {
+    static_assert(narray_source_traits<T>::contiguous, "invalid source: data is not continguous");
+
+    using type = typename narray_source_traits<T>::type;
+
+    static constexpr bool contiguous = false;
+    static constexpr std::size_t dimensions = 1 + narray_source_traits<T>::dimensions;
+
+    static auto getSizes(std::vector<T>& v)
+    {
+      return v.empty()
+        ? Point<dimensions>()
+        : narray_source_traits<T>::getSizes(v[0]).inserted(0, v.size());
+    }
+    static auto getSteps(std::vector<T>& v)
+    {
+      return v.empty()
+        ? Point<dimensions>()
+        : narray_source_traits<T>::getSteps(v[0]).inserted(0, sizeof(T) / sizeof(type));
+    }
+    static auto getData(std::vector<T>& v)
+    {
+      return v.empty()
+        ? nullptr
+        : narray_source_traits<T>::getData(v[0]);
+    }
+  };
+
+  template <class T, std::size_t N>
+  struct narray_source_traits<std::array<T, N>>
+  {
+    static_assert(narray_source_traits<T>::contiguous, "invalid source: data is not continguous");
+
+    using type = typename narray_source_traits<T>::type;
+
+    static constexpr bool contiguous = true;
+    static constexpr std::size_t dimensions = 1 + narray_source_traits<T>::dimensions;
+
+    static auto getSizes(std::array<T, N>& a)
+    {
+      return narray_source_traits<T>::getSizes(a[0]).inserted(0, N);
+    }
+    static auto getSteps(std::array<T, N>& a)
+    {
+      return narray_source_traits<T>::getSteps(a[0]).inserted(0, sizeof(T) / sizeof(type));
+    }
+    static auto getData(std::array<T, N>& a)
+    {
+      return narray_source_traits<T>::getData(a[0]);
+    }
+  };
+
+  template <class T, std::size_t N>
+  struct narray_source_traits<T[N]>
+  {
+    static_assert(narray_source_traits<T>::contiguous, "invalid source: data is not continguous");
+
+    using type = typename narray_source_traits<T>::type;
+
+    static constexpr bool contiguous = true;
+    static constexpr std::size_t dimensions = 1 + narray_source_traits<T>::dimensions;
+
+    static auto getSizes(T(&a)[N])
+    {
+      return narray_source_traits<T>::getSizes(a[0]).inserted(0, N);
+    }
+    static auto getSteps(T(&a)[N])
+    {
+      return narray_source_traits<T>::getSteps(a[0]).inserted(0, sizeof(T) / sizeof(type));
+    }
+    static auto getData(T(&a)[N])
+    {
+      return narray_source_traits<T>::getData(a[0]);
+    }
+  };
+
 } // namespace detail
 
 } // namespace wilt
