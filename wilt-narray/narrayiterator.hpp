@@ -37,16 +37,16 @@
 
 namespace wilt
 {
-  template <class T, std::size_t N> class NArray;
   // - defined in "narray.hpp"
+  template <class T, std::size_t N> class NArray;
 
 namespace detail
 {
+  // - defined below
   template <std::size_t N> void addValueToPosition(Point<N>& pos, const pos_t* sizes, pos_t value);
   template <std::size_t N> void addOneToPosition(Point<N>& pos, const pos_t* sizes);
   template <std::size_t N> void subValueFromPosition(Point<N>& pos, const pos_t* sizes, pos_t value);
   template <std::size_t N> void subOneFromPosition(Point<N>& pos, const pos_t* sizes);
-  // - defined below
 
 } // namespace detail
 

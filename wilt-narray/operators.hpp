@@ -34,8 +34,8 @@
 
 namespace wilt
 {
-  template <class T, std::size_t N> class NArray;
   // - defined in "narray.hpp"
+  template <class T, std::size_t N> class NArray;
 
   template <class T, std::size_t N>
   bool operator== (const wilt::NArray<T, N>& lhs, const wilt::NArray<T, N>& rhs)

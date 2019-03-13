@@ -42,11 +42,11 @@
 
 namespace wilt
 {
-  template <class T, std::size_t N, std::size_t M = 0> class NArrayIterator;
   // - defined in "narrayiterator.hpp"
+  template <class T, std::size_t N, std::size_t M = 0> class NArrayIterator;
 
-  template <class T, std::size_t N, std::size_t M> class SubNArrays;
   // - defined below
+  template <class T, std::size_t N, std::size_t M> class SubNArrays;
 
   //////////////////////////////////////////////////////////////////////////////
   // This class is designed to access a sequence of data and to manipulate it in
