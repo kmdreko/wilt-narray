@@ -71,6 +71,8 @@ This library is header-only, so it can either be added through include directori
 
 This library was built using C++14 and tested using Catch2.
 
+Check out some [examples](/docs/examples.md) for some small samples of what the library can do.
+
 Check out the [overview](/docs/overview.md) for implementation details.
 
 ## Contact
