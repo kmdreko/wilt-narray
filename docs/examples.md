@@ -49,13 +49,13 @@ struct Element { int field_1; float field_2; }
 auto elements = std::vector<Element>{...};
 auto element_array = wilt::make_narray(elements);
 
-for (auto field_2 : element_array.byMember($Element::field_2))
+for (auto field_2 : element_array.byMember(&Element::field_2))
 {
   // iterate over all 'field_2's
 }
 
-auto calculations = element_array.byMember($Element::field_1)
-                  + element_array.byMember($Element::field_2);
+auto calculations = element_array.byMember(&Element::field_1)
+                  + element_array.byMember(&Element::field_2);
 ```
 
 Even more helpful than a simple loop, these `NArray`s can of course be iterated over using standard algorithms and other iterator-friendly libraries. And this isn't a math focused library, others do it better, but it's nice to have the simple stuff.
