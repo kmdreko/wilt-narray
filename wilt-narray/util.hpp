@@ -30,6 +30,8 @@
 
 #include <cstddef>
 
+#include "point.hpp"
+
 namespace wilt
 {
   // type aliases

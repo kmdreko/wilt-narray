@@ -1450,10 +1450,10 @@ TEST_CASE("byMember(member) creates an array of the correct size and type")
   // assert
   REQUIRE(b.size() == a.size());
   REQUIRE(b.sizes() == a.sizes());
-  REQUIRE((std::is_same_v<decltype(b), wilt::NArray<int, 2>>));
+  REQUIRE((std::is_same<decltype(b), wilt::NArray<int, 2>>::value));
   REQUIRE(c.size() == a.size());
   REQUIRE(c.sizes() == a.sizes());
-  REQUIRE((std::is_same_v<decltype(c), wilt::NArray<float, 2>>));
+  REQUIRE((std::is_same<decltype(c), wilt::NArray<float, 2>>::value));
 }
 
 TEST_CASE("byMember(member) creates an array that shares data")
