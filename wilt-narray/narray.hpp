@@ -133,23 +133,23 @@ namespace wilt
     ////////////////////////////////////////////////////////////////////////////
 
     // Default constructor, makes an empty NArray.
-    NArray();
+    constexpr NArray() noexcept;
 
     // Copy and move constructor, shares data and uses the same data segment as
     // 'arr'
     //
     // NOTE: 'arr' is empty after being moved
-    NArray(const NArray<T, N>& arr);
-    NArray(NArray<T, N>&& arr);
+    NArray(const NArray<T, N>& arr) noexcept;
+    NArray(NArray<T, N>&& arr) noexcept;
 
     // Copy and move constructor from 'T' to 'const T'
     //
     // NOTE: 'arr' is empty after being moved
     // NOTE: only exists on 'const T' arrays
     template <class U, typename = typename std::enable_if<std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value>::type>
-    NArray(const NArray<U, N>& arr);
+    NArray(const NArray<U, N>& arr) noexcept;
     template <class U, typename = typename std::enable_if<std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value>::type>
-    NArray(NArray<U, N>&& arr);
+    NArray(NArray<U, N>&& arr) noexcept;
 
     // Creates an array of the given size, elements are default constructed.
     explicit NArray(const Point<N>& size);
@@ -183,7 +183,7 @@ namespace wilt
     template <class Iterator>
     NArray(const Point<N>& size, Iterator first, Iterator last);
 
-    NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps);
+    NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps) noexcept;
 
   public:
     ////////////////////////////////////////////////////////////////////////////
@@ -195,8 +195,8 @@ namespace wilt
     // reference) or destroyed (if it holds the last reference).
     //
     // NOTE: 'arr' is empty after being moved
-    NArray<T, N>& operator= (const NArray<T, N>& arr);
-    NArray<T, N>& operator= (NArray<T, N>&& arr);
+    NArray<T, N>& operator= (const NArray<T, N>& arr) noexcept;
+    NArray<T, N>& operator= (NArray<T, N>&& arr) noexcept;
 
     // copy and assignment from 'T' to 'const T', only on non-const T templates.
     // Original data reference is abandoned (if it doesn't hold the last 
@@ -204,9 +204,9 @@ namespace wilt
     //
     // NOTE: 'arr' is empty after being moved
     template <class U, typename = typename std::enable_if<std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value>::type>
-    NArray<T, N>& operator= (const NArray<U, N>& arr);
+    NArray<T, N>& operator= (const NArray<U, N>& arr) noexcept;
     template <class U, typename = typename std::enable_if<std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value>::type>
-    NArray<T, N>& operator= (NArray<U, N>&& arr);
+    NArray<T, N>& operator= (NArray<U, N>&& arr) noexcept;
 
     // Element-wise modifying assigment operators, modifies the underlying data,
     // arrays must have the same dimensions
@@ -227,20 +227,20 @@ namespace wilt
 
     // Gets the dimension sizes and step values, see class description. They
     // determine the size of data and how that data is accessed.
-    const Point<N>& sizes() const;
-    const Point<N>& steps() const;
+    const Point<N>& sizes() const noexcept;
+    const Point<N>& steps() const noexcept;
 
     // The total count of elements that can be accessed. This is simply the
     // compound of the dimension sizes.
-    std::size_t size() const;
+    std::size_t size() const noexcept;
 
     // Functions for data reference
     //   - empty  = no data is referenced
     //   - unique = data is referenced and hold the only reference
     //   - shared = data is referenced and doesn't hold the only reference
-    bool empty() const;
-    bool unique() const;
-    bool shared() const;
+    bool empty() const noexcept;
+    bool unique() const noexcept;
+    bool shared() const noexcept;
 
     // Convenience functions for dimension sizes (though may be confusing
     // depending on how the array is used)
@@ -250,17 +250,17 @@ namespace wilt
     //
     // NOTE: some functions are only available if they have that dimension
     std::size_t size(std::size_t dim) const;
-    std::size_t width() const;
-    std::size_t height() const;
-    std::size_t depth() const;
+    std::size_t width() const noexcept;
+    std::size_t height() const noexcept;
+    std::size_t depth() const noexcept;
 
     pos_t step(std::size_t dim) const;
 
     // Functions for determining the data organization for this array.
     //   - isContiguous = the array accesses data with no gaps
     //   - isAligned    = the array accesses data linearly
-    bool isContiguous() const;
-    bool isAligned() const;
+    bool isContiguous() const noexcept;
+    bool isAligned() const noexcept;
 
   public:
     ////////////////////////////////////////////////////////////////////////////
@@ -278,7 +278,7 @@ namespace wilt
     reference at(pos_t p1, pos_t p2, pos_t p3) const;
     reference at(pos_t p1, pos_t p2, pos_t p3, pos_t p4) const;
 
-    reference atUnchecked(const Point<N>& loc) const;
+    reference atUnchecked(const Point<N>& loc) const noexcept;
 
     // Indexing operator, will return an N-1 NArray at the location 'x' along
     // the 0th dimension.
@@ -408,16 +408,16 @@ namespace wilt
     // Gets a pointer to the segment base. Can be used to access the whole
     // segment if isContiguous() and isAligned() or by respecting sizes() and 
     // steps()
-    T* data() const;
+    T* data() const noexcept;
 
     // creates a constant version of the NArray, not strictly necessary since a
     // conversion constructor exists but is still nice to have.
-    NArray<const T, N> asConst() const;
+    NArray<const T, N> asConst() const noexcept;
 
     // creates a NArray that references the data in increasing order in memory
     //
     // NOTE: may get a performance increase if the access order doesn't matter
-    NArray<T, N> asAligned() const;
+    NArray<T, N> asAligned() const noexcept;
 
     // Creates an NArray that has its dimension and step values merged to their
     // most condensed form. A continuous and aligned array will be condensed to
@@ -425,10 +425,10 @@ namespace wilt
     //
     // NOTE: this isn't really intended to be used like this, but is used
     // internally to reduce recursive calls and can be useful for reshaping.
-    NArray<T, N> asCondensed() const;
+    NArray<T, N> asCondensed() const noexcept;
 
     template <class U, class T2 = T>
-    NArray<U, N> byMember(U T2::* member) const;
+    NArray<U, N> byMember(U T2::* member) const noexcept;
 
   public:
     ////////////////////////////////////////////////////////////////////////////
@@ -466,7 +466,7 @@ namespace wilt
 
     // Clears the array by dropping its reference to the data, destructing it if
     // it was the last reference.
-    void clear();
+    void clear() noexcept;
 
   private:
     ////////////////////////////////////////////////////////////////////////////
@@ -481,11 +481,11 @@ namespace wilt
     // PRIVATE FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    typename NArray<T, N-1>::exposed_type slice_(std::size_t dim, pos_t n) const;
-    NArray<T, N> range_(std::size_t dim, pos_t n, pos_t length) const;
-    NArray<T, N> flip_(std::size_t dim) const;
-    NArray<T, N> skip_(std::size_t dim, pos_t n, pos_t start) const;
-    NArray<T, N+1> window_(std::size_t dim, pos_t n) const;
+    typename NArray<T, N-1>::exposed_type slice_(std::size_t dim, pos_t n) const noexcept;
+    NArray<T, N> range_(std::size_t dim, pos_t n, pos_t length) const noexcept;
+    NArray<T, N> flip_(std::size_t dim) const noexcept;
+    NArray<T, N> skip_(std::size_t dim, pos_t n, pos_t start) const noexcept;
+    NArray<T, N+1> window_(std::size_t dim, pos_t n) const noexcept;
 
     template <class U, class Converter>
     static void convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func);
@@ -615,7 +615,7 @@ namespace detail
   //! meaningful result
   //! Will fail if N==0
   template <std::size_t N>
-  Point<N> step(const Point<N>& sizes)
+  Point<N> step(const Point<N>& sizes) noexcept
   {
     Point<N> ret;
     ret[N-1] = 1;
@@ -633,7 +633,7 @@ namespace detail
   //! Will be zero if any dimension is zero
   //! Will fail if N==0
   template <std::size_t N>
-  pos_t size(const Point<N>& sizes)
+  pos_t size(const Point<N>& sizes) noexcept
   {
     pos_t ret = sizes[0];
     for (std::size_t i = 1; i < N; ++i)
@@ -642,7 +642,7 @@ namespace detail
   }
 
   template <std::size_t N>
-  bool validSize(const Point<N>& size)
+  bool validSize(const Point<N>& size) noexcept
   {
     for (std::size_t i = 0; i < N; ++i)
       if (size[i] <= 0)
@@ -658,7 +658,7 @@ namespace detail
   //!
   //! Is used exclusively in NArray::align() to create an aligned NArray
   template <std::size_t N>
-  pos_t align(Point<N>& sizes, Point<N>& steps)
+  pos_t align(Point<N>& sizes, Point<N>& steps) noexcept
   {
     pos_t offset = 0;
     for (std::size_t i = 0; i < N; ++i)
@@ -694,7 +694,7 @@ namespace detail
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <std::size_t N>
-  std::size_t condense(Point<N>& sizes, Point<N>& steps)
+  std::size_t condense(Point<N>& sizes, Point<N>& steps) noexcept
   {
     std::size_t j = N-1;
     for (std::size_t i = N-1; i > 0; --i)
@@ -736,7 +736,7 @@ namespace detail
   //! Dimension array should all be positive and non-zero and step arrays must 
   //! be valid to produce a meaningful result
   template <std::size_t N>
-  std::size_t condense(Point<N>& sizes, Point<N>& step1, Point<N>& step2)
+  std::size_t condense(Point<N>& sizes, Point<N>& step1, Point<N>& step2) noexcept
   {
     std::size_t j = 0;
     for (std::size_t i = 1; i < N; ++i)
@@ -773,7 +773,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N>::NArray()
+  constexpr NArray<T, N>::NArray() noexcept
     : data_()
     , sizes_()
     , steps_()
@@ -782,7 +782,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N>::NArray(const NArray<T, N>& arr)
+  NArray<T, N>::NArray(const NArray<T, N>& arr) noexcept
     : data_(arr.data_)
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
@@ -791,7 +791,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N>::NArray(NArray<T, N>&& arr)
+  NArray<T, N>::NArray(NArray<T, N>&& arr) noexcept
     : data_(arr.data_)
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
@@ -801,7 +801,7 @@ namespace detail
 
   template <class T, std::size_t N>
   template <class U, typename>
-  NArray<T, N>::NArray(const NArray<U, N>& arr)
+  NArray<T, N>::NArray(const NArray<U, N>& arr) noexcept
     : data_(arr.data_)
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
@@ -811,7 +811,7 @@ namespace detail
 
   template <class T, std::size_t N>
   template <class U, typename>
-  NArray<T, N>::NArray(NArray<U, N>&& arr)
+  NArray<T, N>::NArray(NArray<U, N>&& arr) noexcept
     : data_(std::move(arr.data_))
     , sizes_(arr.sizes_)
     , steps_(arr.steps_)
@@ -908,7 +908,16 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N>& NArray<T, N>::operator= (const NArray<T, N>& arr)
+  NArray<T, N>::NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps) noexcept
+    : data_(std::move(data))
+    , sizes_(sizes)
+    , steps_(steps)
+  {
+
+  }
+
+  template <class T, std::size_t N>
+  NArray<T, N>& NArray<T, N>::operator= (const NArray<T, N>& arr) noexcept
   {
     data_ = arr.data_;
     sizes_ = arr.sizes_;
@@ -918,7 +927,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N>& NArray<T, N>::operator= (NArray<T, N>&& arr)
+  NArray<T, N>& NArray<T, N>::operator= (NArray<T, N>&& arr) noexcept
   {
     data_ = arr.data_;
     sizes_ = arr.sizes_;
@@ -931,7 +940,7 @@ namespace detail
 
   template <class T, std::size_t N>
   template <class U, typename>
-  NArray<T, N>& NArray<T, N>::operator= (const NArray<U, N>& arr)
+  NArray<T, N>& NArray<T, N>::operator= (const NArray<U, N>& arr) noexcept
   {
     static_assert(std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value, "NArray<const T, N>::operator=(const NArray<T, N>&): invalid for any other conversions");
 
@@ -944,7 +953,7 @@ namespace detail
 
   template <class T, std::size_t N>
   template <class U, typename>
-  NArray<T, N>& NArray<T, N>::operator= (NArray<U, N>&& arr)
+  NArray<T, N>& NArray<T, N>::operator= (NArray<U, N>&& arr) noexcept
   {
     static_assert(std::is_const<T>::value && std::is_same<U, typename std::remove_const<T>::type>::value, "NArray<const T, N>::operator=(NArray<T, N>&&): invalid for any other conversions");
 
@@ -955,15 +964,6 @@ namespace detail
     arr.clear();
 
     return *this;
-  }
-
-  template <class T, std::size_t N>
-  NArray<T, N>::NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps)
-    : data_(std::move(data))
-    , sizes_(sizes)
-    , steps_(steps)
-  {
-
   }
 
   template <class T, std::size_t N>
@@ -1049,37 +1049,37 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  const Point<N>& NArray<T, N>::sizes() const
+  const Point<N>& NArray<T, N>::sizes() const noexcept
   {
     return sizes_;
   }
 
   template <class T, std::size_t N>
-  const Point<N>& NArray<T, N>::steps() const
+  const Point<N>& NArray<T, N>::steps() const noexcept
   {
     return steps_;
   }
 
   template <class T, std::size_t N>
-  std::size_t NArray<T, N>::size() const
+  std::size_t NArray<T, N>::size() const noexcept
   {
     return (std::size_t)wilt::detail::size(sizes_);
   }
 
   template <class T, std::size_t N>
-  bool NArray<T, N>::empty() const
+  bool NArray<T, N>::empty() const noexcept
   {
     return data_.get() == nullptr;
   }
 
   template <class T, std::size_t N>
-  bool NArray<T, N>::unique() const
+  bool NArray<T, N>::unique() const noexcept
   {
     return data_.use_count() == 1;
   }
 
   template <class T, std::size_t N>
-  bool NArray<T, N>::shared() const
+  bool NArray<T, N>::shared() const noexcept
   {
     return data_.use_count() > 1;
   }
@@ -1094,13 +1094,13 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  std::size_t NArray<T, N>::width() const
+  std::size_t NArray<T, N>::width() const noexcept
   {
     return (std::size_t)sizes_[0];
   }
 
   template <class T, std::size_t N>
-  std::size_t NArray<T, N>::height() const
+  std::size_t NArray<T, N>::height() const noexcept
   {
     static_assert(N >= 2, "height(): invalid when N < 2");
 
@@ -1108,7 +1108,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  std::size_t NArray<T, N>::depth() const
+  std::size_t NArray<T, N>::depth() const noexcept
   {
     static_assert(N >= 3, "depth(): invalid when N < 3");
 
@@ -1125,7 +1125,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  bool NArray<T, N>::isContiguous() const
+  bool NArray<T, N>::isContiguous() const noexcept
   {
     pos_t stepSize = 0;
     for (std::size_t i = 0; i < N; ++i)
@@ -1135,7 +1135,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  bool NArray<T, N>::isAligned() const
+  bool NArray<T, N>::isAligned() const noexcept
   {
     if (empty())
       return false;
@@ -1197,7 +1197,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  typename NArray<T, N>::reference NArray<T, N>::atUnchecked(const Point<N>& loc) const
+  typename NArray<T, N>::reference NArray<T, N>::atUnchecked(const Point<N>& loc) const noexcept
   {
     T* ptr = data_.get();
     for (std::size_t i = 0; i < N; ++i)
@@ -1269,7 +1269,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  typename NArray<T, N-1>::exposed_type NArray<T, N>::slice_(std::size_t dim, pos_t n) const
+  typename NArray<T, N-1>::exposed_type NArray<T, N>::slice_(std::size_t dim, pos_t n) const noexcept
   {
     auto newdata = data_.get() + steps_[dim] * n;
     auto newsizes = sizes_.removed(dim);
@@ -1342,7 +1342,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::range_(std::size_t dim, pos_t n, pos_t length) const
+  NArray<T, N> NArray<T, N>::range_(std::size_t dim, pos_t n, pos_t length) const noexcept
   {
     auto newdata = data_.get() + steps_[dim] * n;
     auto newsizes = sizes_;
@@ -1391,7 +1391,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::flip_(std::size_t dim) const
+  NArray<T, N> NArray<T, N>::flip_(std::size_t dim) const noexcept
   {
     auto newdata = data_.get() + steps_[dim] * (sizes_[dim] - 1);
     auto newsteps = steps_;
@@ -1464,7 +1464,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::skip_(std::size_t dim, pos_t n, pos_t start) const
+  NArray<T, N> NArray<T, N>::skip_(std::size_t dim, pos_t n, pos_t start) const noexcept
   {
     auto newdata = data_.get() + steps_[dim] * start;
     auto newsizes = sizes_;
@@ -1668,7 +1668,7 @@ namespace detail
   }
 
   template<class T, std::size_t N>
-  NArray<T, N+1> NArray<T, N>::window_(std::size_t dim, pos_t n) const
+  NArray<T, N+1> NArray<T, N>::window_(std::size_t dim, pos_t n) const noexcept
   {
     auto newsizes = sizes_.inserted(N, n);
     auto newsteps = steps_.inserted(N, steps_[dim]);
@@ -1699,19 +1699,19 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  T* NArray<T, N>::data() const
+  T* NArray<T, N>::data() const noexcept
   {
     return data_.get();
   }
 
   template<class T, std::size_t N>
-  NArray<const T, N> NArray<T, N>::asConst() const
+  NArray<const T, N> NArray<T, N>::asConst() const noexcept
   {
     return NArray<const T, N>(*this);
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::asAligned() const
+  NArray<T, N> NArray<T, N>::asAligned() const noexcept
   {
     if (empty())
       return NArray<T, N>();
@@ -1725,7 +1725,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::asCondensed() const
+  NArray<T, N> NArray<T, N>::asCondensed() const noexcept
   {
     if (empty())
       return NArray<T, N>();
@@ -1739,7 +1739,7 @@ namespace detail
 
   template <class T, std::size_t N>
   template <class U, class T2>
-  NArray<U, N> NArray<T, N>::byMember(U T2::*member) const
+  NArray<U, N> NArray<T, N>::byMember(U T2::*member) const noexcept
   {
     static_assert(std::is_same<T, T2>::value, "byMember(): invalid when types don't match");
 
@@ -1851,7 +1851,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  void NArray<T, N>::clear()
+  void NArray<T, N>::clear() noexcept
   {
     data_.reset();
     sizes_.clear();
