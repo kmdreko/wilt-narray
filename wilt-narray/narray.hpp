@@ -183,7 +183,7 @@ namespace wilt
     template <class Iterator>
     NArray(const Point<N>& size, Iterator first, Iterator last);
 
-    NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps) noexcept;
+    NArray(std::shared_ptr<T> data, const Point<N>& sizes, const Point<N>& steps) noexcept;
 
   public:
     ////////////////////////////////////////////////////////////////////////////
@@ -908,7 +908,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N>::NArray(std::shared_ptr<T> data, Point<N> sizes, Point<N> steps) noexcept
+  NArray<T, N>::NArray(std::shared_ptr<T> data, const Point<N>& sizes, const Point<N>& steps) noexcept
     : data_(std::move(data))
     , sizes_(sizes)
     , steps_(steps)
