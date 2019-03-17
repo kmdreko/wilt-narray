@@ -28,6 +28,7 @@
 #ifndef WILT_NARRAYITERATOR_HPP
 #define WILT_NARRAYITERATOR_HPP
 
+#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <type_traits>
