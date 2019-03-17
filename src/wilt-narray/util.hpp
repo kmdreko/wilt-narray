@@ -41,46 +41,6 @@ namespace detail
 {
   //! @brief         applies an operation on two source arrays and stores the
   //!                result in a destination array
-  //! @param[out]    dst - the destination array
-  //! @param[in]     src1 - pointer to 1st source array
-  //! @param[in]     src2 - pointer to 2nd source array
-  //! @param[in]     sizes - pointer to dimension array
-  //! @param[in]     dsteps - pointer to dst step array
-  //! @param[in]     s1steps - pointer to 1st source step array
-  //! @param[in]     s2steps - pointer to 2nd source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                T(U, V) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! arrays must be the same size (hence the single dimension array), and
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class U, class V, class Operator>
-  void binaryOp(
-    T* dst, 
-    const U* src1, 
-    const V* src2, 
-    const pos_t* sizes,
-    const pos_t* dsteps, 
-    const pos_t* s1steps, 
-    const pos_t* s2steps,
-    Operator op, 
-    std::size_t n)
-  {
-    T* end = dst + sizes[0] * dsteps[0];
-    if (n == 1)
-    {
-      for (; dst != end; dst += dsteps[0], src1 += s1steps[0], src2 += s2steps[0])
-        dst[0] = op(src1[0], src2[0]);
-    }
-    else
-    {
-      for (; dst != end; dst += dsteps[0], src1 += s1steps[0], src2 += s2steps[0])
-        binaryOp(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op, n - 1);
-    }
-  }
-
-  //! @brief         applies an operation on two source arrays and stores the
-  //!                result in a destination array
   //! @param[in,out] dst - the destination array
   //! @param[in]     src1 - pointer to 1st source array
   //! @param[in]     src2 - pointer to 2nd source array
@@ -94,65 +54,26 @@ namespace detail
   //!
   //! arrays must be the same size (hence the single dimension array), and
   //! this function makes no checks whether the inputs are valid.
-  template <class T, class U, class V, class Operator>
-  void binaryOp2(
-    T* dst, 
-    const U* src1, 
-    const V* src2, 
-    const pos_t* sizes,
-    const pos_t* dsteps, 
-    const pos_t* s1steps, 
-    const pos_t* s2steps,
-    Operator op, 
-    std::size_t n)
-  {
-    T* end = dst + sizes[0] * dsteps[0];
-    if (n == 1)
-    {
-      for (; dst != end; dst += dsteps[0], src1 += s1steps[0], src2 += s2steps[0])
-        op(dst[0], src1[0], src2[0]);
+  template <std::size_t N, class T, class U, class V, class Operator>
+  struct binaryOp2Helper {
+    static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator& op) {
+      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src1 += *s1steps, src2 += *s2steps)
+        binaryOp2Helper<N-1, T, U, V, Operator>::call(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op);
     }
-    else
-    {
-      for (; dst != end; dst += dsteps[0], src1 += s1steps[0], src2 += s2steps[0])
-        binaryOp2(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op, n - 1);
-    }
-  }
+  };
 
-  //! @brief         applies an operation on a source array and stores the
-  //!                result in a destination array
-  //! @param[out]    dst - the destination array
-  //! @param[in]     src - pointer to 1st source array
-  //! @param[in]     sizes - pointer to dimension array
-  //! @param[in]     dsteps - pointer to dst step array
-  //! @param[in]     ssteps - pointer to source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                T(U) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! arrays must be the same size (hence the single dimension array), and
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class U, class Operator>
-  void unaryOp(
-    T* dst, 
-    const U* src, 
-    const pos_t* sizes,
-    const pos_t* dsteps, 
-    const pos_t* ssteps,
-    Operator op, 
-    std::size_t n)
+  template <class T, class U, class V, class Operator>
+  struct binaryOp2Helper<1u, T, U, V, Operator> {
+    static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator& op) {
+      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src1 += *s1steps, src2 += *s2steps)
+        op(*dst, *src1, *src2);
+    }
+  };
+
+  template <std::size_t N, class T, class U, class V, class Operator>
+  void binaryOp2(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator op)
   {
-    T* end = dst + dsteps[0] * sizes[0];
-    if (n == 1)
-    {
-      for (; dst != end; dst += dsteps[0], src += ssteps[0])
-        dst[0] = op(src[0]);
-    }
-    else
-    {
-      for (; dst != end; dst += dsteps[0], src += ssteps[0])
-        unaryOp(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op, n - 1);
-    }
+    binaryOp2Helper<N, T, U, V, Operator>::call(dst, src1, src2, sizes, dsteps, s1steps, s2steps, op);
   }
 
   //! @brief         applies an operation on a source array and stores the
@@ -168,58 +89,26 @@ namespace detail
   //!
   //! arrays must be the same size (hence the single dimension array), and
   //! this function makes no checks whether the inputs are valid.
-  template <class T, class U, class Operator>
-  void unaryOp2(
-    T* dst, 
-    const U* src, 
-    const pos_t* sizes,
-    const pos_t* dsteps, 
-    const pos_t* ssteps,
-    Operator op, 
-    std::size_t n)
-  {
-    T* end = dst + dsteps[0] * sizes[0];
-    if (n == 1)
-    {
-      for (; dst < end; dst += dsteps[0], src += ssteps[0])
-        op(dst[0], src[0]);
+  template <std::size_t N, class T, class U, class Operator>
+  struct unaryOp2Helper {
+    static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator& op) {
+      for (T* end = dst + *dsteps * *sizes; dst < end; dst += *dsteps, src += *ssteps)
+        unaryOp2Helper<N-1, T, U, Operator>::call(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op);
     }
-    else
-    {
-      for (; dst < end; dst += dsteps[0], src += ssteps[0])
-        unaryOp2(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op, n - 1);
-    }
-  }
+  };
 
-  //! @brief         applies an operation and stores the result in a destination
-  //!                array
-  //! @param[out]    dst - the destination array
-  //! @param[in]     sizes - pointer to dimension array
-  //! @param[in]     dsteps - pointer to dst step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                T() or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! this function makes no checks whether the inputs are valid.
-  template <class T, class Operator>
-  void singleOp(
-    T* dst, 
-    const pos_t* sizes,
-    const pos_t* dsteps,
-    Operator op, 
-    std::size_t n)
+  template <class T, class U, class Operator>
+  struct unaryOp2Helper<1u, T, U, Operator> {
+    static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator& op) {
+      for (T* end = dst + *dsteps * *sizes; dst < end; dst += *dsteps, src += *ssteps)
+        op(*dst, *src);
+    }
+  };
+
+  template <std::size_t N, class T, class U, class Operator>
+  void unaryOp2(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator op)
   {
-    T* end = dst + sizes[0] * dsteps[0];
-    if (n == 1)
-    {
-      for (; dst != end; dst += dsteps[0])
-        dst[0] = op();
-    }
-    else
-    {
-      for (; dst != end; dst += dsteps[0])
-        singleOp(dst, sizes + 1, dsteps + 1, op, n - 1);
-    }
+    unaryOp2Helper<N, T, U, Operator>::call(dst, src, sizes, dsteps, ssteps, op);
   }
 
   //! @brief         applies an operation and stores the result in a destination
@@ -232,49 +121,24 @@ namespace detail
   //! @param[in]     N - the dimensionality of the arrays
   //!
   //! this function makes no checks whether the inputs are valid.
-  template <class T, class Operator>
-  void singleOp2(
-    T* dst, 
-    const pos_t* sizes,
-    const pos_t* dsteps,
-    Operator op, 
-    std::size_t n)
-  {
-    T* end = dst + sizes[0] * dsteps[0];
-    if (n == 1)
-    {
-      for (; dst != end; dst += dsteps[0])
-        op(dst[0]);
-    }
-    else
-    {
-      for (; dst != end; dst += dsteps[0])
-        singleOp2(dst, sizes + 1, dsteps + 1, op, n - 1);
-    }
-  }
-
   template <std::size_t N, class T, class Operator>
   struct singleOp2Helper {
-    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op)
-    {
-      T* end = dst + *sizes * *dsteps;
-      for (; dst != end; dst += *dsteps)
+    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op) {
+      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps)
         singleOp2Helper<N-1, T, Operator>::call(dst, sizes + 1, dsteps + 1, op);
     }
   };
 
   template <class T, class Operator>
   struct singleOp2Helper<1u, T, Operator> {
-    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op)
-    {
-      T* end = dst + *sizes * *dsteps;
-      for (; dst != end; dst += *dsteps)
+    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op) {
+      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps)
         op(*dst);
     }
   };
 
   template <std::size_t N, class T, class Operator>
-  void singleOp2Templated(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator op)
+  void singleOp2(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator op)
   {
     singleOp2Helper<N, T, Operator>::call(dst, sizes, dsteps, op);
   }
