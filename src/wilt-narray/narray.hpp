@@ -105,16 +105,13 @@ namespace wilt
     // TYPE DEFINITIONS
     ////////////////////////////////////////////////////////////////////////////
 
-    using type = typename std::remove_const<T>::type;
-    using value = T;
-    using cvalue = const T;
-    using pointer = T*;
-    using cpointer = const T*;
+    using value_type = T;
     using reference = T&;
-    using creference = const T&;
-
-    using iterator = NArrayIterator<value, N>;
-    using const_iterator = NArrayIterator<cvalue, N>;
+    using const_reference = const T&;
+    using iterator = NArrayIterator<T, N>;
+    using const_iterator = NArrayIterator<const T, N>;
+    using difference_type = std::ptrdiff_t;
+    using size_type = std::size_t;
 
     using exposed_type = NArray<T, N>;
 
@@ -211,8 +208,8 @@ namespace wilt
 
     // Element-wise modifying assigment operators, modifies the underlying data,
     // arrays must have the same dimensions
-    NArray<T, N>& operator+= (const NArray<cvalue, N>& arr);
-    NArray<T, N>& operator-= (const NArray<cvalue, N>& arr);
+    NArray<T, N>& operator+= (const NArray<const T, N>& arr);
+    NArray<T, N>& operator-= (const NArray<const T, N>& arr);
 
     // Element-wise modifying assigment operators, modifies the underlying data
     NArray<T, N>& operator+= (const T& val);
@@ -492,7 +489,7 @@ namespace wilt
     NArray<T, N+1> window_(std::size_t dim, pos_t n) const noexcept;
 
     template <class U, class Converter>
-    static void convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func);
+    static void convertTo_(const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>& rhs, Converter func);
 
   }; // class NArray
 
@@ -836,7 +833,7 @@ namespace detail
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
-    data_ = std::make_shared<wilt::detail::NArrayDataBlock<type>>(wilt::detail::size(size))->data();
+    data_ = std::make_shared<wilt::detail::NArrayDataBlock<typename std::remove_const<T>::type>>(wilt::detail::size(size))->data();
   }
 
   template <class T, std::size_t N>
@@ -850,7 +847,7 @@ namespace detail
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
-    data_ = std::make_shared<wilt::detail::NArrayDataBlock<type>>(wilt::detail::size(size), val)->data();
+    data_ = std::make_shared<wilt::detail::NArrayDataBlock<typename std::remove_const<T>::type>>(wilt::detail::size(size), val)->data();
   }
 
   template <class T, std::size_t N>
@@ -864,7 +861,7 @@ namespace detail
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
-    data_ = std::make_shared<wilt::detail::NArrayDataBlock<type>>(wilt::detail::size(size), ptr, atype)->data();
+    data_ = std::make_shared<wilt::detail::NArrayDataBlock<typename std::remove_const<T>::type>>(wilt::detail::size(size), ptr, atype)->data();
   }
 
   template <class T, std::size_t N>
@@ -878,7 +875,7 @@ namespace detail
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
-    data_ = std::make_shared<wilt::detail::NArrayDataBlock<type>>(wilt::detail::size(size), list.begin(), list.end())->data();
+    data_ = std::make_shared<wilt::detail::NArrayDataBlock<typename std::remove_const<T>::type>>(wilt::detail::size(size), list.begin(), list.end())->data();
   }
 
   template <class T, std::size_t N>
@@ -893,7 +890,7 @@ namespace detail
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
-    data_ = std::make_shared<wilt::detail::NArrayDataBlock<type>>(wilt::detail::size(size), gen)->data();
+    data_ = std::make_shared<wilt::detail::NArrayDataBlock<typename std::remove_const<T>::type>>(wilt::detail::size(size), gen)->data();
   }
 
   template <class T, std::size_t N>
@@ -908,7 +905,7 @@ namespace detail
 
     sizes_ = size;
     steps_ = wilt::detail::step(size);
-    data_ = std::make_shared<wilt::detail::NArrayDataBlock<type>>(wilt::detail::size(size), first, last)->data();
+    data_ = std::make_shared<wilt::detail::NArrayDataBlock<typename std::remove_const<T>::type>>(wilt::detail::size(size), first, last)->data();
   }
 
   template <class T, std::size_t N>
@@ -984,7 +981,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N>& NArray<T, N>::operator+= (const NArray<cvalue, N>& arr)
+  NArray<T, N>& NArray<T, N>::operator+= (const NArray<const T, N>& arr)
   {
     static_assert(!std::is_const<T>::value, "operator+=(arr): invalid on const type");
 
@@ -1012,7 +1009,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N>& NArray<T, N>::operator-= (const NArray<cvalue, N>& arr)
+  NArray<T, N>& NArray<T, N>::operator-= (const NArray<const T, N>& arr)
   {
     static_assert(!std::is_const<T>::value, "operator-=(arr): invalid on const type");
 
@@ -1817,13 +1814,13 @@ namespace detail
 
   template <class T, std::size_t N>
   template <class U, class Converter>
-  void NArray<T, N>::convertTo_(const wilt::NArray<value, N>& lhs, wilt::NArray<U, N>& rhs, Converter func)
+  void NArray<T, N>::convertTo_(const wilt::NArray<T, N>& lhs, wilt::NArray<U, N>& rhs, Converter func)
   {
     Point<N> sizes = lhs.sizes();
     Point<N> step1 = lhs.steps();
     Point<N> step2 = rhs.steps();
     wilt::detail::condense(sizes, step1, step2);
-    wilt::detail::binaryOp<N>(rhs.data(), lhs.data(), sizes.data(), step2.data(), step1.data(), [&func](U& u, const value& v) { u = func(v); });
+    wilt::detail::binaryOp<N>(rhs.data(), lhs.data(), sizes.data(), step2.data(), step1.data(), [&func](U& u, const T& v) { u = func(v); });
   }
 
   template <class T, std::size_t N>
