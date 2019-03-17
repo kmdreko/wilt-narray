@@ -55,15 +55,15 @@ namespace detail
   //! arrays must be the same size (hence the single dimension array), and
   //! this function makes no checks whether the inputs are valid.
   template <std::size_t N, class T, class U, class V, class Operator>
-  struct binaryOp2Helper {
+  struct ternaryOpHelper {
     static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator& op) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src1 += *s1steps, src2 += *s2steps)
-        binaryOp2Helper<N-1, T, U, V, Operator>::call(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op);
+        ternaryOpHelper<N-1, T, U, V, Operator>::call(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op);
     }
   };
 
   template <class T, class U, class V, class Operator>
-  struct binaryOp2Helper<1u, T, U, V, Operator> {
+  struct ternaryOpHelper<1u, T, U, V, Operator> {
     static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator& op) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src1 += *s1steps, src2 += *s2steps)
         op(*dst, *src1, *src2);
@@ -71,9 +71,9 @@ namespace detail
   };
 
   template <std::size_t N, class T, class U, class V, class Operator>
-  void binaryOp2(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator op)
+  void ternaryOp(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator op)
   {
-    binaryOp2Helper<N, T, U, V, Operator>::call(dst, src1, src2, sizes, dsteps, s1steps, s2steps, op);
+    ternaryOpHelper<N, T, U, V, Operator>::call(dst, src1, src2, sizes, dsteps, s1steps, s2steps, op);
   }
 
   //! @brief         applies an operation on a source array and stores the
@@ -90,15 +90,15 @@ namespace detail
   //! arrays must be the same size (hence the single dimension array), and
   //! this function makes no checks whether the inputs are valid.
   template <std::size_t N, class T, class U, class Operator>
-  struct unaryOp2Helper {
+  struct binaryOpHelper {
     static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator& op) {
       for (T* end = dst + *dsteps * *sizes; dst < end; dst += *dsteps, src += *ssteps)
-        unaryOp2Helper<N-1, T, U, Operator>::call(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op);
+        binaryOpHelper<N-1, T, U, Operator>::call(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op);
     }
   };
 
   template <class T, class U, class Operator>
-  struct unaryOp2Helper<1u, T, U, Operator> {
+  struct binaryOpHelper<1u, T, U, Operator> {
     static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator& op) {
       for (T* end = dst + *dsteps * *sizes; dst < end; dst += *dsteps, src += *ssteps)
         op(*dst, *src);
@@ -106,9 +106,9 @@ namespace detail
   };
 
   template <std::size_t N, class T, class U, class Operator>
-  void unaryOp2(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator op)
+  void binaryOp(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator op)
   {
-    unaryOp2Helper<N, T, U, Operator>::call(dst, src, sizes, dsteps, ssteps, op);
+    binaryOpHelper<N, T, U, Operator>::call(dst, src, sizes, dsteps, ssteps, op);
   }
 
   //! @brief         applies an operation and stores the result in a destination
@@ -122,15 +122,15 @@ namespace detail
   //!
   //! this function makes no checks whether the inputs are valid.
   template <std::size_t N, class T, class Operator>
-  struct singleOp2Helper {
+  struct unaryOpHelper {
     static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps)
-        singleOp2Helper<N-1, T, Operator>::call(dst, sizes + 1, dsteps + 1, op);
+        unaryOpHelper<N-1, T, Operator>::call(dst, sizes + 1, dsteps + 1, op);
     }
   };
 
   template <class T, class Operator>
-  struct singleOp2Helper<1u, T, Operator> {
+  struct unaryOpHelper<1u, T, Operator> {
     static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps)
         op(*dst);
@@ -138,9 +138,9 @@ namespace detail
   };
 
   template <std::size_t N, class T, class Operator>
-  void singleOp2(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator op)
+  void unaryOp(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator op)
   {
-    singleOp2Helper<N, T, Operator>::call(dst, sizes, dsteps, op);
+    unaryOpHelper<N, T, Operator>::call(dst, sizes, dsteps, op);
   }
 
   //! @brief         applies an operation between two source arrays and returns
