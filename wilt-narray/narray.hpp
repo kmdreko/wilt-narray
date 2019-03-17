@@ -183,6 +183,7 @@ namespace wilt
     template <class Iterator>
     NArray(const Point<N>& size, Iterator first, Iterator last);
 
+    NArray(std::shared_ptr<T> data, const Point<N>& sizes) noexcept;
     NArray(std::shared_ptr<T> data, const Point<N>& sizes, const Point<N>& steps) noexcept;
 
   public:
@@ -225,22 +226,13 @@ namespace wilt
     ////////////////////////////////////////////////////////////////////////////
     // functions only report the state of the array
 
-    // Gets the dimension sizes and step values, see class description. They
-    // determine the size of data and how that data is accessed.
+    // Gets the dimension sizes, see class description. They determine the size
+    // of the data accessed.
     const Point<N>& sizes() const noexcept;
-    const Point<N>& steps() const noexcept;
 
     // The total count of elements that can be accessed. This is simply the
     // compound of the dimension sizes.
     std::size_t size() const noexcept;
-
-    // Functions for data reference
-    //   - empty  = no data is referenced
-    //   - unique = data is referenced and hold the only reference
-    //   - shared = data is referenced and doesn't hold the only reference
-    bool empty() const noexcept;
-    bool unique() const noexcept;
-    bool shared() const noexcept;
 
     // Convenience functions for dimension sizes (though may be confusing
     // depending on how the array is used)
@@ -254,7 +246,19 @@ namespace wilt
     std::size_t height() const noexcept;
     std::size_t depth() const noexcept;
 
+    // Gets the step values, see class description. They determine how the data
+    // is accessed.
+    const Point<N>& steps() const noexcept;
+
     pos_t step(std::size_t dim) const;
+
+    // Functions for data reference
+    //   - empty  = no data is referenced
+    //   - unique = data is referenced and hold the only reference
+    //   - shared = data is referenced and doesn't hold the only reference
+    bool empty() const noexcept;
+    bool unique() const noexcept;
+    bool shared() const noexcept;
 
     // Functions for determining the data organization for this array.
     //   - isContiguous = the array accesses data with no gaps
@@ -908,6 +912,19 @@ namespace detail
   }
 
   template <class T, std::size_t N>
+  NArray<T, N>::NArray(std::shared_ptr<T> data, const Point<N>& sizes) noexcept
+    : data_(std::move(data))
+    , sizes_()
+    , steps_()
+  {
+    if (!wilt::detail::validSize(size))
+      throw std::invalid_argument("NArray(data, size): size is not valid");
+
+    sizes_ = size;
+    steps_ = wilt::detail::step(size);
+  }
+
+  template <class T, std::size_t N>
   NArray<T, N>::NArray(std::shared_ptr<T> data, const Point<N>& sizes, const Point<N>& steps) noexcept
     : data_(std::move(data))
     , sizes_(sizes)
@@ -1055,33 +1072,9 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  const Point<N>& NArray<T, N>::steps() const noexcept
-  {
-    return steps_;
-  }
-
-  template <class T, std::size_t N>
   std::size_t NArray<T, N>::size() const noexcept
   {
     return (std::size_t)wilt::detail::size(sizes_);
-  }
-
-  template <class T, std::size_t N>
-  bool NArray<T, N>::empty() const noexcept
-  {
-    return data_.get() == nullptr;
-  }
-
-  template <class T, std::size_t N>
-  bool NArray<T, N>::unique() const noexcept
-  {
-    return data_.use_count() == 1;
-  }
-
-  template <class T, std::size_t N>
-  bool NArray<T, N>::shared() const noexcept
-  {
-    return data_.use_count() > 1;
   }
 
   template <class T, std::size_t N>
@@ -1116,12 +1109,36 @@ namespace detail
   }
 
   template <class T, std::size_t N>
+  const Point<N>& NArray<T, N>::steps() const noexcept
+  {
+    return steps_;
+  }
+
+  template <class T, std::size_t N>
   pos_t NArray<T, N>::step(std::size_t dim) const
   {
     if (dim >= N)
       throw std::out_of_range("step(dim): dim out of bounds");
 
     return steps_[dim];
+  }
+
+  template <class T, std::size_t N>
+  bool NArray<T, N>::empty() const noexcept
+  {
+    return data_.get() == nullptr;
+  }
+
+  template <class T, std::size_t N>
+  bool NArray<T, N>::unique() const noexcept
+  {
+    return data_.use_count() == 1;
+  }
+
+  template <class T, std::size_t N>
+  bool NArray<T, N>::shared() const noexcept
+  {
+    return data_.use_count() > 1;
   }
 
   template <class T, std::size_t N>
