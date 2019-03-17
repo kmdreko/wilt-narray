@@ -32,7 +32,7 @@
 #include <chrono>
 #include <iostream>
 
-#include "../wilt-narray/narray.hpp"
+#include "../src/wilt-narray/narray.hpp"
 
 class NoDefault
 {
