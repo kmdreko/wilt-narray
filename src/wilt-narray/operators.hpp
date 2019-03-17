@@ -140,9 +140,9 @@ namespace wilt
   MAKE_BINARY_OP(div, /)
   MAKE_BINARY_OP(mod, %)
 
-  MAKE_BINARY_OP(bitwiseAnd, &)
-  MAKE_BINARY_OP(bitwiseOr,  |)
-  MAKE_BINARY_OP(bitwiseXor, ^)
+  MAKE_BINARY_OP(bitwiseAND, &)
+  MAKE_BINARY_OP(bitwiseOR,  |)
+  MAKE_BINARY_OP(bitwiseXOR, ^)
 
 #undef MAKE_COMPARE_OP
 #undef MAKE_BINARY_OP

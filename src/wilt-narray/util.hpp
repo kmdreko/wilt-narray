@@ -92,7 +92,7 @@ namespace detail
   template <std::size_t N, class T, class U, class Operator>
   struct binaryOpHelper {
     static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator& op) {
-      for (T* end = dst + *dsteps * *sizes; dst != end; dst += *dsteps, src += *ssteps)
+      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src += *ssteps)
         binaryOpHelper<N-1, T, U, Operator>::call(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op);
     }
   };
@@ -100,7 +100,7 @@ namespace detail
   template <class T, class U, class Operator>
   struct binaryOpHelper<1u, T, U, Operator> {
     static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator& op) {
-      for (T* end = dst + *dsteps * *sizes; dst != end; dst += *dsteps, src += *ssteps)
+      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src += *ssteps)
         op(*dst, *src);
     }
   };
