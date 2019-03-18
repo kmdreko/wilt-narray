@@ -49,7 +49,7 @@ namespace wilt
   //
   // The point has the traditional access methods like `operator[]` and `data()`
   // but it also provides the expected mathematical operators (`+`, `-`, `*`,
-  // and `\`) to use it like a geometric point. In addition, there are methods
+  // and `/`) to use it like a geometric point. In addition, there are methods
   // like `inserted()`, `removed()`, `high()`, and `low()` that return a new
   // object with the dimensionality manipulated as needed. These functions help
   // the `NArray` class perform its transformations.

@@ -462,8 +462,8 @@ namespace wilt
     // size with an optional mask
     void setTo(const NArray<const T, N>& arr) const;
     void setTo(const T& val) const;
-    void setTo(const NArray<const T, N>& arr, const NArray<uint8_t, N>& mask) const;
-    void setTo(const T& val, const NArray<uint8_t, N>& mask) const;
+    void setTo(const NArray<const T, N>& arr, const NArray<const bool, N>& mask) const;
+    void setTo(const T& val, const NArray<const bool, N>& mask) const;
 
     // Clears the array by dropping its reference to the data, destructing it if
     // it was the last reference.
@@ -1864,7 +1864,7 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  void NArray<T, N>::setTo(const NArray<const T, N>& arr, const NArray<uint8_t, N>& mask) const
+  void NArray<T, N>::setTo(const NArray<const T, N>& arr, const NArray<const bool, N>& mask) const
   {
     static_assert(!std::is_const<T>::value, "setTo(arr, mask): invalid when element type is const");
 
@@ -1875,18 +1875,18 @@ namespace detail
            data_.get(),      steps_.data(), 
        arr.data_.get(),  arr.steps_.data(), 
       mask.data_.get(), mask.steps_.data(),
-      [](T& r, const T& v, uint8_t m) { if (m != 0) r = v; });
+      [](T& r, const T& v, bool m) { if (m != 0) r = v; });
   }
 
   template <class T, std::size_t N>
-  void NArray<T, N>::setTo(const T& val, const NArray<uint8_t, N>& mask) const
+  void NArray<T, N>::setTo(const T& val, const NArray<const bool, N>& mask) const
   {
     static_assert(!std::is_const<T>::value, "setTo(val, mask): invalid when element type is const");
 
     wilt::detail::binary<N>(sizes_.data(), 
            data_.get(),      steps_.data(), 
       mask.data_.get(), mask.steps_.data(),
-      [&val](T& r, uint8_t m) { if (m != 0) r = val; });
+      [&val](T& r, bool m) { if (m != 0) r = val; });
   }
 
   template <class T, std::size_t N>

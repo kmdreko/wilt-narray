@@ -174,10 +174,10 @@ namespace detail
   // - the functor signature should be `bool(T)` or similar
   template <class T, class Operator>
   bool allOf(
-    const T* src, 
+    const T* src,
     const pos_t* sizes,
     const pos_t* ssteps,
-    Operator op, 
+    Operator op,
     std::size_t n)
   {
     const T* end = src + sizes[0] * ssteps[0];
@@ -195,6 +195,14 @@ namespace detail
     }
     return true;
   }
+
+  // The `narray_source_traits` class determines what types are available for
+  // `make_narray` calls and uses static functions to get the required
+  // information needed to build the array.
+  //
+  // Notes:
+  // - the sizes and steps returns needs to match the dimensions
+  // - all specializations need to include the contiguous check
 
   template <class T>
   struct narray_source_traits
