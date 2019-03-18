@@ -28,7 +28,9 @@
 #ifndef WILT_UTIL_HPP
 #define WILT_UTIL_HPP
 
+#include <array>
 #include <cstddef>
+#include <vector>
 
 #include "point.hpp"
 
@@ -48,25 +50,25 @@ namespace detail
   // - the functor signature should be `void(T, U, V)` or similar
 
   template <std::size_t N, class T, class U, class V, class Functor>
-  struct ternaryOpHelper {
-    static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Functor& f) {
-      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src1 += *s1steps, src2 += *s2steps)
-        ternaryOpHelper<N-1, T, U, V, Functor>::call(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, f);
+  struct ternaryHelper {
+    static void call(const pos_t* sizes, T* data1, const pos_t* steps1, U* data2, const pos_t* steps2, V* data3, const pos_t* steps3, Functor& f) {
+      for (T* end = data1 + *sizes * *steps1; data1 != end; data1 += *steps1, data2 += *steps2, data3 += *steps3)
+        ternaryHelper<N-1, T, U, V, Functor>::call(sizes + 1, data1, steps1 + 1, data2, steps2 + 1, data3, steps3 + 1, f);
     }
   };
 
   template <class T, class U, class V, class Functor>
-  struct ternaryOpHelper<1u, T, U, V, Functor> {
-    static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Functor& f) {
-      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src1 += *s1steps, src2 += *s2steps)
-        f(*dst, *src1, *src2);
+  struct ternaryHelper<1u, T, U, V, Functor> {
+    static void call(const pos_t* sizes, T* data1, const pos_t* steps1, U* data2, const pos_t* steps2, V* data3, const pos_t* steps3, Functor& f) {
+      for (T* end = data1 + *sizes * *steps1; data1 != end; data1 += *steps1, data2 += *steps2, data3 += *steps3)
+        f(*data1, *data2, *data3);
     }
   };
 
   template <std::size_t N, class T, class U, class V, class Functor>
-  void ternaryOp(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Functor f)
+  void ternary(const pos_t* sizes, T* data1, const pos_t* steps1, U* data2, const pos_t* steps2, V* data3, const pos_t* steps3, Functor f)
   {
-    ternaryOpHelper<N, T, U, V, Functor>::call(dst, src1, src2, sizes, dsteps, s1steps, s2steps, f);
+    ternaryHelper<N, T, U, V, Functor>::call(sizes, data1, steps1, data2, steps2, data3, steps3, f);
   }
 
   // Calls a functor on all corresponding elements from two arrays that are
@@ -78,25 +80,25 @@ namespace detail
   // - the functor signature should be `void(T, U)` or similar
 
   template <std::size_t N, class T, class U, class Functor>
-  struct binaryOpHelper {
-    static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Functor& f) {
-      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src += *ssteps)
-        binaryOpHelper<N-1, T, U, Functor>::call(dst, src, sizes + 1, dsteps + 1, ssteps + 1, f);
+  struct binaryHelper {
+    static void call(const pos_t* sizes, T* data1, const pos_t* steps1, U* data2, const pos_t* steps2, Functor& f) {
+      for (T* end = data1 + *sizes * *steps1; data1 != end; data1 += *steps1, data2 += *steps2)
+        binaryHelper<N-1, T, U, Functor>::call(sizes + 1, data1, steps1 + 1, data2, steps2 + 1, f);
     }
   };
 
   template <class T, class U, class Functor>
-  struct binaryOpHelper<1u, T, U, Functor> {
-    static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Functor& f) {
-      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src += *ssteps)
-        f(*dst, *src);
+  struct binaryHelper<1u, T, U, Functor> {
+    static void call(const pos_t* sizes, T* data1, const pos_t* steps1, U* data2, const pos_t* steps2, Functor& f) {
+      for (T* end = data1 + *sizes * *steps1; data1 != end; data1 += *steps1, data2 += *steps2)
+        f(*data1, *data2);
     }
   };
 
   template <std::size_t N, class T, class U, class Functor>
-  void binaryOp(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Functor f)
+  void binary(const pos_t* sizes, T* data1, const pos_t* steps1, U* data2, const pos_t* steps2, Functor f)
   {
-    binaryOpHelper<N, T, U, Functor>::call(dst, src, sizes, dsteps, ssteps, f);
+    binaryHelper<N, T, U, Functor>::call(sizes, data1, steps1, data2, steps2, f);
   }
 
   // Calls a functor on all elements from an array that is accessed by its
@@ -107,25 +109,25 @@ namespace detail
   // - the functor signature should be `void(T)` or similar
 
   template <std::size_t N, class T, class Functor>
-  struct unaryOpHelper {
-    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Functor& f) {
-      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps)
-        unaryOpHelper<N-1, T, Functor>::call(dst, sizes + 1, dsteps + 1, f);
+  struct unaryHelper {
+    static void call(const pos_t* sizes, T* data, const pos_t* steps, Functor& f) {
+      for (T* end = data + *sizes * *steps; data != end; data += *steps)
+        unaryHelper<N-1, T, Functor>::call(sizes + 1, data, steps + 1, f);
     }
   };
 
   template <class T, class Functor>
-  struct unaryOpHelper<1u, T, Functor> {
-    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Functor& f) {
-      for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps)
-        f(*dst);
+  struct unaryHelper<1u, T, Functor> {
+    static void call(const pos_t* sizes, T* data, const pos_t* steps, Functor& f) {
+      for (T* end = data + *sizes * *steps; data != end; data += *steps)
+        f(*data);
     }
   };
 
   template <std::size_t N, class T, class Functor>
-  void unaryOp(T* dst, const pos_t* sizes, const pos_t* dsteps, Functor f)
+  void unary(const pos_t* sizes, T* data, const pos_t* steps, Functor f)
   {
-    unaryOpHelper<N, T, Functor>::call(dst, sizes, dsteps, f);
+    unaryHelper<N, T, Functor>::call(sizes, data, steps, f);
   }
 
   // Calls a functor on corresponding elements from two arrays accessed by their

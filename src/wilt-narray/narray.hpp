@@ -558,8 +558,11 @@ namespace wilt
   NArray<T, N> binaryOp(const NArray<U, N>& src1, const NArray<V, N>& src2, Operator op)
   {
     NArray<T, N> ret(src1.sizes());
-    wilt::detail::ternaryOp<N>(ret.data(), src1.data(), src2.data(), ret.sizes().data(), 
-              ret.steps().data(), src1.steps().data(), src2.steps().data(), [&op](T& t, const U& u, const V& v) { t = op(u, v); });
+    wilt::detail::ternary<N>(ret.sizes().data(), 
+      ret.data(), ret.steps().data(),
+      src1.data(), src1.steps().data(), 
+      src2.data(), src2.steps().data(), 
+      [&op](T& t, const U& u, const V& v) { t = op(u, v); });
     return ret;
   }
 
@@ -573,8 +576,10 @@ namespace wilt
   template <class T, class U, class V, std::size_t N, class Operator>
   void binaryOp(NArray<T, N>& dst, const NArray<U, N>& src1, const NArray<V, N>& src2, Operator op)
   {
-    wilt::detail::ternaryOp<N>(dst.data(), src1.data(), src2.data(), dst.sizes().data(),
-               dst.steps().data(), src1.steps().data(), src2.steps().data(), op, N);
+    wilt::detail::ternary<N>(dst.sizes().data(), 
+      dst.data(), dst.steps().data(), 
+      src1.data(), src1.steps().data(), 
+      src2.data(), src2.steps().data(), op);
   }
 
   //! @brief         applies an operation on a source array and stores the
@@ -587,8 +592,10 @@ namespace wilt
   NArray<T, N> unaryOp(const NArray<U, N>& src, Operator op)
   {
     NArray<T, N> ret(src.sizes());
-    wilt::detail::binaryOp<N>(ret.data(), src.data(), ret.sizes().data(),
-             ret.steps().data(), src.steps().data(), [&op](T& t, const U& u){ t = op(u); });
+    wilt::detail::binary<N>(ret.sizes().data(), 
+      ret.data(), ret.steps().data(), 
+      src.data(), src.steps().data(), 
+      [&op](T& t, const U& u){ t = op(u); });
     return ret;
   }
 
@@ -601,8 +608,10 @@ namespace wilt
   template <class T, class U, std::size_t N, class Operator>
   void unaryOp(NArray<T, N>& dst, const NArray<U, N>& src, Operator op)
   {
-    wilt::detail::binaryOp<N>(dst.data(), src.data(), dst.sizes().data(),
-              dst.steps().data(), src.steps().data(), op);
+    wilt::detail::binary<N>(dst.sizes().data(), 
+      dst.data(), dst.steps().data(), 
+      src.data(), src.steps().data(), 
+      op);
   }
 
 namespace detail
@@ -990,7 +999,10 @@ namespace detail
     if (empty())
       return *this;
 
-    wilt::detail::binaryOp<N>(data_.get(), arr.data_.get(), sizes_.data(), steps_.data(), arr.steps_.data(), [](T& lhs, const T& rhs) {lhs += rhs; });
+    wilt::detail::binary<N>(sizes_.data(), 
+          data_.get(),     steps_.data(), 
+      arr.data_.get(), arr.steps_.data(), 
+      [](T& lhs, const T& rhs) {lhs += rhs; });
 
     return *this;
   }
@@ -1003,7 +1015,7 @@ namespace detail
     if (empty())
       return *this;
 
-    wilt::detail::unaryOp<N>(data_.get(), sizes_.data(), steps_.data(), [&val](T& lhs) {lhs += val; });
+    wilt::detail::unary<N>(sizes_.data(), data_.get(), steps_.data(), [&val](T& lhs) {lhs += val; });
 
     return *this;
   }
@@ -1018,7 +1030,10 @@ namespace detail
     if (empty())
       return *this;
 
-    wilt::detail::binaryOp<N>(data_.get(), arr.data_.get(), sizes_.data(), steps_.data(), arr.steps_.data(), [](T& lhs, const T& rhs) {lhs -= rhs; });
+    wilt::detail::binary<N>(sizes_.data(), 
+          data_.get(),     steps_.data(), 
+      arr.data_.get(), arr.steps_.data(), 
+      [](T& lhs, const T& rhs) {lhs -= rhs; });
 
     return *this;
   }
@@ -1031,7 +1046,7 @@ namespace detail
     if (empty())
       return *this;
 
-    wilt::detail::unaryOp<N>(data_.get(), sizes_.data(), steps_.data(), [&val](T& lhs) {lhs -= val; });
+    wilt::detail::unary<N>(sizes_.data(), data_.get(), steps_.data(), [&val](T& lhs) {lhs -= val; });
 
     return *this;
   }
@@ -1044,7 +1059,7 @@ namespace detail
     if (empty())
       return *this;
 
-    wilt::detail::unaryOp<N>(data_.get(), sizes_.data(), steps_.data(), [&val](T& lhs) {lhs *= val; });
+    wilt::detail::unary<N>(sizes_.data(), data_.get(), steps_.data(), [&val](T& lhs) {lhs *= val; });
 
     return *this;
   }
@@ -1057,7 +1072,7 @@ namespace detail
     if (empty())
       return *this;
 
-    wilt::detail::unaryOp<N>(data_.get(), sizes_.data(), steps_.data(), [&val](T& lhs) {lhs /= val; });
+    wilt::detail::unary<N>(sizes_.data(), data_.get(), steps_.data(), [&val](T& lhs) {lhs /= val; });
 
     return *this;
   }
@@ -1709,7 +1724,7 @@ namespace detail
   template <class Operator>
   void NArray<T, N>::foreach(Operator op) const
   {
-    wilt::detail::unaryOp<N>(data_.get(), sizes_.data(), steps_.data(), op);
+    wilt::detail::unary<N>(sizes_.data(), data_.get(), steps_.data(), op);
   }
 
   template <class T, std::size_t N>
@@ -1820,7 +1835,10 @@ namespace detail
     Point<N> step1 = lhs.steps();
     Point<N> step2 = rhs.steps();
     wilt::detail::condense(sizes, step1, step2);
-    wilt::detail::binaryOp<N>(rhs.data(), lhs.data(), sizes.data(), step2.data(), step1.data(), [&func](U& u, const T& v) { u = func(v); });
+    wilt::detail::binary<N>(sizes.data(), 
+      rhs.data(), step2.data(), 
+      lhs.data(), step1.data(), 
+      [&func](U& u, const T& v) { u = func(v); });
   }
 
   template <class T, std::size_t N>
@@ -1831,7 +1849,9 @@ namespace detail
     if (sizes_ != arr.sizes())
       throw std::invalid_argument("setTo(arr): dimensions must match");
 
-    wilt::detail::binaryOp<N>(data_.get(), arr.data(), sizes_.data(), steps_.data(), arr.steps().data(),
+    wilt::detail::binary<N>(sizes_.data(), 
+          data_.get(),     steps_.data(), 
+      arr.data_.get(), arr.steps_.data(),
       [](T& r, const T& v) { r = v; });
   }
 
@@ -1840,7 +1860,7 @@ namespace detail
   {
     static_assert(!std::is_const<T>::value, "setTo(val): invalid when element type is const");
 
-    wilt::detail::unaryOp<N>(data_.get(), sizes_.data(), steps_.data(), [&val](T& r) { r = val; });
+    wilt::detail::unary<N>(sizes_.data(), data_.get(), steps_.data(), [&val](T& r) { r = val; });
   }
 
   template <class T, std::size_t N>
@@ -1851,7 +1871,10 @@ namespace detail
     if (sizes_ != arr.sizes() || sizes_ != mask.sizes())
       throw std::invalid_argument("setTo(arr, mask): dimensions must match");
 
-    wilt::detail::ternaryOp<N>(data_.get(), arr.data(), mask.data(), sizes_.data(), steps_.data(), arr.steps().data(), mask.steps().data(),
+    wilt::detail::ternary<N>(sizes_.data(), 
+           data_.get(),      steps_.data(), 
+       arr.data_.get(),  arr.steps_.data(), 
+      mask.data_.get(), mask.steps_.data(),
       [](T& r, const T& v, uint8_t m) { if (m != 0) r = v; });
   }
 
@@ -1860,7 +1883,9 @@ namespace detail
   {
     static_assert(!std::is_const<T>::value, "setTo(val, mask): invalid when element type is const");
 
-    wilt::detail::binaryOp<N>(data_.get(), mask.data(), sizes_.data(), steps_.data(), mask.steps().data(),
+    wilt::detail::binary<N>(sizes_.data(), 
+           data_.get(),      steps_.data(), 
+      mask.data_.get(), mask.steps_.data(),
       [&val](T& r, uint8_t m) { if (m != 0) r = val; });
   }
 
