@@ -81,16 +81,12 @@ namespace wilt
     template <class... Args, typename std::enable_if<sizeof...(Args) == N, int>::type* = nullptr>
     constexpr Point(Args... args) noexcept
       : data_{ args... }
-    {
-
-    }
+    { }
 
     // Creates a point with values copied from another point
     constexpr Point(const Point<N>& pt) noexcept
       : data_{ pt.data_ }
-    {
-
-    }
+    { }
 
   public:
     ////////////////////////////////////////////////////////////////////////////
