@@ -39,124 +39,104 @@ namespace wilt
 
 namespace detail
 {
-  //! @brief         applies an operation on two source arrays and stores the
-  //!                result in a destination array
-  //! @param[in,out] dst - the destination array
-  //! @param[in]     src1 - pointer to 1st source array
-  //! @param[in]     src2 - pointer to 2nd source array
-  //! @param[in]     sizes - pointer to dimension array
-  //! @param[in]     dsteps - pointer to dst step array
-  //! @param[in]     s1steps - pointer to 1st source step array
-  //! @param[in]     s2steps - pointer to 2nd source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                void(T&, U, V) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! arrays must be the same size (hence the single dimension array), and
-  //! this function makes no checks whether the inputs are valid.
-  template <std::size_t N, class T, class U, class V, class Operator>
+  // Calls a functor on all corresponding elements from three arrays that are
+  // accessed by their provided size and step pointers. 
+  //
+  // Notes:
+  // - the array sizes must all be the same (hence the single size parameter)
+  // - this function makes no checks on the validity of the inputs
+  // - the functor signature should be `void(T, U, V)` or similar
+
+  template <std::size_t N, class T, class U, class V, class Functor>
   struct ternaryOpHelper {
-    static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator& op) {
+    static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Functor& f) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src1 += *s1steps, src2 += *s2steps)
-        ternaryOpHelper<N-1, T, U, V, Operator>::call(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, op);
+        ternaryOpHelper<N-1, T, U, V, Functor>::call(dst, src1, src2, sizes + 1, dsteps + 1, s1steps + 1, s2steps + 1, f);
     }
   };
 
-  template <class T, class U, class V, class Operator>
-  struct ternaryOpHelper<1u, T, U, V, Operator> {
-    static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator& op) {
+  template <class T, class U, class V, class Functor>
+  struct ternaryOpHelper<1u, T, U, V, Functor> {
+    static void call(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Functor& f) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src1 += *s1steps, src2 += *s2steps)
-        op(*dst, *src1, *src2);
+        f(*dst, *src1, *src2);
     }
   };
 
-  template <std::size_t N, class T, class U, class V, class Operator>
-  void ternaryOp(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Operator op)
+  template <std::size_t N, class T, class U, class V, class Functor>
+  void ternaryOp(T* dst, const U* src1, const V* src2, const pos_t* sizes, const pos_t* dsteps, const pos_t* s1steps, const pos_t* s2steps, Functor f)
   {
-    ternaryOpHelper<N, T, U, V, Operator>::call(dst, src1, src2, sizes, dsteps, s1steps, s2steps, op);
+    ternaryOpHelper<N, T, U, V, Functor>::call(dst, src1, src2, sizes, dsteps, s1steps, s2steps, f);
   }
 
-  //! @brief         applies an operation on a source array and stores the
-  //!                result in a destination array
-  //! @param[in,out] dst - the destination array
-  //! @param[in]     src - pointer to 1st source array
-  //! @param[in]     sizes - pointer to dimension array
-  //! @param[in]     dsteps - pointer to dst step array
-  //! @param[in]     ssteps - pointer to source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                void(T&, U) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! arrays must be the same size (hence the single dimension array), and
-  //! this function makes no checks whether the inputs are valid.
-  template <std::size_t N, class T, class U, class Operator>
+  // Calls a functor on all corresponding elements from two arrays that are
+  // accessed by their provided size and step pointers. 
+  //
+  // Notes:
+  // - the array sizes must all be the same (hence the single size parameter)
+  // - this function makes no checks on the validity of the inputs
+  // - the functor signature should be `void(T, U)` or similar
+
+  template <std::size_t N, class T, class U, class Functor>
   struct binaryOpHelper {
-    static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator& op) {
+    static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Functor& f) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src += *ssteps)
-        binaryOpHelper<N-1, T, U, Operator>::call(dst, src, sizes + 1, dsteps + 1, ssteps + 1, op);
+        binaryOpHelper<N-1, T, U, Functor>::call(dst, src, sizes + 1, dsteps + 1, ssteps + 1, f);
     }
   };
 
-  template <class T, class U, class Operator>
-  struct binaryOpHelper<1u, T, U, Operator> {
-    static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator& op) {
+  template <class T, class U, class Functor>
+  struct binaryOpHelper<1u, T, U, Functor> {
+    static void call(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Functor& f) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps, src += *ssteps)
-        op(*dst, *src);
+        f(*dst, *src);
     }
   };
 
-  template <std::size_t N, class T, class U, class Operator>
-  void binaryOp(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Operator op)
+  template <std::size_t N, class T, class U, class Functor>
+  void binaryOp(T* dst, const U* src, const pos_t* sizes, const pos_t* dsteps, const pos_t* ssteps, Functor f)
   {
-    binaryOpHelper<N, T, U, Operator>::call(dst, src, sizes, dsteps, ssteps, op);
+    binaryOpHelper<N, T, U, Functor>::call(dst, src, sizes, dsteps, ssteps, f);
   }
 
-  //! @brief         applies an operation and stores the result in a destination
-  //!                array
-  //! @param[in,out] dst - the destination array
-  //! @param[in]     sizes - pointer to dimension array
-  //! @param[in]     dsteps - pointer to dst step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                void(T&) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //!
-  //! this function makes no checks whether the inputs are valid.
-  template <std::size_t N, class T, class Operator>
+  // Calls a functor on all elements from an array that is accessed by its
+  // provided size and step pointers. 
+  //
+  // Notes:
+  // - this function makes no checks on the validity of the inputs
+  // - the functor signature should be `void(T)` or similar
+
+  template <std::size_t N, class T, class Functor>
   struct unaryOpHelper {
-    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op) {
+    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Functor& f) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps)
-        unaryOpHelper<N-1, T, Operator>::call(dst, sizes + 1, dsteps + 1, op);
+        unaryOpHelper<N-1, T, Functor>::call(dst, sizes + 1, dsteps + 1, f);
     }
   };
 
-  template <class T, class Operator>
-  struct unaryOpHelper<1u, T, Operator> {
-    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator& op) {
+  template <class T, class Functor>
+  struct unaryOpHelper<1u, T, Functor> {
+    static void call(T* dst, const pos_t* sizes, const pos_t* dsteps, Functor& f) {
       for (T* end = dst + *sizes * *dsteps; dst != end; dst += *dsteps)
-        op(*dst);
+        f(*dst);
     }
   };
 
-  template <std::size_t N, class T, class Operator>
-  void unaryOp(T* dst, const pos_t* sizes, const pos_t* dsteps, Operator op)
+  template <std::size_t N, class T, class Functor>
+  void unaryOp(T* dst, const pos_t* sizes, const pos_t* dsteps, Functor f)
   {
-    unaryOpHelper<N, T, Operator>::call(dst, sizes, dsteps, op);
+    unaryOpHelper<N, T, Functor>::call(dst, sizes, dsteps, f);
   }
 
-  //! @brief         applies an operation between two source arrays and returns
-  //!                a bool. Returns false upon getting the first false, or
-  //!                or returns true if all operations return true
-  //! @param[in]     src1 - pointer to 1st source array
-  //! @param[in]     src2 - pointer to 2nd source array
-  //! @param[in]     sizes - pointer to dimension array
-  //! @param[in]     s1steps - pointer to 1st source step array
-  //! @param[in]     s2steps - pointer to 2nd source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                bool(T, U) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //! @return        true if all operations return true, else false
-  //!
-  //! this function makes no checks whether the inputs are valid.
+  // Calls a functor on corresponding elements from two arrays accessed by their
+  // provided size and step pointers. The functor should return a bool. This
+  // function returns false upon getting the first false or returns true if all
+  // calls are true.
+  //
+  // Notes:
+  // - the array sizes must all be the same (hence the single size parameter)
+  // - this function makes no checks on the validity of the inputs
+  // - the functor signature should be `bool(T, U)` or similar
   template <class T, class U, class Operator>
   bool allOf(
     const T* src1, 
@@ -183,18 +163,13 @@ namespace detail
     return true;
   }
 
-  //! @brief         applies an operation on a source array and returns a bool.
-  //!                Returns false upon getting the first false, or returns true
-  //!                if all operations return true
-  //! @param[in]     src - pointer to source array
-  //! @param[in]     sizes - pointer to dimension array
-  //! @param[in]     ssteps - pointer to source step array
-  //! @param[in]     op - function or function object with the signature 
-  //!                bool(T) or similar
-  //! @param[in]     N - the dimensionality of the arrays
-  //! @return        true if all operations return true, else false
-  //!
-  //! this function makes no checks whether the inputs are valid.
+  // Calls a functor on elements from an array accessed by its provided size and
+  // step pointers. The functor should return a bool. This function returns
+  // false upon getting the first false or returns true if all calls are true.
+  //
+  // Notes:
+  // - this function makes no checks on the validity of the inputs
+  // - the functor signature should be `bool(T)` or similar
   template <class T, class Operator>
   bool allOf(
     const T* src, 
