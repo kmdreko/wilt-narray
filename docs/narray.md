@@ -624,7 +624,7 @@ These functions create a new array that accesses the shared data in a transforma
 
 <br/>
 
-## `exposed_type operator[](pos_t)` (_indexing operator_)
+#### `exposed_type operator[](pos_t)` (_indexing operator_)
 
 Used to get the `N-1` dimensional sub-array at the position along the 0th dimension. This is designed such that it can be called repeatedly (`N` times) to get an element.
 
