@@ -39,14 +39,37 @@ namespace wilt
   // type aliases
   using pos_t = std::ptrdiff_t;
 
-  //! @class  Point
-  //! @brief  An integer point class with arithmetic operations
+  //////////////////////////////////////////////////////////////////////////////
+  // This class is designed to resemble an N-dimensional integral-point object.
+  //
+  // This class is basically a wrapper around an `std::array<int, N>` member
+  // that provides both functions and semantics to use it as a generic integral-
+  // point object as well as those needed to manipulate the dimensions as
+  // required by the `NArray` class.
+  //
+  // The point has the traditional access methods like `operator[]` and `data()`
+  // but it also provides the expected mathematical operators (`+`, `-`, `*`,
+  // and `\`) to use it like a geometric point. In addition, there are methods
+  // like `inserted()`, `removed()`, `high()`, and `low()` that return a new
+  // object with the dimensionality manipulated as needed. These functions help
+  // the `NArray` class perform its transformations.
+
   template <std::size_t N>
   class Point
   {
-  public:
+  private:
+    ////////////////////////////////////////////////////////////////////////////
+    // PRIVATE MEMBERS
+    ////////////////////////////////////////////////////////////////////////////
 
-    //! @brief  Default constructor. Sets all values to 0
+    std::array<pos_t, N> data_; // internal storage
+
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // CONSTRUCTORS
+    ////////////////////////////////////////////////////////////////////////////
+
+    // Creates a point with all values initialized to zero
     constexpr Point() noexcept
       : data_{ }
     {
@@ -54,6 +77,7 @@ namespace wilt
         data_[i] = 0;
     }
 
+    // Creates a point with the given values (number of arguments must match N)
     template <class... Args, typename std::enable_if<sizeof...(Args) == N, int>::type* = nullptr>
     constexpr Point(Args... args) noexcept
       : data_{ args... }
@@ -61,27 +85,27 @@ namespace wilt
 
     }
 
-    //! @brief      Copy constructor
-    //! @param[in]  pt - Point to copy from
+    // Creates a point with values copied from another point
     constexpr Point(const Point<N>& pt) noexcept
       : data_{ pt.data_ }
     {
 
     }
 
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // ASSIGNMENT OPERATORS
+    ////////////////////////////////////////////////////////////////////////////
 
-    //! @brief      Assignment operator
-    //! @param[in]  pt - the point to copy from
-    //! @return     reference to this point
+    // Copies values from another point
     constexpr Point<N>& operator = (const Point<N>& pt) noexcept
     {
       data_ = pt.data_;
       return *this;
     }
 
-    //! @brief      In-place addition operator
-    //! @param[in]  pt - the point to add
-    //! @return     reference to this point
+    // Element-wise assignment operators
+
     constexpr Point<N>& operator+= (const Point<N>& pt) noexcept
     {
       for (std::size_t i = 0; i < N; ++i)
@@ -89,9 +113,6 @@ namespace wilt
       return *this;
     }
 
-    //! @brief      In-place subtraction operator
-    //! @param[in]  pt - the point to subtract
-    //! @return     reference to this point
     constexpr Point<N>& operator-= (const Point<N>& pt) noexcept
     {
       for (std::size_t i = 0; i < N; ++i)
@@ -99,9 +120,8 @@ namespace wilt
       return *this;
     }
 
-    //! @brief      In-place addition operator
-    //! @param[in]  val - the value to add
-    //! @return     reference to this point
+    // Per-element assignment operators
+
     constexpr Point<N>& operator+= (pos_t val) noexcept
     {
       for (std::size_t i = 0; i < N; ++i)
@@ -109,9 +129,6 @@ namespace wilt
       return *this;
     }
 
-    //! @brief      In-place subtraction operator
-    //! @param[in]  val - the value to subtract
-    //! @return     reference to this point
     constexpr Point<N>& operator-= (pos_t val) noexcept
     {
       for (std::size_t i = 0; i < N; ++i)
@@ -119,9 +136,6 @@ namespace wilt
       return *this;
     }
 
-    //! @brief      In-place multiplication operator
-    //! @param[in]  val - the value to multiply
-    //! @return     reference to this point
     constexpr Point<N>& operator*= (pos_t val) noexcept
     {
       for (std::size_t i = 0; i < N; ++i)
@@ -129,9 +143,6 @@ namespace wilt
       return *this;
     }
 
-    //! @brief      In-place division operator
-    //! @param[in]  val - the value to divide
-    //! @return     reference to this point
     constexpr Point<N>& operator/= (pos_t val) noexcept
     {
       for (std::size_t i = 0; i < N; ++i)
@@ -139,18 +150,16 @@ namespace wilt
       return *this;
     }
 
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // ACCESS FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
 
-    //! @brief      Indexing operator
-    //! @param[in]  n - index
-    //! @return     reference to value at the index
     constexpr pos_t& operator[] (std::size_t n) noexcept
     {
       return data_[n];
     }
 
-    //! @brief      Indexing operator
-    //! @param[in]  n - index
-    //! @return     reference to value at the index
     constexpr const pos_t& operator[] (std::size_t n) const noexcept
     {
       return data_[n];
@@ -166,6 +175,11 @@ namespace wilt
       return data_.data();
     }
 
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // MODIFIER FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
+
     constexpr void clear() noexcept
     {
       for (std::size_t i = 0; i < N; ++i)
@@ -178,12 +192,12 @@ namespace wilt
         data_[i] = val;
     }
 
-    //! @brief      Slices a point by removing an index
-    //! @param[in]  n - index to remove
-    //! @return     copy with the index removed
-    //!
-    //! Is used to simplify NArray::slice() calls
-    //! Will fail if N==0
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // GENERATIVE FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
+
+    // Creates a new point with a value removed at the index (will fail if N==0)
     constexpr Point<N-1> removed(std::size_t n) const noexcept
     {
       Point<N-1> ret;
@@ -193,10 +207,7 @@ namespace wilt
       return ret;
     }
 
-    //! @brief      Adds an element to a point at an index
-    //! @param[in]  n - index to add at
-    //! @param[in]  v - value to add
-    //! @return     copy with the value added
+    // Creates a new point with a value added at the index
     constexpr Point<N+1> inserted(std::size_t n, pos_t v) const noexcept
     {
       Point<N+1> ret;
@@ -208,13 +219,7 @@ namespace wilt
       return ret;
     }
 
-    //! @brief      Creates a point with two index values swapped
-    //! @param[in]  a - first index to swap
-    //! @param[in]  b - second index to swap
-    //! @return     point with the indices swapped
-    //!
-    //! Is used to simplify NArray::transpose() calls
-    //! Will fail if N==0
+    // Creates a new point with a two values swapped (will fail if N==0)
     constexpr Point<N> swapped(std::size_t a, std::size_t b) const noexcept
     {
       Point<N> ret = *this;
@@ -222,7 +227,7 @@ namespace wilt
       return ret;
     }
 
-    // gets the first M values
+    // Creates a new point with the first M values
     template <std::size_t M>
     constexpr Point<M> high() const noexcept
     {
@@ -232,7 +237,7 @@ namespace wilt
       return ret;
     }
 
-    // gets the last M values
+    // Creates a new point with the last M values
     template <std::size_t M>
     constexpr Point<M> low() const noexcept
     {
@@ -241,17 +246,9 @@ namespace wilt
         ret[i] = data_[N - M + i];
       return ret;
     }
-
-  private:
-    //! @brief  internal storage array
-    std::array<pos_t, N> data_;
     
   }; // class Point
 
-  //! @brief      Compares the two points
-  //! @param[in]  lhs - point to compare
-  //! @param[in]  rhs - point to compare
-  //! @return     true if points are equal, false if elements are not equal
   template <std::size_t N>
   constexpr bool operator== (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs) noexcept
   {
@@ -262,10 +259,6 @@ namespace wilt
     return true;
   }
 
-  //! @brief      Compares the two points
-  //! @param[in]  lhs - point to compare
-  //! @param[in]  rhs - point to compare
-  //! @return     false if points are equal, true if elements are not equal
   template <std::size_t N>
   constexpr bool operator!= (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs) noexcept
   {
@@ -276,10 +269,6 @@ namespace wilt
     return false;
   }
 
-  //! @brief      Adds two points
-  //! @param[in]  lhs - point to add
-  //! @param[in]  rhs - point to add
-  //! @return     result from addition of the two points
   template <std::size_t N>
   constexpr wilt::Point<N> operator+ (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs) noexcept
   {
@@ -289,10 +278,6 @@ namespace wilt
     return ret;
   }
 
-  //! @brief      Subtracts two points
-  //! @param[in]  lhs - point to subtract
-  //! @param[in]  rhs - point to subtract
-  //! @return     result from subtraction of the two points
   template <std::size_t N>
   constexpr wilt::Point<N> operator- (const wilt::Point<N>& lhs, const wilt::Point<N>& rhs) noexcept
   {
@@ -302,11 +287,6 @@ namespace wilt
     return ret;
   }
 
-
-  //! @brief      Adds a point and a scalar
-  //! @param[in]  lhs - point to add
-  //! @param[in]  rhs - scalar to add
-  //! @return     result from addition of the point and scalar
   template <std::size_t N>
   constexpr wilt::Point<N> operator+ (const wilt::Point<N>& lhs, pos_t rhs) noexcept
   {
@@ -316,10 +296,6 @@ namespace wilt
     return ret;
   }
 
-  //! @brief      Subtracts a point and a scalar
-  //! @param[in]  lhs - point to subtract
-  //! @param[in]  rhs - scalar to subtract
-  //! @return     result from subtraction of the point and scalar
   template <std::size_t N>
   constexpr wilt::Point<N> operator- (const wilt::Point<N>& lhs, pos_t rhs) noexcept
   {
@@ -329,10 +305,6 @@ namespace wilt
     return ret;
   }
 
-  //! @brief      Multiplies a point and a scalar
-  //! @param[in]  lhs - point to multiply
-  //! @param[in]  rhs - scalar to multiply
-  //! @return     result from multipliction of the point and scalar
   template <std::size_t N>
   constexpr wilt::Point<N> operator* (const wilt::Point<N>& lhs, pos_t rhs) noexcept
   {
@@ -342,10 +314,6 @@ namespace wilt
     return ret;
   }
 
-  //! @brief      Divides a point and a scalar
-  //! @param[in]  lhs - point to divide
-  //! @param[in]  rhs - scalar to divide
-  //! @return     result from division of the point and scalar
   template <std::size_t N>
   constexpr wilt::Point<N> operator/ (const wilt::Point<N>& lhs, pos_t rhs) noexcept
   {
@@ -355,11 +323,6 @@ namespace wilt
     return ret;
   }
 
-
-  //! @brief      Adds a point and a scalar
-  //! @param[in]  lhs - scalar to add
-  //! @param[in]  rhs - point to add
-  //! @return     result from addition of the point and scalar
   template <std::size_t N>
   constexpr wilt::Point<N> operator+ (pos_t lhs, const wilt::Point<N>& rhs) noexcept
   {
@@ -369,10 +332,6 @@ namespace wilt
     return ret;
   }
 
-  //! @brief      Subtracts a point and a scalar
-  //! @param[in]  lhs - scalar to subtract
-  //! @param[in]  rhs - point to subtract
-  //! @return     result from subtraction of the point and scalar
   template <std::size_t N>
   constexpr wilt::Point<N> operator- (pos_t lhs, const wilt::Point<N>& rhs) noexcept
   {
@@ -382,10 +341,6 @@ namespace wilt
     return ret;
   }
 
-  //! @brief      Multiplies a point and a scalar
-  //! @param[in]  lhs - scalar to multiply
-  //! @param[in]  rhs - point to multiply
-  //! @return     result from multipliction of the point and scalar
   template <std::size_t N>
   constexpr wilt::Point<N> operator* (pos_t lhs, const wilt::Point<N>& rhs) noexcept
   {
@@ -395,10 +350,6 @@ namespace wilt
     return ret;
   }
 
-  //! @brief      Divides a point and a scalar
-  //! @param[in]  lhs - scalar to divide
-  //! @param[in]  rhs - point to divide
-  //! @return     result from division of the point and scalar
   template <std::size_t N>
   constexpr wilt::Point<N> operator/ (pos_t lhs, const wilt::Point<N>& rhs) noexcept
   {
