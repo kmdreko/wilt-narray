@@ -221,7 +221,7 @@ namespace wilt
     ////////////////////////////////////////////////////////////////////////////
     // QUERY FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
-    // functions only report the state of the array
+    // functions that only report the state of the array
 
     // Gets the dimension sizes, see class description. They determine the size
     // of the data accessed.
@@ -268,9 +268,6 @@ namespace wilt
     // ACCESS FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
     // Functions for accessing different segments of the array.
-    //
-    // NOTE: any function that would return an NArray of dimension 0, will
-    // instead return a T&.
 
     // Gets the element at that location.
     reference at(const Point<N>& loc) const;
@@ -280,6 +277,30 @@ namespace wilt
     reference at(pos_t p1, pos_t p2, pos_t p3, pos_t p4) const;
 
     reference atUnchecked(const Point<N>& loc) const noexcept;
+
+    // Iterators for all the elements in-order
+    iterator begin() const;
+    iterator end() const;
+    const_iterator cbegin() const;
+    const_iterator cend() const;
+
+    // Iterates over all elements in-order and calls operator
+    template <class Operator>
+    void foreach(Operator op) const;
+
+    // Gets a pointer to the segment base. Can be used to access the whole
+    // segment if isContiguous() and isAligned() or by respecting sizes() and 
+    // steps()
+    T* data() const noexcept;
+
+  public:
+    ////////////////////////////////////////////////////////////////////////////
+    // TRANSFORMATION FUNCTIONS
+    ////////////////////////////////////////////////////////////////////////////
+    // Functions that create a new array that references the shared data
+    //
+    // NOTE: any function that would return an NArray of dimension 0, will
+    // instead return a T&.
 
     // Indexing operator, will return an N-1 NArray at the location 'x' along
     // the 0th dimension.
@@ -398,19 +419,6 @@ namespace wilt
     NArray<T, N+1> windowZ(pos_t n) const;
     NArray<T, N+1> windowW(pos_t n) const;
 
-    // Iterators for all the elements in-order
-    iterator begin() const;
-    iterator end() const;
-
-    // Iterates over all elements in-order and calls operator
-    template <class Operator>
-    void foreach(Operator op) const;
-
-    // Gets a pointer to the segment base. Can be used to access the whole
-    // segment if isContiguous() and isAligned() or by respecting sizes() and 
-    // steps()
-    T* data() const noexcept;
-
     // creates a constant version of the NArray, not strictly necessary since a
     // conversion constructor exists but is still nice to have.
     NArray<const T, N> asConst() const noexcept;
@@ -433,7 +441,7 @@ namespace wilt
 
   public:
     ////////////////////////////////////////////////////////////////////////////
-    // TRANSFORMATION FUNCTIONS
+    // MAPPING FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////
     // Functions designed to create a new dataset
 
@@ -1236,9 +1244,50 @@ namespace detail
   }
 
   template <class T, std::size_t N>
+  typename NArray<T, N>::iterator NArray<T, N>::begin() const
+  {
+    return iterator(*this);
+  }
+
+  template <class T, std::size_t N>
+  typename NArray<T, N>::iterator NArray<T, N>::end() const
+  {
+    Point<N> pos;
+    pos[0] = sizes_[0];
+    return iterator(*this, pos);
+  }
+
+  template <class T, std::size_t N>
+  typename NArray<T, N>::const_iterator NArray<T, N>::cbegin() const
+  {
+    return const_iterator(*this);
+  }
+
+  template <class T, std::size_t N>
+  typename NArray<T, N>::const_iterator NArray<T, N>::cend() const
+  {
+    Point<N> pos;
+    pos[0] = sizes_[0];
+    return const_iterator(*this, pos);
+  }
+
+  template <class T, std::size_t N>
+  template <class Operator>
+  void NArray<T, N>::foreach(Operator op) const
+  {
+    wilt::detail::unary<N>(sizes_.data(), data_.get(), steps_.data(), op);
+  }
+
+  template <class T, std::size_t N>
+  T* NArray<T, N>::data() const noexcept
+  {
+    return data_.get();
+  }
+
+  template <class T, std::size_t N>
   typename NArray<T, N-1>::exposed_type NArray<T, N>::operator[] (pos_t n) const
   {
-    if (n >= sizes_[0])
+    if (n < 0 || n >= sizes_[0])
       throw std::out_of_range("operator[](): n out of bounds");
 
     return slice_(0, n);
@@ -1704,33 +1753,6 @@ namespace detail
     newsizes[dim] -= n - 1;
 
     return NArray<T, N+1>(data_, newsizes, newsteps);
-  }
-
-  template <class T, std::size_t N>
-  typename NArray<T, N>::iterator NArray<T, N>::begin() const
-  {
-    return iterator(*this);
-  }
-
-  template <class T, std::size_t N>
-  typename NArray<T, N>::iterator NArray<T, N>::end() const
-  {
-    Point<N> pos;
-    pos[0] = sizes_[0];
-    return iterator(*this, pos);
-  }
-
-  template <class T, std::size_t N>
-  template <class Operator>
-  void NArray<T, N>::foreach(Operator op) const
-  {
-    wilt::detail::unary<N>(sizes_.data(), data_.get(), steps_.data(), op);
-  }
-
-  template <class T, std::size_t N>
-  T* NArray<T, N>::data() const noexcept
-  {
-    return data_.get();
   }
 
   template<class T, std::size_t N>

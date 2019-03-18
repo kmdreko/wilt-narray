@@ -1,4 +1,4 @@
-# Examples
+# Examples ![logo](/docs/images/logo.png)
 
 These are some examples/samples/scenarios where I've used this library.
 

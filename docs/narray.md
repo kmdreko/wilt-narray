@@ -1,6 +1,6 @@
-# NArray<T, N>
+# NArray<T, N> ![logo](/docs/images/logo.png)
 
-Represents an N-dimensional array of `T` elements.
+Represents a multi-dimensional array of elements.
 
 Template parameters:
 - `class T`: the type of elements that are contained
@@ -11,14 +11,22 @@ Notes:
 - `T` has no class requirements (some functions will impose requirements independently)
 - `N` must be greater than `0` (any function that would theoretically return an `NArray<T, 0>` will instead return `T&`)
 
-# Constructors
 
-## `NArray()` (_default constructor_)
+<br/>
+
+## Constructors
+
+
+<br/>
+
+#### `NArray()` (_default constructor_)
 
 Creates an empty array (`empty()` is true, `size()` is 0, `data()` is null)
 
 
-## `NArray(const NArray<T, N>&)` (_copy constructor_)
+<br/>
+
+#### `NArray(const NArray<T, N>&)` (_copy constructor_)
 
 Copies the data pointer, size, and step values from another array.
 
@@ -30,7 +38,9 @@ Notes:
 - does not copy any elements
 
 
-## `NArray(NArray<T, N>&&)` (_move constructor_)
+<br/>
+
+#### `NArray(NArray<T, N>&&)` (_move constructor_)
 
 Moves the data pointer, size, and step values from another array.
 
@@ -42,7 +52,9 @@ Notes:
 - does not move any elements
 
 
-## `NArray(const NArray<U, N>&)` (_non-const copy constructor_)
+<br/>
+
+#### `NArray(const NArray<U, N>&)` (_non-const copy constructor_)
 
 Copies the data pointer, size, and step values from another array. This constructor is for converting a `T` array into a `const T` array.
 
@@ -62,7 +74,9 @@ Notes:
 - does not copy any elements
 
 
-## `NArray(NArray<U, N>&&)` (_non-const move constructor_)
+<br/>
+
+#### `NArray(NArray<U, N>&&)` (_non-const move constructor_)
 
 Moves the data pointer, size, and step values from another array. This constructor is for converting a `T` array into a `const T` array.
 
@@ -75,7 +89,9 @@ Notes:
 - does not move any elements
 
 
-## `NArray(const Point<N>&)`
+<br/>
+
+#### `NArray(const Point<N>&)`
 
 Creates an array of the given size with elements default-constructed.
 
@@ -87,7 +103,9 @@ Notes:
 - `T` must be _DefaultConstructible_
 
 
-## `NArray(const Point<N>&, const T&)`
+<br/>
+
+#### `NArray(const Point<N>&, const T&)`
 
 Creates an array of the given size with elements copy-constructed.
 
@@ -100,7 +118,9 @@ Notes:
 - `T` must be _CopyConstructible_
 
 
-## `NArray<T, N>::NArray(const Point<N>&, T*, NArrayDataAcquireType)`
+<br/>
+
+#### `NArray<T, N>::NArray(const Point<N>&, T*, NArrayDataAcquireType)`
 
 Creates an array of the given size using data from an existing contiguous source.
 
@@ -129,7 +149,9 @@ Notes:
 - `ptr` must have enough elements for the constructed size
 
 
-## `NArray(const Point<N>&, std::initializer_list<T>)`
+<br/>
+
+#### `NArray(const Point<N>&, std::initializer_list<T>)`
 
 Creates an array of the given size using data from an initializer list.
 
@@ -149,7 +171,9 @@ Notes:
 - if there are not enough elements for the constructed size, the rest will be default-constructed
 
 
-## `NArray(const Point<N>&, Generator)`
+<br/>
+
+#### `NArray(const Point<N>&, Generator)`
 
 Creates an array of the given size with elements constructed from values from a generator function.
 
@@ -169,7 +193,9 @@ Notes:
 - `gen` is called once per each element constructed
 
 
-## `NArray(const Point<N>&, Iterator, Iterator)`
+<br/>
+
+#### `NArray(const Point<N>&, Iterator, Iterator)`
 
 Creates an array of the given size with elements constructed from values from the given range.
 
@@ -192,7 +218,9 @@ Notes:
 - if there are not enough elements for the constructed size, the rest will be default-constructed
 
 
-## `NArray(std::shared_ptr<T>, const Point<N>&)`
+<br/>
+
+#### `NArray(std::shared_ptr<T>, const Point<N>&)`
 
 Creates an array of the given size using the data provided.
 
@@ -205,7 +233,9 @@ Notes:
 - keeps a strong reference to `data`
 
 
-## `NArray(std::shared_ptr<T>, const Point<N>&, const Point<N>&)`
+<br/>
+
+#### `NArray(std::shared_ptr<T>, const Point<N>&, const Point<N>&)`
 
 Creates an array of the given size and step values using the data provided.
 
@@ -219,9 +249,14 @@ Notes:
 - keeps a strong reference to `data`
 
 
-# Assignment Operators
+<br/>
 
-## `NArray<T, N>& operator= (const NArray<T, N>&)` (_copy assignment operator_)
+## Assignment Operators
+
+
+<br/>
+
+#### `NArray<T, N>& operator= (const NArray<T, N>&)` (_copy assignment operator_)
 
 Copies the data pointer, size, and step values from another array. This array releases its reference to the data, if it had one, and destroys it, if it was the last.
 
@@ -234,7 +269,9 @@ Notes:
 - does not copy any elements
 
 
-## `NArray<T, N>& operator= (NArray<T, N>&&)` (_move assignment operator_)
+<br/>
+
+#### `NArray<T, N>& operator= (NArray<T, N>&&)` (_move assignment operator_)
 
 Moves the data pointer, size, and step values from another array. This array releases its reference to the data, if it had one, and destroys it, if it was the last.
 
@@ -248,7 +285,9 @@ Notes:
 - does not move any elements
 
 
-## `NArray<T, N>& operator= (const NArray<U, N>&)` (_non-const copy assignment operator_)
+<br/>
+
+#### `NArray<T, N>& operator= (const NArray<U, N>&)` (_non-const copy assignment operator_)
 
 Copies the data pointer, size, and step values from another array. This operator is for assigning a `T` array into a `const T` array. This array releases its reference to the data, if it had one, and destroys it, if it was the last.
 
@@ -272,7 +311,9 @@ Notes:
 - does not copy any elements
 
 
-## `NArray<T, N>& operator= (NArray<U, N>&&)` (_non-const move assignment operator_)
+<br/>
+
+#### `NArray<T, N>& operator= (NArray<U, N>&&)` (_non-const move assignment operator_)
 
 Moves the data pointer, size, and step values from another array. This operator is for assigning a `T` array into a `const T` array. This array releases its reference to the data, if it had one, and destroys it, if it was the last.
 
@@ -287,7 +328,9 @@ Notes:
 - does not move any elements
 
 
-## Element-wise Assigment Operators
+<br/>
+
+#### Element-wise Assigment Operators
 
 Modifies the referenced elements with elements from another array. 
 
@@ -315,7 +358,9 @@ Notes:
 - not available if `T` is const
 
 
-## Per-element Assigment Operators
+<br/>
+
+#### Per-element Assigment Operators
 
 Modifies the referenced elements with a given value.
 
@@ -341,11 +386,16 @@ Notes:
 - not available if `T` is const
 
 
-# Query Functions
+<br/>
 
-Functions that return the state of the array.
+## Query Functions
 
-## `const Point<N>& sizes()`
+Functions that only report the state of the array.
+
+
+<br/>
+
+#### `const Point<N>& sizes()`
 
 Gets a `Point` storing the array's dimension sizes.
 
@@ -356,7 +406,9 @@ Notes:
 - if the array is not empty, all values will be positive
 
 
-## `std::size_t size()`
+<br/>
+
+#### `std::size_t size()`
 
 Returns the number of elements accessed in the array.
 
@@ -366,7 +418,9 @@ Notes:
 - not necessarily the number of unique elements (because of `window()` and `repeat()`)
 
 
-## `std::size_t size(std::size_t)`
+<br/>
+
+#### `std::size_t size(std::size_t)`
 
 Gets the size of the given dimension.
 
@@ -386,7 +440,9 @@ Notes:
 - variants are only available if that dimension exists
 
 
-## `const Point<N>& steps()`
+<br/>
+
+#### `const Point<N>& steps()`
 
 Gets a `Point` storing the array's step values.
 
@@ -396,7 +452,9 @@ Notes:
 - if the array is empty, all values will be `0`
 
 
-## `std::size_t step(std::size_t)`
+<br/>
+
+#### `std::size_t step(std::size_t)`
 
 Gets the step value for the given dimension.
 
@@ -410,7 +468,9 @@ Notes:
 - equal to `steps()[dim]`
 
 
-## `bool empty()`
+<br/>
+
+#### `bool empty()`
 
 Returns true if no data is referenced.
 
@@ -419,7 +479,9 @@ Notes:
 - if false, `data()` is not null, `sizes()` are all positive
 
 
-## `bool unique()`
+<br/>
+
+#### `bool unique()`
 
 Returns true if this array holds the only reference to the shared data.
 
@@ -427,7 +489,9 @@ Notes:
 - only one of `empty()`, `unique()`, and `shared()` is true at any time
 
 
-## `bool shared()`
+<br/>
+
+#### `bool shared()`
 
 Returns true if this array does not hold the only reference to the shared data.
 
@@ -435,7 +499,9 @@ Notes:
 - only one of `empty()`, `unique()`, and `shared()` is true at any time
 
 
-## `bool isContiguous()`
+<br/>
+
+#### `bool isContiguous()`
 
 Returns true if the elements accessed by this array have no gaps in memory.
 
@@ -443,10 +509,178 @@ Notes:
 - if `isContiguous()` and `isAligned()`, the elements can be accessed linearly starting from `data()`
 
 
-## `bool isAligned()`
+<br/>
+
+#### `bool isAligned()`
 
 Returns true if the elements accessed by this array are in order in memory.
 
 Notes:
 - repeated elements are still considered aligned as long as in-memory access order never reverses
 - if `isContiguous()` and `isAligned()`, the elements can be accessed linearly starting from `data()`
+
+
+<br/>
+
+## Access Functions
+
+These functions are for accessing elements in the array.
+
+
+<br/>
+
+#### `T& at(const Point<N>&)`
+
+Gets the element at that location in the array
+
+Parameters:
+- `const Point<N>& loc`: the location to get the element at
+
+Variants:
+- `T& at(pos_t)`: creates `loc` from the parameter
+- `T& at(pos_t, pos_t)`: creates `loc` from the parameters
+- `T& at(pos_t, pos_t, pos_t)`: creates `loc` from the parameters
+- `T& at(pos_t, pos_t, pos_t, pos_t)`: creates `loc` from the parameters
+- `T& atUnchecked(const Point<N>&)`: empty array and `loc` values checks are skipped
+
+Returns a reference to the element
+
+Notes:
+- the array must not be empty, otherwise an exception is thrown
+- all values of `loc` must not be negative and must be less than the corresponding dimension size of the array, otherwise an exception is thrown
+- some variants only availiable if `N` matches
+
+
+<br/>
+
+#### Iterator Functions
+
+Functions that return iterators that access the elements in the array.
+
+- `NArrayIterator<T, N, 0> begin()`: returns the beginning iterator
+- `NArrayIterator<T, N, 0> end()`: returns the end iterator
+- `NArrayIterator<const T, N, 0> cbegin()`: returns the beginning const iterator
+- `NArrayIterator<const T, N, 0> cend()`: returns the end const iterator
+
+The iterators yield references (or const references) to the elements
+
+Example:
+
+```
+wilt::NArray<int, 2> arr({ 100, 100 }, 1);
+
+// print all the elements
+for (auto& element : arr)
+  std::cout << element << ' ';
+```
+
+Notes:
+- if the array is empty, `begin() == end()`
+- the iterators are invalidated if the array is destroyed or reassigned
+
+
+<br/>
+
+#### `void foreach(Operator)`
+
+Calls a function for every element in the array. 
+
+Parameters:
+- `Operator op`: a templated parameter that should be a functor with the signature `void(T)` or similar
+
+Example:
+
+```
+wilt::NArray<int, 2> arr({ 100, 100 }, 1);
+
+// get the sum of all elements
+int sum = 0;
+arr.foreach([&sum](int element) mutable { sum += element; });
+```
+
+Notes:
+- if the array is empty, this does nothing
+- this often faster than using iterators for accessing all the elements
+
+
+<br/>
+
+#### `T* data()`
+
+Returns a pointer to the first element accessed by the array.
+
+Notes:
+- if the array is empty, this returns null
+- if `isContiguous()` and `isAligned()`, the elements can be accessed linearly starting from `data()`
+- can be used to access the elements manually if used with respect to `steps()` and `sizes()`
+
+
+<br/>
+
+## Transformation Functions
+
+These functions create a new array that accesses the shared data in a transformative way. No data is copied.
+
+
+<br/>
+
+## `exposed_type operator[](pos_t)` (_indexing operator_)
+
+Used to get the `N-1` dimensional sub-array at the position along the 0th dimension. This is designed such that it can be called repeatedly (`N` times) to get an element.
+
+Parameters:
+- `pos_t n`: the position along the 0th dimension to get
+
+Returns either an `NArray<T, N-1>` or `T&` (if `N == 1`) corresponding to that position
+
+Example:
+
+```
+wilt::NArray<int, 2> arr({ 100, 100 }, 1);
+
+// get a single element
+int& element = arr[0][0];
+
+// get a single slice
+wilt::NArray<int, 1> slice = arr[0];
+```
+
+Notes:
+- `n` must be non-negative and less than `size(0)`, otherwise an exception is thrown
+- if the array is empty, there is no acceptable value for `n`, so an exception is thrown
+- identical to `slice(0, n)`
+
+
+<br/>
+
+#### `exposed_type slice(std::size_t, pos_t)`
+
+Used to get the `N-1` dimensional sub-array at the position along the specified dimension.
+
+Parameters:
+- `std::size_t dim`: the dimension to slice
+- `pos_t n`: the position along that dimension to get
+
+Variants:
+- `exposed_type sliceX(n)`: with `dim` equal to `0`
+- `exposed_type sliceY(n)`: with `dim` equal to `1`
+- `exposed_type sliceZ(n)`: with `dim` equal to `2`
+- `exposed_type sliceW(n)`: with `dim` equal to `3`
+
+Returns either an `NArray<T, N-1>` or `T&` (if `N == 1`) corresponding to that position
+
+Example:
+
+```
+wilt::NArray<int, 3> arr({ 3, 4, 5 });
+
+auto slice_x = arr.sliceX(0); // size is 4x5 with elements from arr where x=0
+auto slice_y = arr.sliceY(0); // size is 3x5 with elements from arr where y=0
+auto slice_z = arr.sliceZ(0); // size is 3x4 with elements from arr where z=0
+```
+
+Notes:
+- `dim` must be less than `N`, otherwise an exception is thrown
+- `n` must be non-negative and less than `size(dim)`, otherwise an exception is thrown
+- if the array is empty, there is no acceptable value for `n`, so an exception is thrown
+- some variants only availiable if that dimension exists
