@@ -332,11 +332,11 @@ namespace wilt
     //   - W = 3rd dimension
     //
     // NOTE: some functions are only available if they have that dimension
-    NArray<T, N> range(std::size_t dim, pos_t n, pos_t length) const;
-    NArray<T, N> rangeX(pos_t x, pos_t length) const;
-    NArray<T, N> rangeY(pos_t y, pos_t length) const;
-    NArray<T, N> rangeZ(pos_t z, pos_t length) const;
-    NArray<T, N> rangeW(pos_t w, pos_t length) const;
+    NArray<T, N> range(std::size_t dim, pos_t start, pos_t length) const;
+    NArray<T, N> rangeX(pos_t start, pos_t length) const;
+    NArray<T, N> rangeY(pos_t start, pos_t length) const;
+    NArray<T, N> rangeZ(pos_t start, pos_t length) const;
+    NArray<T, N> rangeW(pos_t start, pos_t length) const;
 
     // Gets an NArray with the specified dimension reversed
     //   - dim = specified dimension
@@ -491,7 +491,7 @@ namespace wilt
     ////////////////////////////////////////////////////////////////////////////
 
     typename NArray<T, N-1>::exposed_type slice_(std::size_t dim, pos_t n) const noexcept;
-    NArray<T, N> range_(std::size_t dim, pos_t n, pos_t length) const noexcept;
+    NArray<T, N> range_(std::size_t dim, pos_t start, pos_t length) const noexcept;
     NArray<T, N> flip_(std::size_t dim) const noexcept;
     NArray<T, N> skip_(std::size_t dim, pos_t n, pos_t start) const noexcept;
     NArray<T, N+1> window_(std::size_t dim, pos_t n) const noexcept;
@@ -1357,72 +1357,72 @@ namespace detail
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::range(std::size_t dim, pos_t n, pos_t length) const
+  NArray<T, N> NArray<T, N>::range(std::size_t dim, pos_t start, pos_t length) const
   {
     if (dim >= N)
-      throw std::out_of_range("range(dim, n, length): dim out of bounds");
-    if (n < 0 || n >= sizes_[dim])
-      throw std::out_of_range("range(dim, n, length): n out of bounds");
-    if (length <= 0 || n + length > sizes_[dim])
-      throw std::out_of_range("range(dim, n, length): length out of bounds");
+      throw std::out_of_range("range(dim, start, length): dim out of bounds");
+    if (start < 0 || start >= sizes_[dim])
+      throw std::out_of_range("range(dim, start, length): start out of bounds");
+    if (length <= 0 || start + length > sizes_[dim])
+      throw std::out_of_range("range(dim, start, length): length out of bounds");
 
-    return range_(dim, n, length);
+    return range_(dim, start, length);
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::rangeX(pos_t x, pos_t length) const
+  NArray<T, N> NArray<T, N>::rangeX(pos_t start, pos_t length) const
   {
-    if (x < 0 || x >= sizes_[0])
-      throw std::out_of_range("rangeX(x, length): x out of bounds");
-    if (length <= 0 || x + length > sizes_[0])
-      throw std::out_of_range("rangeX(x, length): length out of bounds");
+    if (start < 0 || start >= sizes_[0])
+      throw std::out_of_range("rangeX(start, length): start out of bounds");
+    if (length <= 0 || start + length > sizes_[0])
+      throw std::out_of_range("rangeX(start, length): length out of bounds");
 
-    return range_(0, x, length);
+    return range_(0, start, length);
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::rangeY(pos_t y, pos_t length) const
+  NArray<T, N> NArray<T, N>::rangeY(pos_t start, pos_t length) const
   {
-    static_assert(N >= 2, "rangeY(y, length): invalid when N < 2");
+    static_assert(N >= 2, "rangeY(start, length): invalid when N < 2");
 
-    if (y < 0 || y >= sizes_[1])
-      throw std::out_of_range("rangeY(y, length): y out of bounds");
-    if (length <= 0 || y + length > sizes_[1])
-      throw std::out_of_range("rangeY(y, length): length out of bounds");
+    if (start < 0 || start >= sizes_[1])
+      throw std::out_of_range("rangeY(start, length): start out of bounds");
+    if (length <= 0 || start + length > sizes_[1])
+      throw std::out_of_range("rangeY(start, length): length out of bounds");
 
-    return range_(1, y, length);
+    return range_(1, start, length);
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::rangeZ(pos_t z, pos_t length) const
+  NArray<T, N> NArray<T, N>::rangeZ(pos_t start, pos_t length) const
   {
-    static_assert(N >= 3, "rangeZ(z, length): invalid when N < 3");
+    static_assert(N >= 3, "rangeZ(start, length): invalid when N < 3");
 
-    if (z < 0 || z >= sizes_[2])
-      throw std::out_of_range("rangeZ(z, length): z out of bounds");
-    if (length <= 0 || z + length > sizes_[2])
-      throw std::out_of_range("rangeZ(z, length): length out of bounds");
+    if (start < 0 || start >= sizes_[2])
+      throw std::out_of_range("rangeZ(start, length): start out of bounds");
+    if (length <= 0 || start + length > sizes_[2])
+      throw std::out_of_range("rangeZ(start, length): length out of bounds");
 
-    return range_(2, z, length);
+    return range_(2, start, length);
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::rangeW(pos_t w, pos_t length) const
+  NArray<T, N> NArray<T, N>::rangeW(pos_t start, pos_t length) const
   {
-    static_assert(N >= 4, "rangeW(w, length): invalid when N < 4");
+    static_assert(N >= 4, "rangeW(start, length): invalid when N < 4");
 
-    if (w < 0 || w >= sizes_[3])
-      throw std::out_of_range("rangeW(w, length): w out of bounds");
-    if (length <= 0 || w + length > sizes_[3])
-      throw std::out_of_range("rangeW(w, length): length out of bounds");
+    if (start < 0 || start >= sizes_[3])
+      throw std::out_of_range("rangeW(start, length): start out of bounds");
+    if (length <= 0 || start + length > sizes_[3])
+      throw std::out_of_range("rangeW(start, length): length out of bounds");
 
-    return range_(3, w, length);
+    return range_(3, start, length);
   }
 
   template <class T, std::size_t N>
-  NArray<T, N> NArray<T, N>::range_(std::size_t dim, pos_t n, pos_t length) const noexcept
+  NArray<T, N> NArray<T, N>::range_(std::size_t dim, pos_t start, pos_t length) const noexcept
   {
-    auto newdata = data_.get() + steps_[dim] * n;
+    auto newdata = data_.get() + steps_[dim] * start;
     auto newsizes = sizes_;
     newsizes[dim] = length;
 

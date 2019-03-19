@@ -12,19 +12,13 @@ Notes:
 - `N` must be greater than `0` (any function that would theoretically return an `NArray<T, 0>` will instead return `T&`)
 
 
-<br/>
-
 ## Constructors
 
-
-<br/>
 
 #### `NArray()` (_default constructor_)
 
 Creates an empty array (`empty()` is true, `size()` is 0, `data()` is null)
 
-
-<br/>
 
 #### `NArray(const NArray<T, N>&)` (_copy constructor_)
 
@@ -38,8 +32,6 @@ Notes:
 - does not copy any elements
 
 
-<br/>
-
 #### `NArray(NArray<T, N>&&)` (_move constructor_)
 
 Moves the data pointer, size, and step values from another array.
@@ -51,8 +43,6 @@ Notes:
 - `arr` is empty after this call
 - does not move any elements
 
-
-<br/>
 
 #### `NArray(const NArray<U, N>&)` (_non-const copy constructor_)
 
@@ -74,8 +64,6 @@ Notes:
 - does not copy any elements
 
 
-<br/>
-
 #### `NArray(NArray<U, N>&&)` (_non-const move constructor_)
 
 Moves the data pointer, size, and step values from another array. This constructor is for converting a `T` array into a `const T` array.
@@ -89,8 +77,6 @@ Notes:
 - does not move any elements
 
 
-<br/>
-
 #### `NArray(const Point<N>&)`
 
 Creates an array of the given size with elements default-constructed.
@@ -102,8 +88,6 @@ Notes:
 - `size` must have all positive (non-zero) values, otherwise an exception will be thrown
 - `T` must be _DefaultConstructible_
 
-
-<br/>
 
 #### `NArray(const Point<N>&, const T&)`
 
@@ -117,8 +101,6 @@ Notes:
 - `size` must have all positive (non-zero) values, otherwise an exception will be thrown
 - `T` must be _CopyConstructible_
 
-
-<br/>
 
 #### `NArray<T, N>::NArray(const Point<N>&, T*, NArrayDataAcquireType)`
 
@@ -149,8 +131,6 @@ Notes:
 - `ptr` must have enough elements for the constructed size
 
 
-<br/>
-
 #### `NArray(const Point<N>&, std::initializer_list<T>)`
 
 Creates an array of the given size using data from an initializer list.
@@ -171,8 +151,6 @@ Notes:
 - if there are not enough elements for the constructed size, the rest will be default-constructed
 
 
-<br/>
-
 #### `NArray(const Point<N>&, Generator)`
 
 Creates an array of the given size with elements constructed from values from a generator function.
@@ -192,8 +170,6 @@ Notes:
 - `T` must be _CopyConstructible_
 - `gen` is called once per each element constructed
 
-
-<br/>
 
 #### `NArray(const Point<N>&, Iterator, Iterator)`
 
@@ -218,8 +194,6 @@ Notes:
 - if there are not enough elements for the constructed size, the rest will be default-constructed
 
 
-<br/>
-
 #### `NArray(std::shared_ptr<T>, const Point<N>&)`
 
 Creates an array of the given size using the data provided.
@@ -232,8 +206,6 @@ Notes:
 - `size` must have all positive (non-zero) values, otherwise an exception will be thrown
 - keeps a strong reference to `data`
 
-
-<br/>
 
 #### `NArray(std::shared_ptr<T>, const Point<N>&, const Point<N>&)`
 
@@ -249,12 +221,8 @@ Notes:
 - keeps a strong reference to `data`
 
 
-<br/>
-
 ## Assignment Operators
 
-
-<br/>
 
 #### `NArray<T, N>& operator= (const NArray<T, N>&)` (_copy assignment operator_)
 
@@ -269,8 +237,6 @@ Notes:
 - does not copy any elements
 
 
-<br/>
-
 #### `NArray<T, N>& operator= (NArray<T, N>&&)` (_move assignment operator_)
 
 Moves the data pointer, size, and step values from another array. This array releases its reference to the data, if it had one, and destroys it, if it was the last.
@@ -284,8 +250,6 @@ Notes:
 - `arr` is empty after this call
 - does not move any elements
 
-
-<br/>
 
 #### `NArray<T, N>& operator= (const NArray<U, N>&)` (_non-const copy assignment operator_)
 
@@ -311,8 +275,6 @@ Notes:
 - does not copy any elements
 
 
-<br/>
-
 #### `NArray<T, N>& operator= (NArray<U, N>&&)` (_non-const move assignment operator_)
 
 Moves the data pointer, size, and step values from another array. This operator is for assigning a `T` array into a `const T` array. This array releases its reference to the data, if it had one, and destroys it, if it was the last.
@@ -327,8 +289,6 @@ Notes:
 - `arr` is empty after this call
 - does not move any elements
 
-
-<br/>
 
 #### Element-wise Assigment Operators
 
@@ -358,8 +318,6 @@ Notes:
 - not available if `T` is const
 
 
-<br/>
-
 #### Per-element Assigment Operators
 
 Modifies the referenced elements with a given value.
@@ -386,14 +344,10 @@ Notes:
 - not available if `T` is const
 
 
-<br/>
-
 ## Query Functions
 
 Functions that only report the state of the array.
 
-
-<br/>
 
 #### `const Point<N>& sizes()`
 
@@ -406,8 +360,6 @@ Notes:
 - if the array is not empty, all values will be positive
 
 
-<br/>
-
 #### `std::size_t size()`
 
 Returns the number of elements accessed in the array.
@@ -417,8 +369,6 @@ Notes:
 - equal to the values yeilded from iterators
 - not necessarily the number of unique elements (because of `window()` and `repeat()`)
 
-
-<br/>
 
 #### `std::size_t size(std::size_t)`
 
@@ -440,8 +390,6 @@ Notes:
 - variants are only available if that dimension exists
 
 
-<br/>
-
 #### `const Point<N>& steps()`
 
 Gets a `Point` storing the array's step values.
@@ -451,8 +399,6 @@ Returns a const-reference to the point stored in the array.
 Notes:
 - if the array is empty, all values will be `0`
 
-
-<br/>
 
 #### `std::size_t step(std::size_t)`
 
@@ -468,8 +414,6 @@ Notes:
 - equal to `steps()[dim]`
 
 
-<br/>
-
 #### `bool empty()`
 
 Returns true if no data is referenced.
@@ -479,8 +423,6 @@ Notes:
 - if false, `data()` is not null, `sizes()` are all positive
 
 
-<br/>
-
 #### `bool unique()`
 
 Returns true if this array holds the only reference to the shared data.
@@ -488,8 +430,6 @@ Returns true if this array holds the only reference to the shared data.
 Notes:
 - only one of `empty()`, `unique()`, and `shared()` is true at any time
 
-
-<br/>
 
 #### `bool shared()`
 
@@ -499,8 +439,6 @@ Notes:
 - only one of `empty()`, `unique()`, and `shared()` is true at any time
 
 
-<br/>
-
 #### `bool isContiguous()`
 
 Returns true if the elements accessed by this array have no gaps in memory.
@@ -508,8 +446,6 @@ Returns true if the elements accessed by this array have no gaps in memory.
 Notes:
 - if `isContiguous()` and `isAligned()`, the elements can be accessed linearly starting from `data()`
 
-
-<br/>
 
 #### `bool isAligned()`
 
@@ -520,14 +456,10 @@ Notes:
 - if `isContiguous()` and `isAligned()`, the elements can be accessed linearly starting from `data()`
 
 
-<br/>
-
 ## Access Functions
 
 These functions are for accessing elements in the array.
 
-
-<br/>
 
 #### `T& at(const Point<N>&)`
 
@@ -550,8 +482,6 @@ Notes:
 - all values of `loc` must not be negative and must be less than the corresponding dimension size of the array, otherwise an exception is thrown
 - some variants only availiable if `N` matches
 
-
-<br/>
 
 #### Iterator Functions
 
@@ -579,8 +509,6 @@ Notes:
 - the iterators are invalidated if the array is destroyed or reassigned
 
 
-<br/>
-
 #### `void foreach(Operator)`
 
 Calls a function for every element in the array. 
@@ -603,8 +531,6 @@ Notes:
 - this often faster than using iterators for accessing all the elements
 
 
-<br/>
-
 #### `T* data()`
 
 Returns a pointer to the first element accessed by the array.
@@ -615,14 +541,10 @@ Notes:
 - can be used to access the elements manually if used with respect to `steps()` and `sizes()`
 
 
-<br/>
-
 ## Transformation Functions
 
 These functions create a new array that accesses the shared data in a transformative way. No data is copied.
 
-
-<br/>
 
 #### `exposed_type operator[](pos_t)` (_indexing operator_)
 
@@ -651,8 +573,6 @@ Notes:
 - identical to `slice(0, n)`
 
 
-<br/>
-
 #### `exposed_type slice(std::size_t, pos_t)`
 
 Used to get the `N-1` dimensional sub-array at the position along the specified dimension.
@@ -675,12 +595,82 @@ Example:
 wilt::NArray<int, 3> arr({ 3, 4, 5 });
 
 auto slice_x = arr.sliceX(0); // size is 4x5 with elements from arr where x=0
-auto slice_y = arr.sliceY(0); // size is 3x5 with elements from arr where y=0
-auto slice_z = arr.sliceZ(0); // size is 3x4 with elements from arr where z=0
+auto slice_y = arr.sliceY(1); // size is 3x5 with elements from arr where y=1
+auto slice_z = arr.sliceZ(2); // size is 3x4 with elements from arr where z=2
 ```
 
 Notes:
 - `dim` must be less than `N`, otherwise an exception is thrown
 - `n` must be non-negative and less than `size(dim)`, otherwise an exception is thrown
 - if the array is empty, there is no acceptable value for `n`, so an exception is thrown
-- some variants only availiable if that dimension exists
+- some variants only available if that dimension exists
+
+
+#### `NArray<T, N> range(std::size_t, pos_t, pos_t)`
+
+Used to create an array that accesses the shared data with the specified dimension limited to a range.
+
+Parameters:
+- `std::size_t dim`: the dimension to limit
+- `pos_t start`: the start index of the range
+- `pos_t length`: the length of the range
+
+Variants:
+- `NArray<T, N> rangeX(pos_t, pos_t)`: with `dim` equal to `0`
+- `NArray<T, N> rangeY(pos_t, pos_t)`: with `dim` equal to `1`
+- `NArray<T, N> rangeZ(pos_t, pos_t)`: with `dim` equal to `2`
+- `NArray<T, N> rangeW(pos_t, pos_t)`: with `dim` equal to `3`
+
+Returns a new array that accesses the new range of elements
+
+Example:
+
+```
+wilt::NArray<int, 3> arr({ 3, 4, 5 });
+
+auto range_x = arr.rangeX(1, 2); // size is 2x4x5
+auto range_y = arr.rangeY(1, 2); // size is 3x2x5
+auto range_z = arr.rangeZ(1, 2); // size is 3x4x2
+```
+
+Notes:
+- `dim` must be less than `N`, otherwise an exception is thrown
+- `start` must be non-negative and less than `size(dim)`, otherwise an exception is thrown
+- `length` must be positive and `start+length` must be less than `size(dim)`, otherwise an exception is thrown
+- if the array is empty, there is no acceptable values for `start` and `length`, so an exception is thrown
+- some variants only available if that dimension exists
+
+
+#### `NArray<T, N> flip(std::size_t)`
+
+Used to create an array that accesses the same elements but with the specified dimension reversed.
+
+Parameters:
+- `std::size_t dim`: the dimension to flip
+
+Variants:
+- `NArray<T, N> flipX()`: with `dim` equal to `0`
+- `NArray<T, N> flipY()`: with `dim` equal to `1`
+- `NArray<T, N> flipZ()`: with `dim` equal to `2`
+- `NArray<T, N> flipW()`: with `dim` equal to `3`
+
+Returns a new array with the dimension flipped
+
+Example:
+
+```
+wilt::NArray<int, 2> arr({ 3, 3 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8 });
+
+auto flip_x = arr.flipX();
+auto flip_y = arr.flipY();
+
+// arr:       flip_x:    flip_y:
+// 0  3  6    6  3  0    2  5  8
+// 1  4  7    7  4  1    1  4  7
+// 2  5  8    8  5  2    0  3  6
+```
+
+Notes:
+- `dim` must be less than `N`, otherwise an exception is thrown
+- if the array is empty, this returns an empty array
+- some variants only available if that dimension exists
